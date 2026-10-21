@@ -44,7 +44,6 @@
       gap: 0.4rem;
     }
 
-    /* LCARS Top Elbow & Banner */
     header {
       width: 100%;
       height: 44px;
@@ -126,7 +125,6 @@
       padding-right: 1.5rem;
     }
 
-    /* Main Theater Layout */
     #theater-layout {
       display: flex;
       flex: 1;
@@ -137,7 +135,6 @@
       overflow: hidden;
     }
 
-    /* Left LCARS Decorative Frame Rail */
     .lcars-side-rail {
       width: 42px;
       min-width: 42px;
@@ -166,7 +163,6 @@
       border-bottom-left-radius: 14px;
     }
 
-    /* Map Box Stage */
     #map-wrapper {
       position: relative;
       flex: 1;
@@ -205,7 +201,6 @@
       pointer-events: none;
     }
 
-    /* LCARS Sector Number Badges */
     .sector-number-badge {
       position: absolute;
       transform: translate(-50%, -50%);
@@ -214,7 +209,7 @@
       font-weight: 700;
       line-height: 1;
       padding: 3px 6px;
-      border-radius: 8px;
+      border-radius: 7px;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
       border: 1.5px solid transparent;
       cursor: pointer;
@@ -229,7 +224,6 @@
       z-index: 25;
     }
 
-    /* LCARS Fleet Badges */
     .fleet-token-pill {
       position: absolute;
       transform: translate(-50%, -50%);
@@ -263,7 +257,6 @@
       box-shadow: 0 0 4px #ffffff;
     }
 
-    /* LCARS Tactical Sidebar (PADD / Terminal) */
     #sidebar-panel {
       width: 320px;
       min-width: 320px;
@@ -346,7 +339,6 @@
       line-height: 1.35;
     }
 
-    /* Force Mobile Landscape Warning */
     #landscape-prompt {
       display: none;
       position: fixed;
@@ -394,7 +386,6 @@
 </head>
 <body>
 
-  <!-- Forced Landscape Warning Overlay -->
   <div id="landscape-prompt">
     <svg viewBox="0 0 24 24">
       <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
@@ -406,7 +397,6 @@
   </div>
 
   <div id="app-container">
-    <!-- LCARS Header Frame -->
     <header>
       <div class="lcars-elbow-top">LCARS 47</div>
       <div id="phase-display" class="lcars-pill-bar">INITIALIZING TACTICAL STATUS...</div>
@@ -417,14 +407,12 @@
     </header>
 
     <div id="theater-layout">
-      <!-- Decorative LCARS Side Spine -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
         <div class="rail-block-mid"></div>
         <div class="rail-block-bottom"></div>
       </div>
 
-      <!-- Main Sector Map Stage -->
       <div id="map-wrapper">
         <div id="stage-container">
           <img id="campaign-map" src="map.png" alt="LCARS Campaign Map">
@@ -432,7 +420,6 @@
         </div>
       </div>
 
-      <!-- LCARS Tactical Readout Terminal -->
       <aside id="sidebar-panel" class="hidden">
         <div class="sidebar-header">
           <span id="sidebar-title" class="sidebar-title">TACTICAL DOSSIER</span>
@@ -446,6 +433,11 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycby908UFG7N8UXnPCoswOY1HHMTv5n-D4Q10LSJO8zJYXJFH1f1XNR0w1tTteMRrB39QOA/exec";
 
+    // -------------------------------------------------------------
+    // COMMAND PASSCODE PROTECTION (Change this code to whatever you want)
+    // -------------------------------------------------------------
+    const GM_PASSCODE = "10324";
+
     const PHASES = [
       "Phase I: Resource Gathering",
       "Phase II: The Operations Order",
@@ -455,13 +447,12 @@
 
     let campaignData = null;
 
-    // Authentic LCARS Palette Mappings
     const KNOWN_COLORS = {
-      'player a': { bg: '#0044aa', border: '#99ccff', text: '#ffffff' }, // Federation Blue
-      'player b': { bg: '#990000', border: '#ff6666', text: '#ffffff' }, // Klingon Red
-      'player c': { bg: '#006633', border: '#66ff99', text: '#ffffff' }, // Romulan Green
-      'player d': { bg: '#cc6600', border: '#ffaa00', text: '#ffffff' }, // Cardassian Amber
-      'neutral':  { bg: '#223344', border: '#ffcc00', text: '#ffcc00' }  // LCARS Dark/Gold
+      'player a': { bg: '#0044aa', border: '#99ccff', text: '#ffffff' },
+      'player b': { bg: '#990000', border: '#ff6666', text: '#ffffff' },
+      'player c': { bg: '#006633', border: '#66ff99', text: '#ffffff' },
+      'player d': { bg: '#cc6600', border: '#ffaa00', text: '#ffffff' },
+      'neutral':  { bg: '#223344', border: '#ffcc00', text: '#ffcc00' }
     };
 
     function getPlayerColorTheme(name) {
@@ -505,6 +496,14 @@
     }
 
     async function advancePhase() {
+      // 3. Password Verification Prompt
+      const entry = prompt("SECURITY OVERRIDE: Enter Command Passcode to cycle phase:");
+      if (entry === null) return; // Player clicked cancel
+      if (entry.trim() !== GM_PASSCODE) {
+        alert("ACCESS DENIED: Invalid command authorization.");
+        return;
+      }
+
       const state = campaignData.campaignState || {};
       const currentPhase = state['Current Phase'] || PHASES[0];
       let nextIndex = PHASES.indexOf(currentPhase) + 1;
@@ -542,12 +541,15 @@
         fleetsBySector[secId].push(fleet);
       });
 
-      // Render LCARS Sector Badges
+      // 1 & 2. Render Sector Numbers with Sector 03 elevated
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
         let xPct = parseFloat(sec.x_pct);
         let yPct = parseFloat(sec.y_pct);
+        
+        // Manual coordinate overrides
         if (secId === '01') xPct = 10.0;
+        if (secId === '03') yPct = 18.0; // Nudged upward
 
         const theme = getPlayerColorTheme(sec.controller);
 
@@ -558,7 +560,7 @@
         btn.style.background = theme.bg;
         btn.style.borderColor = theme.border;
         btn.style.color = theme.text;
-        btn.textContent = `SEC ${secId}`;
+        btn.textContent = secId; // Plain number only
 
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -568,7 +570,7 @@
         layer.appendChild(btn);
       });
 
-      // Render LCARS Vertically Stacked Fleets
+      // Render Fleets
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
         const stationFleets = fleetsBySector[secId] || [];
@@ -576,6 +578,7 @@
         let xPct = parseFloat(sec.x_pct);
         let yPct = parseFloat(sec.y_pct);
         if (secId === '01') xPct = 10.0;
+        if (secId === '03') yPct = 18.0;
 
         const verticalStepPx = 22;
 
