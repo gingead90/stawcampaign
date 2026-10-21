@@ -790,12 +790,12 @@
       document.getElementById('phase-display').textContent = currentPhase;
     }
 
-    // 2. Advance Phase: Blocks advancing out of Phase III if opposing fleets share space
     async function advancePhase() {
       const state = campaignData.campaignState || {};
       const currentPhase = state['Current Phase'] || PHASES[0];
       const isPhase3 = currentPhase.toLowerCase().includes("phase iii");
 
+      // Verify that no contested sectors remain unresolved at the end of Phase III
       if (isPhase3) {
         const fleets = campaignData.taskForces || [];
         const fleetsBySector = {};
@@ -935,7 +935,15 @@
       showFleetSidebar(tf, sec);
     }
 
+    // Retreat Fleet: Protected by GM Passcode
     async function retreatFleet(taskForceId, assignedPlayer, sec) {
+      const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
+      if (pass === null) return;
+      if (pass.trim() !== GM_PASSCODE) {
+        alert("ACCESS DENIED: Invalid command passcode.");
+        return;
+      }
+
       const pNorm = norm(assignedPlayer);
       const friendlyNeighbors = getSectorNeighbors(String(sec.sector_id).padStart(2, '0'), campaignData.sectors)
         .filter(nId => {
@@ -974,7 +982,15 @@
       }
     }
 
+    // Destroy Fleet: Protected by GM Passcode
     async function destroyFleet(taskForceId) {
+      const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to decommission/destroy fleet:");
+      if (pass === null) return;
+      if (pass.trim() !== GM_PASSCODE) {
+        alert("ACCESS DENIED: Invalid command passcode.");
+        return;
+      }
+
       const conf = confirm(`RED ALERT: Confirm destruction and removal of ${taskForceId} from the campaign roster?`);
       if (!conf) return;
 
@@ -1140,10 +1156,10 @@
 
       document.getElementById('sidebar-title').textContent = `${fleet.task_force_id} LOG`;
 
-      // 1. Strict Phase Check: Orders only available in Phase II
-      const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '').toLowerCase();
-      const isPhase2 = currentPhase.includes("phase ii");
-      const isPhase3 = currentPhase.includes("phase iii");
+      // Strict word-boundary regex checks so Phase II does not match Phase III
+      const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
+      const isPhase2 = /\bphase ii\b/i.test(currentPhase);
+      const isPhase3 = /\bphase iii\b/i.test(currentPhase);
 
       let ordersHtml = '';
 
