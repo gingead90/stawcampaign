@@ -278,8 +278,8 @@
 
     /* LCARS Sidebar Panel */
     #sidebar-panel {
-      width: 320px;
-      min-width: 320px;
+      width: 330px;
+      min-width: 330px;
       height: 100%;
       background: rgba(3, 7, 18, 0.94);
       backdrop-filter: blur(8px);
@@ -374,7 +374,7 @@
     /* Secret Orders UI */
     .order-box {
       margin-top: 0.5rem;
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.85);
       border: 1px solid var(--lcars-amber);
       border-radius: 4px;
       padding: 0.75rem;
@@ -388,9 +388,9 @@
       background: #000;
       color: #ffaa00;
       border: 1px solid #ff9900;
-      padding: 0.4rem;
+      padding: 0.45rem;
       font-family: 'Antonio', sans-serif;
-      font-size: 1rem;
+      font-size: 0.95rem;
       border-radius: 4px;
       text-transform: uppercase;
     }
@@ -559,7 +559,18 @@
 
     const API_URL = "https://script.google.com/macros/s/AKfycby908UFG7N8UXnPCoswOY1HHMTv5n-D4Q10LSJO8zJYXJFH1f1XNR0w1tTteMRrB39QOA/exec";
 
+    // GM Passcode to cycle turns/phases
     const GM_PASSCODE = "1701";
+
+    // 1. Secret Player PINs for submitting fleet orders
+    const PLAYER_PINS = {
+      'player a': '1111',
+      'federation': '1111',
+      'player b': '2222',
+      'klingon': '2222',
+      'player c': '3333',
+      'player d': '4444'
+    };
 
     const PHASES = [
       "Phase I: Resource Gathering",
@@ -609,18 +620,67 @@
       return str.replace(/-/g, ', ').replace(/SEC\s*/gi, 'SEC ');
     }
 
-    function parseAdjacentSectorIds(sec) {
-      const currentId = String(sec.sector_id).padStart(2, '0');
-      const list = [currentId]; // Option to hold station
-      const str = String(sec.connected_lanes || '');
-      const matches = str.match(/\d+/g);
-      if (matches) {
-        matches.forEach(m => {
-          const padded = String(m).padStart(2, '0');
-          if (!list.includes(padded)) list.push(padded);
+    // Helper: Map sectors and calculate adjacent neighbors
+    function getSectorNeighbors(secId, sectors) {
+      const targetSec = sectors.find(s => String(s.sector_id).padStart(2, '0') === secId);
+      if (!targetSec) return [];
+      const matches = String(targetSec.connected_lanes || '').match(/\d+/g) || [];
+      return matches.map(m => String(m).padStart(2, '0'));
+    }
+
+    // 2. Rule Enforcement: 1 sector move anywhere, 2 sector move ONLY through friendly sectors
+    function calculateLegalDestinations(currentSec, controllingPlayer, sectors) {
+      const currentId = String(currentSec.sector_id).padStart(2, '0');
+      const destinations = [];
+
+      // 0 sectors: Hold Station
+      destinations.push({
+        id: currentId,
+        dist: 0,
+        label: `HOLD STATION (SEC ${currentId})`
+      });
+
+      // 1 sector hop (Any adjacent connected hyperlane)
+      const directNeighbors = getSectorNeighbors(currentId, sectors);
+      directNeighbors.forEach(nbrId => {
+        const nbrObj = sectors.find(s => String(s.sector_id).padStart(2, '0') === nbrId);
+        const name = nbrObj ? nbrObj.sector_name : `SEC ${nbrId}`;
+        destinations.push({
+          id: nbrId,
+          dist: 1,
+          label: `STANDARD TRANSIT [1 HOP]: ${name} (${nbrId})`
         });
-      }
-      return list;
+      });
+
+      // 2 sector hop (Only valid if the intermediate neighbor is controlled by this player)
+      directNeighbors.forEach(step1Id => {
+        const step1Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step1Id);
+        if (step1Sec) {
+          const step1Ctrl = String(step1Sec.controller || '').trim().toLowerCase();
+          const playerNorm = String(controllingPlayer || '').trim().toLowerCase();
+
+          // Intermediate sector MUST be controlled by the moving player
+          const isFriendly = (step1Ctrl && (step1Ctrl === playerNorm || (playerNorm.includes('player a') && step1Ctrl.includes('player a')) || (playerNorm.includes('player b') && step1Ctrl.includes('player b'))));
+
+          if (isFriendly) {
+            const step2Neighbors = getSectorNeighbors(step1Id, sectors);
+            step2Neighbors.forEach(step2Id => {
+              // Cannot loop back to start, and avoid duplicate entries
+              if (step2Id !== currentId && !destinations.some(d => d.id === step2Id)) {
+                const step2Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step2Id);
+                const name = step2Sec ? step2Sec.sector_name : `SEC ${step2Id}`;
+                destinations.push({
+                  id: step2Id,
+                  dist: 2,
+                  label: `TACTICAL FLANK [2 HOPS VIA ${step1Id}]: ${name} (${step2Id})`
+                });
+              }
+            });
+          }
+        }
+      });
+
+      return destinations;
     }
 
     async function fetchCampaignData() {
@@ -670,7 +730,6 @@
         state['Current Phase'] = newPhase;
         document.getElementById('phase-display').textContent = newPhase;
 
-        // Auto-refresh map so simultaneous movements render immediately on Phase III
         setTimeout(fetchCampaignData, 1200);
       } catch (e) {
         console.error("Failed to update phase", e);
@@ -678,14 +737,30 @@
       }
     }
 
-    // Submit Secret Fleet Movement Order
-    async function submitSecretOrder(taskForceId) {
+    // 1. PIN verification on fleet order submission
+    async function submitSecretOrder(taskForceId, assignedPlayer) {
+      const playerKey = String(assignedPlayer || '').trim().toLowerCase();
+      let expectedPin = PLAYER_PINS[playerKey];
+
+      if (!expectedPin) {
+        if (playerKey.includes('player a') || playerKey.includes('federation')) expectedPin = PLAYER_PINS['player a'];
+        else if (playerKey.includes('player b') || playerKey.includes('klingon')) expectedPin = PLAYER_PINS['player b'];
+        else expectedPin = '0000';
+      }
+
+      const enteredPin = prompt(`TACTICAL AUTHENTICATION: Enter security PIN for ${assignedPlayer}:`);
+      if (enteredPin === null) return;
+      if (enteredPin.trim() !== expectedPin) {
+        alert("SECURITY BREACH: Unauthorized access code. Movement orders cancelled.");
+        return;
+      }
+
       const select = document.getElementById(`order-dest-${taskForceId}`);
       if (!select) return;
 
       const destSector = select.value;
       const btn = document.getElementById(`btn-order-${taskForceId}`);
-      btn.textContent = "TRANSMITTING...";
+      btn.textContent = "TRANSMITTING ENCRYPTED ORDER...";
       btn.disabled = true;
 
       try {
@@ -700,11 +775,11 @@
           })
         });
 
-        btn.textContent = "ORDERS TRANSMITTED & ENCRYPTED";
+        btn.textContent = "ENCRYPTED ORDERS ON FILE";
         btn.style.background = "#22c55e";
         btn.style.color = "#000";
       } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
+        alert("TRANSMISSION FAILURE: " + err);
         btn.textContent = "TRANSMIT ENCRYPTED ORDERS";
         btn.disabled = false;
       }
@@ -724,7 +799,7 @@
         fleetsBySector[secId].push(fleet);
       });
 
-      // Render Sector Numbers
+      // Render Sector Badges
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
         let xPct = parseFloat(sec.x_pct);
@@ -857,10 +932,12 @@
 
       let ordersHtml = '';
       if (isPhase2) {
-        const legalDestinations = parseAdjacentSectorIds(sec);
+        const controllingPlayer = fleet.player || fleet.faction;
+        // 2. Compute 1-sector vs 2-sector range based on sector control rules
+        const legalDestinations = calculateLegalDestinations(sec, controllingPlayer, campaignData.sectors);
+        
         const optionsHtml = legalDestinations.map(d => {
-          const isHold = (d === String(sec.sector_id).padStart(2, '0'));
-          return `<option value="${d}">${isHold ? `HOLD STATION (SEC ${d})` : `TRANSIT TO SEC ${d}`}</option>`;
+          return `<option value="${d.id}">${d.label}</option>`;
         }).join('');
 
         ordersHtml = `
@@ -869,7 +946,7 @@
             <select id="order-dest-${fleet.task_force_id}" class="order-select">
               ${optionsHtml}
             </select>
-            <button id="btn-order-${fleet.task_force_id}" class="btn-submit-order" onclick="submitSecretOrder('${fleet.task_force_id}')">
+            <button id="btn-order-${fleet.task_force_id}" class="btn-submit-order" onclick="submitSecretOrder('${fleet.task_force_id}', '${controllingPlayer}')">
               TRANSMIT ENCRYPTED ORDERS
             </button>
           </div>
