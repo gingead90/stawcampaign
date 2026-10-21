@@ -276,7 +276,6 @@
       box-shadow: 0 0 6px #ffffff;
     }
 
-    /* LCARS Sidebar Panel */
     #sidebar-panel {
       width: 330px;
       min-width: 330px;
@@ -371,7 +370,6 @@
       transition: border-left-color 0.25s ease;
     }
 
-    /* Secret Orders UI */
     .order-box {
       margin-top: 0.5rem;
       background: rgba(15, 23, 42, 0.85);
@@ -558,19 +556,7 @@
     })();
 
     const API_URL = "https://script.google.com/macros/s/AKfycby908UFG7N8UXnPCoswOY1HHMTv5n-D4Q10LSJO8zJYXJFH1f1XNR0w1tTteMRrB39QOA/exec";
-
-    // GM Passcode to cycle turns/phases
     const GM_PASSCODE = "1701";
-
-    // 1. Secret Player PINs for submitting fleet orders
-    const PLAYER_PINS = {
-      'Adam': '1111',
-      'Adam': '1111',
-      'player b': '2222',
-      'klingon': '2222',
-      'player c': '3333',
-      'player d': '4444'
-    };
 
     const PHASES = [
       "Phase I: Resource Gathering",
@@ -581,25 +567,37 @@
 
     let campaignData = null;
 
-    const KNOWN_COLORS = {
-      'player a': { bg: '#0044aa', border: '#99ccff', text: '#ffffff' },
-      'player b': { bg: '#990000', border: '#ff6666', text: '#ffffff' },
-      'player c': { bg: '#006633', border: '#66ff99', text: '#ffffff' },
-      'player d': { bg: '#cc6600', border: '#ffaa00', text: '#ffffff' },
-      'neutral':  { bg: '#223344', border: '#ffcc00', text: '#ffcc00' }
-    };
+    // Helper: Normalize strings for reliable comparisons
+    function norm(str) {
+      return String(str || '').trim().toLowerCase();
+    }
+
+    // Dynamic Player Resolution from the Google Sheet 'Players' tab
+    function getPlayerRecord(name) {
+      const list = (campaignData && campaignData.players) || [];
+      const target = norm(name);
+      return list.find(p => norm(p.player_name) === target);
+    }
 
     function getPlayerColorTheme(name) {
-      if (!name) return KNOWN_COLORS['neutral'];
-      const key = String(name).trim().toLowerCase();
+      const rec = getPlayerRecord(name);
+      if (rec && rec.color_bg && rec.color_border) {
+        return {
+          bg: rec.color_bg,
+          border: rec.color_border,
+          text: '#ffffff'
+        };
+      }
 
-      if (KNOWN_COLORS[key]) return KNOWN_COLORS[key];
-      if (key.includes('neutral') || key === 'uncontrolled' || key === '') return KNOWN_COLORS['neutral'];
-      if (key.includes('player a') || key.includes('federation')) return KNOWN_COLORS['player a'];
-      if (key.includes('player b') || key.includes('klingon')) return KNOWN_COLORS['player b'];
+      // Default Neutral Fallback
+      const n = norm(name);
+      if (!n || n.includes('neutral') || n === 'uncontrolled') {
+        return { bg: '#223344', border: '#ffcc00', text: '#ffcc00' };
+      }
 
+      // Fallback deterministic hue generator if player is not in the Players tab
       let hash = 0;
-      for (let i = 0; i < key.length; i++) hash = key.charCodeAt(i) + ((hash << 5) - hash);
+      for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
       const hue = Math.abs(hash) % 360;
       return {
         bg: `hsl(${hue}, 80%, 28%)`,
@@ -620,7 +618,6 @@
       return str.replace(/-/g, ', ').replace(/SEC\s*/gi, 'SEC ');
     }
 
-    // Helper: Map sectors and calculate adjacent neighbors
     function getSectorNeighbors(secId, sectors) {
       const targetSec = sectors.find(s => String(s.sector_id).padStart(2, '0') === secId);
       if (!targetSec) return [];
@@ -628,19 +625,17 @@
       return matches.map(m => String(m).padStart(2, '0'));
     }
 
-    // 2. Rule Enforcement: 1 sector move anywhere, 2 sector move ONLY through friendly sectors
+    // 2-Hop Rule: 1 hop anywhere; 2 hops ONLY if intermediate sector is controlled by this player
     function calculateLegalDestinations(currentSec, controllingPlayer, sectors) {
       const currentId = String(currentSec.sector_id).padStart(2, '0');
       const destinations = [];
 
-      // 0 sectors: Hold Station
       destinations.push({
         id: currentId,
         dist: 0,
         label: `HOLD STATION (SEC ${currentId})`
       });
 
-      // 1 sector hop (Any adjacent connected hyperlane)
       const directNeighbors = getSectorNeighbors(currentId, sectors);
       directNeighbors.forEach(nbrId => {
         const nbrObj = sectors.find(s => String(s.sector_id).padStart(2, '0') === nbrId);
@@ -652,20 +647,13 @@
         });
       });
 
-      // 2 sector hop (Only valid if the intermediate neighbor is controlled by this player)
       directNeighbors.forEach(step1Id => {
         const step1Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step1Id);
         if (step1Sec) {
-          const step1Ctrl = String(step1Sec.controller || '').trim().toLowerCase();
-          const playerNorm = String(controllingPlayer || '').trim().toLowerCase();
-
-          // Intermediate sector MUST be controlled by the moving player
-          const isFriendly = (step1Ctrl && (step1Ctrl === playerNorm || (playerNorm.includes('player a') && step1Ctrl.includes('player a')) || (playerNorm.includes('player b') && step1Ctrl.includes('player b'))));
-
+          const isFriendly = (norm(step1Sec.controller) === norm(controllingPlayer));
           if (isFriendly) {
             const step2Neighbors = getSectorNeighbors(step1Id, sectors);
             step2Neighbors.forEach(step2Id => {
-              // Cannot loop back to start, and avoid duplicate entries
               if (step2Id !== currentId && !destinations.some(d => d.id === step2Id)) {
                 const step2Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step2Id);
                 const name = step2Sec ? step2Sec.sector_name : `SEC ${step2Id}`;
@@ -737,21 +725,20 @@
       }
     }
 
-    // 1. PIN verification on fleet order submission
+    // Submit Secret Order with spreadsheet-verified PIN
     async function submitSecretOrder(taskForceId, assignedPlayer) {
-      const playerKey = String(assignedPlayer || '').trim().toLowerCase();
-      let expectedPin = PLAYER_PINS[playerKey];
+      const playerRecord = getPlayerRecord(assignedPlayer);
+      const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
 
       if (!expectedPin) {
-        if (playerKey.includes('player a') || playerKey.includes('federation')) expectedPin = PLAYER_PINS['player a'];
-        else if (playerKey.includes('player b') || playerKey.includes('klingon')) expectedPin = PLAYER_PINS['player b'];
-        else expectedPin = '0000';
+        alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined in the Players tab of your Google Sheet.`);
+        return;
       }
 
       const enteredPin = prompt(`TACTICAL AUTHENTICATION: Enter security PIN for ${assignedPlayer}:`);
       if (enteredPin === null) return;
       if (enteredPin.trim() !== expectedPin) {
-        alert("SECURITY BREACH: Unauthorized access code. Movement orders cancelled.");
+        alert("SECURITY BREACH: Incorrect player PIN. Order transmission aborted.");
         return;
       }
 
@@ -853,7 +840,7 @@
           el.style.left = `${xPct}%`;
           el.style.top = `calc(${yPct}% + 14px + ${verticalOffset}px)`;
 
-          const fleetTheme = getPlayerColorTheme(fleet.player || fleet.faction);
+          const fleetTheme = getPlayerColorTheme(fleet.player);
           el.style.background = fleetTheme.bg;
           el.style.borderColor = fleetTheme.border;
           el.style.color = fleetTheme.text;
@@ -920,7 +907,7 @@
     function showFleetSidebar(fleet, sec) {
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
-      const fleetTheme = getPlayerColorTheme(fleet.player || fleet.faction);
+      const fleetTheme = getPlayerColorTheme(fleet.player);
 
       sidebar.style.borderColor = fleetTheme.border;
       header.style.background = fleetTheme.border;
@@ -932,8 +919,7 @@
 
       let ordersHtml = '';
       if (isPhase2) {
-        const controllingPlayer = fleet.player || fleet.faction;
-        // 2. Compute 1-sector vs 2-sector range based on sector control rules
+        const controllingPlayer = fleet.player || '';
         const legalDestinations = calculateLegalDestinations(sec, controllingPlayer, campaignData.sectors);
         
         const optionsHtml = legalDestinations.map(d => {
@@ -957,7 +943,7 @@
         <div class="sidebar-field-grid">
           <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
             <div class="field-label">ALLEGIANCE</div>
-            <div class="field-value">${fleet.player || fleet.faction || 'N/A'}</div>
+            <div class="field-value">${fleet.player || 'N/A'}</div>
           </div>
           <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
             <div class="field-label">DEPLOYED SECTOR</div>
