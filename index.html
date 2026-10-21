@@ -276,6 +276,17 @@
       box-shadow: 0 0 6px #ffffff;
     }
 
+    /* Green lock badge displayed when orders are on file */
+    .fleet-locked-indicator {
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 6px #22c55e;
+      margin-left: 2px;
+    }
+
     #sidebar-panel {
       width: 330px;
       min-width: 330px;
@@ -370,6 +381,7 @@
       transition: border-left-color 0.25s ease;
     }
 
+    /* Secret Orders Box & Classified Masking */
     .order-box {
       margin-top: 0.5rem;
       background: rgba(15, 23, 42, 0.85);
@@ -379,6 +391,30 @@
       display: flex;
       flex-direction: column;
       gap: 0.5rem;
+    }
+
+    .order-classified-box {
+      background: #022c22;
+      border: 1px solid #22c55e;
+      border-radius: 4px;
+      padding: 0.75rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .order-classified-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #4ade80;
+      letter-spacing: 1px;
+    }
+
+    .order-classified-text {
+      font-size: 0.78rem;
+      color: #86efac;
+      letter-spacing: 0.5px;
     }
 
     .order-select {
@@ -391,12 +427,6 @@
       font-size: 0.95rem;
       border-radius: 4px;
       text-transform: uppercase;
-    }
-
-    .order-select:disabled {
-      opacity: 0.65;
-      border-color: #556677;
-      color: #94a3b8;
     }
 
     .btn-submit-order {
@@ -417,16 +447,11 @@
       filter: brightness(1.2);
     }
 
-    .btn-submit-order:disabled {
-      cursor: not-allowed;
-      filter: none;
-    }
-
     .btn-modify-order {
       background: #334155;
-      color: #94a3b8;
+      color: #cbd5e1;
       border: 1px solid #475569;
-      padding: 0.35rem;
+      padding: 0.45rem;
       font-family: 'Antonio', sans-serif;
       font-size: 0.85rem;
       font-weight: 700;
@@ -596,7 +621,9 @@
     ];
 
     let campaignData = null;
-    const submittedOrders = {};
+
+    // Ephemeral unlocking map for editing an order in active session
+    const unlockedForEdit = {};
 
     function norm(str) {
       return String(str || '').trim().toLowerCase();
@@ -645,11 +672,23 @@
       return str.replace(/-/g, ', ').replace(/SEC\s*/gi, 'SEC ');
     }
 
+    // Robust Adjacency: Extracts clean 2-digit sector numbers and rejects ISO dates
     function getSectorNeighbors(secId, sectors) {
       const targetSec = sectors.find(s => String(s.sector_id).padStart(2, '0') === secId);
       if (!targetSec) return [];
-      const matches = String(targetSec.connected_lanes || '').match(/\d+/g) || [];
-      return matches.map(m => String(m).padStart(2, '0'));
+
+      let rawLanes = String(targetSec.connected_lanes || '').trim();
+      
+      // If Sheets converted it to an ISO date timestamp (e.g., 2026-02-05T00:00:00.000Z), parse explicitly
+      if (rawLanes.includes('T') && rawLanes.includes('-') && !isNaN(Date.parse(rawLanes))) {
+        const d = new Date(rawLanes);
+        const d1 = String(d.getDate()).padStart(2, '0');
+        const d2 = String(d.getMonth() + 1).padStart(2, '0');
+        return [d1, d2];
+      }
+
+      const matches = rawLanes.match(/\b\d{1,2}\b/g) || [];
+      return matches.map(m => String(m).padStart(2, '0')).filter(id => id !== secId);
     }
 
     // Strict 1-hop vs 2-hop movement rule:
@@ -668,7 +707,7 @@
         label: `HOLD STATION (SEC ${currentId})`
       });
 
-      // 1 Hop: All immediate connected neighbors
+      // 1 Hop: Immediate connected neighbors
       const directNeighbors = getSectorNeighbors(currentId, sectors);
       directNeighbors.forEach(nbrId => {
         const nbrObj = sectors.find(s => String(s.sector_id).padStart(2, '0') === nbrId);
@@ -680,15 +719,14 @@
         });
       });
 
-      // 2 Hops (Tactical Flank):
-      // Strict prerequisite: The origin sector itself MUST be controlled by the player
+      // 2 Hops (Tactical Flank): Only if Start is player controlled
       const startIsFriendly = (norm(currentSec.controller) === pNorm);
 
       if (startIsFriendly) {
         directNeighbors.forEach(step1Id => {
           const step1Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step1Id);
+          // Intermediate sector MUST be controlled by this player
           if (step1Sec && norm(step1Sec.controller) === pNorm) {
-            // Intermediate waypoint is friendly; check its immediate neighbors
             const step2Neighbors = getSectorNeighbors(step1Id, sectors);
 
             step2Neighbors.forEach(step2Id => {
@@ -698,6 +736,7 @@
 
               if (isNotOrigin && isNotDirectNeighbor && notAlreadyListed) {
                 const step2Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step2Id);
+                // Destination sector MUST also be controlled by this player
                 if (step2Sec && norm(step2Sec.controller) === pNorm) {
                   const name = step2Sec.sector_name || `Sector ${step2Id}`;
                   destinations.push({
@@ -752,7 +791,8 @@
       const newPhase = PHASES[nextIndex];
       document.getElementById('phase-display').textContent = `${newPhase} [UPDATING...]`;
 
-      for (const k in submittedOrders) delete submittedOrders[k];
+      // Clear local edit overrides when moving between phases
+      for (const k in unlockedForEdit) delete unlockedForEdit[k];
 
       try {
         await fetch(API_URL, {
@@ -771,6 +811,7 @@
       }
     }
 
+    // Submit Secret Order with PIN authentication
     async function submitSecretOrder(taskForceId, assignedPlayer) {
       const playerRecord = getPlayerRecord(assignedPlayer);
       const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
@@ -807,15 +848,15 @@
           })
         });
 
-        submittedOrders[taskForceId] = destSector;
+        // Relock in local session and mark sheet pending flag locally
+        delete unlockedForEdit[taskForceId];
+        const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
+        if (tf) tf.has_pending_order = true;
 
-        select.disabled = true;
-        btn.textContent = "ENCRYPTED ORDERS ON FILE [LOCKED]";
-        btn.style.background = "#15803d";
-        btn.style.color = "#ffffff";
-
-        const modBtn = document.getElementById(`btn-mod-${taskForceId}`);
-        if (modBtn) modBtn.style.display = "block";
+        // Re-render sidebar to show the classified fog-of-war lock screen
+        const sec = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === String(tf.sector_id).padStart(2, '0'));
+        showFleetSidebar(tf, sec);
+        renderMap();
 
       } catch (err) {
         alert("TRANSMISSION FAILURE: " + err);
@@ -824,6 +865,7 @@
       }
     }
 
+    // Unlock submitted order using player PIN
     function unlockOrderModification(taskForceId, assignedPlayer) {
       const playerRecord = getPlayerRecord(assignedPlayer);
       const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
@@ -831,22 +873,16 @@
       const enteredPin = prompt(`SECURITY CLEARANCE: Enter PIN for ${assignedPlayer} to modify orders:`);
       if (enteredPin === null) return;
       if (enteredPin.trim() !== expectedPin) {
-        alert("ACCESS DENIED: PIN incorrect.");
+        alert("ACCESS DENIED: Incorrect PIN.");
         return;
       }
 
-      const select = document.getElementById(`order-dest-${taskForceId}`);
-      const btn = document.getElementById(`btn-order-${taskForceId}`);
-      const modBtn = document.getElementById(`btn-mod-${taskForceId}`);
+      // Mark this fleet as unlocked in this active session
+      unlockedForEdit[taskForceId] = true;
 
-      if (select) select.disabled = false;
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "TRANSMIT ENCRYPTED ORDERS";
-        btn.style.background = "var(--lcars-gold)";
-        btn.style.color = "#000000";
-      }
-      if (modBtn) modBtn.style.display = "none";
+      const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
+      const sec = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === String(tf.sector_id).padStart(2, '0'));
+      showFleetSidebar(tf, sec);
     }
 
     function renderMap() {
@@ -924,9 +960,14 @@
           el.style.borderWidth = '1.5px';
           el.style.borderStyle = 'solid';
 
+          // Shows a subtle green confirmation dot when orders are locked in Google Sheets
+          const hasLockedOrders = Boolean(fleet.has_pending_order);
+          const lockIndicator = hasLockedOrders ? `<span class="fleet-locked-indicator" title="Encrypted Orders On File"></span>` : '';
+
           el.innerHTML = `
             <span class="fleet-dot" style="background: ${fleetTheme.border};"></span>
             <span>${fleet.task_force_id}</span>
+            ${lockIndicator}
           `;
 
           el.addEventListener('click', (e) => {
@@ -997,35 +1038,43 @@
       let ordersHtml = '';
       if (isPhase2) {
         const controllingPlayer = fleet.player || '';
-        const legalDestinations = calculateLegalDestinations(sec, controllingPlayer, campaignData.sectors);
-        const isLocked = Boolean(submittedOrders[fleet.task_force_id]);
-        const lockedDest = submittedOrders[fleet.task_force_id];
-        
-        const optionsHtml = legalDestinations.map(d => {
-          const selected = (isLocked && d.id === lockedDest) ? 'selected' : '';
-          return `<option value="${d.id}" ${selected}>${d.label}</option>`;
-        }).join('');
+        const isServerLocked = Boolean(fleet.has_pending_order);
+        const isSessionUnlocked = Boolean(unlockedForEdit[fleet.task_force_id]);
 
-        ordersHtml = `
-          <div class="order-box">
-            <div class="field-label" style="color: var(--lcars-gold);">CONFIDENTIAL MOVEMENT DIRECTIVE</div>
-            <select id="order-dest-${fleet.task_force_id}" class="order-select" ${isLocked ? 'disabled' : ''}>
-              ${optionsHtml}
-            </select>
-            <button id="btn-order-${fleet.task_force_id}" 
-                    class="btn-submit-order" 
-                    ${isLocked ? 'disabled style="background: #15803d; color: #fff;"' : ''} 
-                    onclick="submitSecretOrder('${fleet.task_force_id}', '${controllingPlayer}')">
-              ${isLocked ? 'ENCRYPTED ORDERS ON FILE [LOCKED]' : 'TRANSMIT ENCRYPTED ORDERS'}
-            </button>
-            <button id="btn-mod-${fleet.task_force_id}" 
-                    class="btn-modify-order" 
-                    style="${isLocked ? 'display:block;' : 'display:none;'}"
-                    onclick="unlockOrderModification('${fleet.task_force_id}', '${controllingPlayer}')">
-              MODIFY ORDERS (REQUIRES PIN)
-            </button>
-          </div>
-        `;
+        // FOG OF WAR: If orders are locked and user hasn't explicitly entered PIN to edit, mask destination completely
+        if (isServerLocked && !isSessionUnlocked) {
+          ordersHtml = `
+            <div class="order-box">
+              <div class="order-classified-box">
+                <div class="order-classified-title">&#128274; ORDERS TRANSMITTED & ENCRYPTED</div>
+                <div class="order-classified-text">DESTINATION SEALED UNDER FOG OF WAR</div>
+              </div>
+              <button class="btn-modify-order" onclick="unlockOrderModification('${fleet.task_force_id}', '${controllingPlayer}')">
+                CHANGE ORDERS (REQUIRES PIN)
+              </button>
+            </div>
+          `;
+        } else {
+          // Open selection form
+          const legalDestinations = calculateLegalDestinations(sec, controllingPlayer, campaignData.sectors);
+          const optionsHtml = legalDestinations.map(d => {
+            return `<option value="${d.id}">${d.label}</option>`;
+          }).join('');
+
+          ordersHtml = `
+            <div class="order-box">
+              <div class="field-label" style="color: var(--lcars-gold);">CONFIDENTIAL MOVEMENT DIRECTIVE</div>
+              <select id="order-dest-${fleet.task_force_id}" class="order-select">
+                ${optionsHtml}
+              </select>
+              <button id="btn-order-${fleet.task_force_id}" 
+                      class="btn-submit-order" 
+                      onclick="submitSecretOrder('${fleet.task_force_id}', '${controllingPlayer}')">
+                TRANSMIT ENCRYPTED ORDERS
+              </button>
+            </div>
+          `;
+        }
       }
 
       document.getElementById('sidebar-content').innerHTML = `
