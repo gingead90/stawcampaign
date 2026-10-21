@@ -538,4 +538,178 @@
       let nextIndex = PHASES.indexOf(currentPhase) + 1;
       if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
 
-      const newPhase
+      const newPhase = PHASES[nextIndex];
+      document.getElementById('phase-display').textContent = `${newPhase} [UPDATING...]`;
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update_phase', newPhase: newPhase })
+        });
+        state['Current Phase'] = newPhase;
+        document.getElementById('phase-display').textContent = newPhase;
+      } catch (e) {
+        console.error("Failed to update phase", e);
+        document.getElementById('phase-display').textContent = currentPhase;
+      }
+    }
+
+    function renderMap() {
+      const layer = document.getElementById('overlay-layer');
+      layer.innerHTML = '';
+
+      const sectors = campaignData.sectors || [];
+      const fleets = campaignData.taskForces || [];
+
+      const fleetsBySector = {};
+      fleets.forEach(fleet => {
+        const secId = String(fleet.sector_id).padStart(2, '0');
+        if (!fleetsBySector[secId]) fleetsBySector[secId] = [];
+        fleetsBySector[secId].push(fleet);
+      });
+
+      // Render Sector Numbers
+      sectors.forEach(sec => {
+        const secId = String(sec.sector_id).padStart(2, '0');
+        let xPct = parseFloat(sec.x_pct);
+        let yPct = parseFloat(sec.y_pct);
+        
+        if (secId === '01') xPct = 10.0;
+        if (secId === '03') {
+          xPct = 23.5;
+          yPct = 60.0;
+        }
+
+        const theme = getPlayerColorTheme(sec.controller);
+
+        const btn = document.createElement('div');
+        btn.className = 'sector-number-badge';
+        btn.style.left = `${xPct}%`;
+        btn.style.top = `calc(${yPct}% - 12px)`;
+        btn.style.background = theme.bg;
+        btn.style.borderColor = theme.border;
+        btn.style.color = theme.text;
+        btn.textContent = secId;
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showSectorSidebar(sec);
+        });
+
+        layer.appendChild(btn);
+      });
+
+      // Render Fleets
+      sectors.forEach(sec => {
+        const secId = String(sec.sector_id).padStart(2, '0');
+        const stationFleets = fleetsBySector[secId] || [];
+
+        let xPct = parseFloat(sec.x_pct);
+        let yPct = parseFloat(sec.y_pct);
+        if (secId === '01') xPct = 10.0;
+        if (secId === '03') {
+          xPct = 23.5;
+          yPct = 60.0;
+        }
+
+        const verticalStepPx = 22;
+
+        stationFleets.forEach((fleet, idx) => {
+          const el = document.createElement('div');
+          const verticalOffset = idx * verticalStepPx;
+
+          el.className = 'fleet-token-pill';
+          el.style.left = `${xPct}%`;
+          el.style.top = `calc(${yPct}% + 14px + ${verticalOffset}px)`;
+
+          const fleetTheme = getPlayerColorTheme(fleet.player || fleet.faction);
+          el.style.background = fleetTheme.bg;
+          el.style.borderColor = fleetTheme.border;
+          el.style.color = fleetTheme.text;
+          el.style.borderWidth = '1.5px';
+          el.style.borderStyle = 'solid';
+
+          el.innerHTML = `
+            <span class="fleet-dot" style="background: ${fleetTheme.border};"></span>
+            <span>${fleet.task_force_id}</span>
+          `;
+
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showFleetSidebar(fleet, sec);
+          });
+
+          layer.appendChild(el);
+        });
+      });
+    }
+
+    function showSectorSidebar(sec) {
+      const sidebar = document.getElementById('sidebar-panel');
+      const secId = String(sec.sector_id).padStart(2, '0');
+      document.getElementById('sidebar-title').textContent = `SECTOR ${secId} DOSSIER`;
+
+      document.getElementById('sidebar-content').innerHTML = `
+        <div class="sidebar-field-grid">
+          <div class="sidebar-field">
+            <div class="field-label">DESIGNATION</div>
+            <div class="field-value">${sec.sector_name}</div>
+          </div>
+          <div class="sidebar-field">
+            <div class="field-label">TACTICAL CONTROL</div>
+            <div class="field-value">${sec.controller || 'NEUTRAL SPACE'}</div>
+          </div>
+          <div class="sidebar-field">
+            <div class="field-label">STELLAR CLASSIFICATION</div>
+            <div class="field-value">${sec.classification || 'STANDARD'}</div>
+          </div>
+          <div class="sidebar-field">
+            <div class="field-label">RESOURCE HARVEST</div>
+            <div class="field-value">+${sec.rp_yield || '0'} RP / CYCLE</div>
+          </div>
+          <div class="sidebar-field">
+            <div class="field-label">CONNECTED HYPERLANES</div>
+            <div class="field-value">${sec.connected_lanes || 'NONE'}</div>
+          </div>
+        </div>
+        <div class="sidebar-notes" style="margin-top: 0.5rem;">
+          <div class="field-label" style="color: var(--lcars-gold); margin-bottom: 2px;">TACTICAL ASSESSMENT</div>
+          ${sec.notes || 'NO SPECIAL ANOMALIES RECORDED.'}
+        </div>
+      `;
+      sidebar.classList.remove('hidden');
+    }
+
+    function showFleetSidebar(fleet, sec) {
+      const sidebar = document.getElementById('sidebar-panel');
+      document.getElementById('sidebar-title').textContent = `${fleet.task_force_id} LOG`;
+
+      document.getElementById('sidebar-content').innerHTML = `
+        <div class="sidebar-field-grid">
+          <div class="sidebar-field">
+            <div class="field-label">COMMANDING POWER</div>
+            <div class="field-value">${fleet.faction || 'N/A'}</div>
+          </div>
+          <div class="sidebar-field">
+            <div class="field-label">OPERATOR</div>
+            <div class="field-value">${fleet.player || 'N/A'}</div>
+          </div>
+          <div class="sidebar-field">
+            <div class="field-label">DEPLOYED SECTOR</div>
+            <div class="field-value">${sec.sector_name} (SEC ${String(sec.sector_id).padStart(2, '0')})</div>
+          </div>
+        </div>
+      `;
+      sidebar.classList.remove('hidden');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar-panel').classList.add('hidden');
+    }
+
+    fetchCampaignData();
+  </script>
+</body>
+</html>
