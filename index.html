@@ -464,7 +464,6 @@
       color: #ffffff;
     }
 
-    /* Combat Outcome Controls */
     .combat-action-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -791,7 +790,36 @@
       document.getElementById('phase-display').textContent = currentPhase;
     }
 
+    // 2. Advance Phase: Blocks advancing out of Phase III if opposing fleets share space
     async function advancePhase() {
+      const state = campaignData.campaignState || {};
+      const currentPhase = state['Current Phase'] || PHASES[0];
+      const isPhase3 = currentPhase.toLowerCase().includes("phase iii");
+
+      if (isPhase3) {
+        const fleets = campaignData.taskForces || [];
+        const fleetsBySector = {};
+        fleets.forEach(f => {
+          const sId = String(f.sector_id).padStart(2, '0');
+          if (!fleetsBySector[sId]) fleetsBySector[sId] = [];
+          fleetsBySector[sId].push(f);
+        });
+
+        const contestedSectors = [];
+        for (const [sId, fleetList] of Object.entries(fleetsBySector)) {
+          const players = new Set(fleetList.map(f => norm(f.player)));
+          if (players.size > 1) {
+            const fleetNames = fleetList.map(f => `${f.task_force_id} (${f.player})`).join(', ');
+            contestedSectors.push(`Sector ${sId}: ${fleetNames}`);
+          }
+        }
+
+        if (contestedSectors.length > 0) {
+          alert("TACTICAL ALERT: COMBAT UNRESOLVED!\n\nOpposing fleets cannot share space at the end of Tactical Resolution. Retreat or destroy defeated fleets before concluding Phase III:\n\n" + contestedSectors.join('\n'));
+          return;
+        }
+      }
+
       const entry = prompt("SECURITY OVERRIDE: Enter Command Passcode to cycle phase:");
       if (entry === null) return;
       if (entry.trim() !== GM_PASSCODE) {
@@ -799,8 +827,6 @@
         return;
       }
 
-      const state = campaignData.campaignState || {};
-      const currentPhase = state['Current Phase'] || PHASES[0];
       let nextIndex = PHASES.indexOf(currentPhase) + 1;
       if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
 
@@ -877,7 +903,6 @@
       }
     }
 
-    // 3. Clear/Modify Order: Immediately wipes the green indicator dot
     async function unlockOrderModification(taskForceId, assignedPlayer) {
       const playerRecord = getPlayerRecord(assignedPlayer);
       const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
@@ -891,7 +916,7 @@
 
       unlockedForEdit[taskForceId] = true;
       const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
-      if (tf) tf.has_pending_order = false; // Immediately removes green dot
+      if (tf) tf.has_pending_order = false;
 
       renderMap();
 
@@ -910,7 +935,6 @@
       showFleetSidebar(tf, sec);
     }
 
-    // 2. Post-Combat: Retreat Fleet to friendly neighbor
     async function retreatFleet(taskForceId, assignedPlayer, sec) {
       const pNorm = norm(assignedPlayer);
       const friendlyNeighbors = getSectorNeighbors(String(sec.sector_id).padStart(2, '0'), campaignData.sectors)
@@ -950,7 +974,6 @@
       }
     }
 
-    // 2. Post-Combat: Decommission/Destroy Fleet
     async function destroyFleet(taskForceId) {
       const conf = confirm(`RED ALERT: Confirm destruction and removal of ${taskForceId} from the campaign roster?`);
       if (!conf) return;
@@ -1046,7 +1069,6 @@
           el.style.borderWidth = '1.5px';
           el.style.borderStyle = 'solid';
 
-          // Accurate Green Dot: Only appears if orders are genuinely locked on backend & not unsubmitted
           const hasLockedOrders = Boolean(fleet.has_pending_order) && !unlockedForEdit[fleet.task_force_id];
           const lockIndicator = hasLockedOrders ? `<span class="fleet-locked-indicator" title="Encrypted Orders On File"></span>` : '';
 
@@ -1118,13 +1140,13 @@
 
       document.getElementById('sidebar-title').textContent = `${fleet.task_force_id} LOG`;
 
-      const currentPhase = (campaignData.campaignState || {})['Current Phase'] || '';
-      const isPhase2 = currentPhase.includes("Phase II");
-      const isPhase3 = currentPhase.includes("Phase III");
+      // 1. Strict Phase Check: Orders only available in Phase II
+      const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '').toLowerCase();
+      const isPhase2 = currentPhase.includes("phase ii");
+      const isPhase3 = currentPhase.includes("phase iii");
 
       let ordersHtml = '';
 
-      // Phase II Secret Movement Order Form
       if (isPhase2) {
         const controllingPlayer = fleet.player || '';
         const isServerLocked = Boolean(fleet.has_pending_order);
@@ -1164,7 +1186,6 @@
         }
       }
 
-      // Phase III Post-Combat Resolution Controls
       let combatHtml = '';
       if (isPhase3) {
         combatHtml = `
