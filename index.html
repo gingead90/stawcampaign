@@ -150,6 +150,7 @@
       overflow: hidden;
     }
 
+    /* Left LCARS Side Rail with RP Treasury & Config */
     .lcars-side-rail {
       width: 60px;
       min-width: 60px;
@@ -541,6 +542,21 @@
       border-radius: 4px;
     }
 
+    .btn-combat-bonus {
+      grid-column: span 2;
+      background: var(--lcars-gold);
+      color: #000;
+      border: none;
+      padding: 0.45rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
     #landscape-prompt {
       display: none;
       position: fixed;
@@ -611,7 +627,7 @@
     </header>
 
     <div id="theater-layout">
-      <!-- Left LCARS Side Rail with RP Treasury & Config -->
+      <!-- Left Side Rail with RP Treasury & Config -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
         <button class="rail-btn rail-btn-rp" onclick="openRpLedgerMenu()" title="Open Confidential RP Treasury">
@@ -916,7 +932,7 @@
       }
     }
 
-    // --- RP LEDGER SYSTEM ---
+    // --- RP LEDGER SYSTEM (WITH PHASE IV COMMISSIONING) ---
     function openRpLedgerMenu() {
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
@@ -934,7 +950,7 @@
       content.innerHTML = `
         <div class="sidebar-notes" style="border-left-color: var(--lcars-gold); margin-bottom: 0.5rem;">
           <div class="field-label" style="color: var(--lcars-gold); margin-bottom: 2px;">TREASURY PROTOCOL</div>
-          RESOURCE POINTS ARE HARVESTED IN PHASE I ACCORDING TO CONTROLLED SECTORS. ENTER PIN TO ACCESS YOUR SECURE LEDGER.
+          RESOURCE POINTS ARE HARVESTED IN PHASE I ACCORDING TO CONTROLLED SECTORS. SPEND RP IN PHASE IV ON UPKEEP OR COMMISSIONING.
         </div>
 
         <div class="order-box" style="border-color: var(--lcars-gold);">
@@ -1010,6 +1026,46 @@
       const display = document.getElementById('rp-account-display');
       display.style.display = 'block';
 
+      const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
+      const isPhase4 = /\bphase iv\b/i.test(currentPhase);
+
+      // Filter sectors controlled by this player for shipyard commissioning
+      const ownedSectors = (campaignData.sectors || []).filter(s => norm(s.controller) === norm(accData.playerName));
+      const ownedSectorOptions = ownedSectors.map(s => {
+        const sId = String(s.sector_id).padStart(2, '0');
+        return `<option value="${sId}">SEC ${sId}: ${s.sector_name}</option>`;
+      }).join('');
+
+      let commissioningHtml = '';
+      if (isPhase4) {
+        commissioningHtml = `
+          <div class="order-box" style="border-color: var(--lcars-blue); margin-top: 0.75rem;">
+            <div class="field-label" style="color: var(--lcars-blue);">PHASE IV: COMMISSION NEW TASK FORCE</div>
+            
+            <div style="margin-top: 0.25rem;">
+              <div class="field-label" style="color: var(--lcars-amber);">TASK FORCE DESIGNATION</div>
+              <input id="new-tf-id" type="text" class="order-input" placeholder="E.G. TF-12 OR 3RD FLEET">
+            </div>
+
+            <div style="margin-top: 0.25rem;">
+              <div class="field-label" style="color: var(--lcars-amber);">DEPLOYMENT SHIPYARD (CONTROLLED SECTOR)</div>
+              <select id="new-tf-sector" class="order-select" style="border-color: var(--lcars-blue); color: #fff;">
+                ${ownedSectorOptions || '<option value="">NO CONTROLLED SECTORS AVAILABLE</option>'}
+              </select>
+            </div>
+
+            <div style="margin-top: 0.25rem;">
+              <div class="field-label" style="color: var(--lcars-amber);">CONSTRUCTION COST (RP)</div>
+              <input id="new-tf-cost" type="number" min="1" max="${accData.currentRp}" value="5" class="order-input">
+            </div>
+
+            <button id="btn-commission-tf" class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executeFleetCommission('${accData.playerName}', '${pinHash}')">
+              AUTHORIZE SHIPYARD CONSTRUCTION
+            </button>
+          </div>
+        `;
+      }
+
       display.innerHTML = `
         <div class="sidebar-field-grid">
           <div class="sidebar-field" style="border-left-color: var(--lcars-gold);">
@@ -1022,12 +1078,13 @@
           </div>
         </div>
 
+        ${commissioningHtml}
+
         <div class="order-box" style="border-color: var(--lcars-amber); margin-top: 0.75rem;">
-          <div class="field-label" style="color: var(--lcars-amber);">EXPENDITURE DIRECTIVE</div>
+          <div class="field-label" style="color: var(--lcars-amber);">GENERAL EXPENDITURE (REPAIRS / UPKEEP)</div>
           <select id="spend-type-select" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">
             <option value="Fleet Maintenance">FLEET MAINTENANCE / ATTRITION</option>
             <option value="Fleet Repairs">DAMAGE REPAIRS</option>
-            <option value="Commission Task Force">COMMISSION NEW TASK FORCE</option>
             <option value="Sector Fortification">SECTOR FORTIFICATION / EXPANSION</option>
             <option value="Custom">OTHER EXPENDITURE</option>
           </select>
@@ -1042,6 +1099,67 @@
           </button>
         </div>
       `;
+    }
+
+    async function executeFleetCommission(playerName, pinHash) {
+      const tfIdInput = document.getElementById('new-tf-id');
+      const sectorSelect = document.getElementById('new-tf-sector');
+      const costInput = document.getElementById('new-tf-cost');
+
+      const tfId = tfIdInput.value.trim().toUpperCase();
+      const sectorId = sectorSelect.value;
+      const cost = Number(costInput.value);
+
+      if (!tfId) {
+        alert("INPUT ERROR: Please provide a Task Force designation.");
+        return;
+      }
+      if (!sectorId) {
+        alert("DEPLOYMENT ERROR: You must own at least one sector to commission a fleet.");
+        return;
+      }
+      if (!cost || cost <= 0) {
+        alert("INPUT ERROR: Please enter a valid RP cost.");
+        return;
+      }
+
+      const conf = confirm(`CONFIRM COMMISSIONING: Deploy ${tfId} to Sector ${sectorId} for ${cost} RP?`);
+      if (!conf) return;
+
+      const btn = document.getElementById('btn-commission-tf');
+      btn.textContent = "COMMISSIONING VESSEL...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'commission_fleet',
+            playerName: playerName,
+            pinHash: pinHash,
+            taskForceId: tfId,
+            sectorId: sectorId,
+            cost: cost
+          })
+        });
+        const respData = await res.json();
+
+        if (respData.status === 'insufficient_funds') {
+          alert("SHIPYARD HALT: Insufficient RP balance.");
+          btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION";
+          btn.disabled = false;
+          return;
+        }
+
+        alert(`SHIPYARD REPORT: ${tfId} successfully deployed to Sector ${sectorId}. Remaining RP: ${respData.newBalance}`);
+        openRpLedgerMenu();
+        fetchCampaignData();
+      } catch (err) {
+        alert("COMMUNICATION ERROR: " + err);
+        btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION";
+        btn.disabled = false;
+      }
     }
 
     async function executeRpSpend(playerName, pinHash) {
@@ -1088,6 +1206,46 @@
         alert("COMMUNICATION ERROR: " + err);
         btn.textContent = "TRANSMIT EXPENDITURE";
         btn.disabled = false;
+      }
+    }
+
+    // --- PHASE III COMBAT BONUS RP AWARD (GM AUTHORIZED) ---
+    async function awardBonusRpPrompt(suggestedPlayer) {
+      const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize Combat Bonus RP:");
+      if (pass === null || pass.trim() === '') return;
+
+      const recipient = prompt("Enter recipient Player Name:", suggestedPlayer || "");
+      if (!recipient) return;
+
+      const amountStr = prompt("Enter Bonus RP amount to award (e.g. 2, 5):", "2");
+      const amt = Number(amountStr);
+      if (!amt || amt <= 0) return;
+
+      const rawPass = pass.trim();
+      const gmHash = await hashPin(rawPass);
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'award_rp',
+            recipientPlayer: recipient.trim(),
+            amount: amt,
+            rawPass: rawPass,
+            gmHash: gmHash
+          })
+        });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("ACCESS DENIED: GM Authorization failed.");
+          return;
+        }
+
+        alert(`TACTICAL COMMENDATION: Awarded ${amt} Bonus RP to ${recipient}. New Balance: ${respData.newBalance} RP.`);
+        fetchCampaignData();
+      } catch (err) {
+        alert("COMMUNICATION ERROR: " + err);
       }
     }
 
@@ -1188,6 +1346,12 @@
       const pRecord = getPlayerRecord(assignedPlayer);
       if (!pRecord) {
         alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined in the Players tab.`);
+        return;
+      }
+
+      if (!pRecord.has_pin_set) {
+        const setup = confirm(`SECURITY ALERT: ${assignedPlayer} has not set a secret PIN yet. Would you like to open Settings to set one now?`);
+        if (setup) toggleSettingsMenu();
         return;
       }
 
@@ -1564,6 +1728,9 @@
               </button>
               <button class="btn-combat-destroy" onclick="destroyFleet('${fleet.task_force_id}')">
                 DESTROY FLEET
+              </button>
+              <button class="btn-combat-bonus" onclick="awardBonusRpPrompt('${fleet.player}')">
+                AWARD COMBAT BONUS RP
               </button>
             </div>
           </div>
