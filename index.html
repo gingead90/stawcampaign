@@ -150,7 +150,6 @@
       overflow: hidden;
     }
 
-    /* Left LCARS Side Rail with RP Treasury & Config */
     .lcars-side-rail {
       width: 60px;
       min-width: 60px;
@@ -904,31 +903,45 @@
 
       let nextIndex = PHASES.indexOf(currentPhase) + 1;
       if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
-
       const newPhase = PHASES[nextIndex];
-      document.getElementById('phase-display').textContent = `${newPhase} [UPDATING...]`;
 
-      for (const k in unlockedForEdit) delete unlockedForEdit[k];
+      const phaseBar = document.getElementById('phase-display');
+      const originalText = phaseBar.textContent;
+      phaseBar.textContent = `AUTHENTICATING COMMAND OVERRIDE...`;
 
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ 
             action: 'update_phase', 
             newPhase: newPhase, 
-            gmHash: gmHash,
+            gmHash: gmHash, 
             rawPass: rawPass
           })
         });
 
-        state['Current Phase'] = newPhase;
-        document.getElementById('phase-display').textContent = newPhase;
-        setTimeout(fetchCampaignData, 1200);
+        const respData = await res.json();
+        
+        if (respData.status === 'auth_failed') {
+          alert("ACCESS DENIED: Invalid command passcode.");
+          phaseBar.textContent = originalText;
+          return;
+        }
+
+        if (respData.status === 'success') {
+          for (const k in unlockedForEdit) delete unlockedForEdit[k];
+          state['Current Phase'] = newPhase;
+          phaseBar.textContent = newPhase;
+          fetchCampaignData();
+        } else {
+          alert("SERVER ERROR: " + (respData.message || "Could not update phase."));
+          phaseBar.textContent = originalText;
+        }
       } catch (e) {
-        console.error("Failed to update phase", e);
-        setTimeout(fetchCampaignData, 1500);
+        console.error("Transmission error:", e);
+        alert("COMMUNICATION ERROR: Unable to verify passcode with tactical server.");
+        phaseBar.textContent = originalText;
       }
     }
 
@@ -1029,7 +1042,6 @@
       const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
       const isPhase4 = /\bphase iv\b/i.test(currentPhase);
 
-      // Filter sectors controlled by this player for shipyard commissioning
       const ownedSectors = (campaignData.sectors || []).filter(s => norm(s.controller) === norm(accData.playerName));
       const ownedSectorOptions = ownedSectors.map(s => {
         const sId = String(s.sector_id).padStart(2, '0');
@@ -1209,7 +1221,6 @@
       }
     }
 
-    // --- PHASE III COMBAT BONUS RP AWARD (GM AUTHORIZED) ---
     async function awardBonusRpPrompt(suggestedPlayer) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize Combat Bonus RP:");
       if (pass === null || pass.trim() === '') return;
@@ -1346,12 +1357,6 @@
       const pRecord = getPlayerRecord(assignedPlayer);
       if (!pRecord) {
         alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined in the Players tab.`);
-        return;
-      }
-
-      if (!pRecord.has_pin_set) {
-        const setup = confirm(`SECURITY ALERT: ${assignedPlayer} has not set a secret PIN yet. Would you like to open Settings to set one now?`);
-        if (setup) toggleSettingsMenu();
         return;
       }
 
