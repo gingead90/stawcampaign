@@ -18,46 +18,42 @@
       --lcars-dark-red: #990000;
       --lcars-dark-blue: #0044aa;
       --lcars-slate: #556677;
-      --lcars-panel: rgba(10, 14, 23, 0.85);
+      --lcars-panel: rgba(10, 14, 23, 0.9);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* Deep Space Multi-Layered Starfield Background */
     html, body {
       width: 100%;
       height: 100vh;
       overflow: hidden;
-      background-color: #030611;
-      background-image: 
-        /* Subtle Nebula Clouds */
-        radial-gradient(circle at 15% 25%, rgba(30, 58, 138, 0.35) 0%, transparent 45%),
-        radial-gradient(circle at 85% 75%, rgba(88, 28, 135, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.4) 0%, transparent 60%),
-        /* Dense Micro Stars */
-        radial-gradient(1px 1px at 20px 30px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 40px 70px, rgba(255,255,255,0.7), rgba(0,0,0,0)),
-        radial-gradient(1.5px 1.5px at 90px 40px, #99ccff, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 160px 120px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(1.5px 1.5px at 230px 190px, #ffccaa, rgba(0,0,0,0)),
-        radial-gradient(2px 2px at 290px 80px, #ffffff, rgba(0,0,0,0)),
-        radial-gradient(1px 1px at 340px 240px, rgba(255,255,255,0.6), rgba(0,0,0,0)),
-        radial-gradient(1.5px 1.5px at 410px 160px, #99ccff, rgba(0,0,0,0));
-      background-repeat: repeat;
-      background-size: 100% 100%, 100% 100%, 100% 100%, 350px 350px, 350px 350px, 350px 350px, 350px 350px, 350px 350px, 350px 350px, 350px 350px, 350px 350px;
+      background-color: #030712;
       color: #ffffff;
       font-family: 'Antonio', -apple-system, sans-serif;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
 
+    /* Fixed Space Backdrop Canvas */
+    #space-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
     #app-container {
+      position: relative;
       display: flex;
       flex-direction: column;
       width: 100vw;
       height: 100vh;
       padding: 0.5rem 0.75rem 0.75rem 0.75rem;
       gap: 0.4rem;
+      z-index: 10;
     }
 
     header {
@@ -84,7 +80,7 @@
       font-size: 1rem;
       color: #000;
       flex-shrink: 0;
-      box-shadow: 0 0 12px rgba(255, 153, 0, 0.4);
+      box-shadow: 0 0 14px rgba(255, 153, 0, 0.45);
     }
 
     .lcars-pill-bar {
@@ -101,7 +97,7 @@
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
-      box-shadow: 0 0 12px rgba(204, 153, 204, 0.3);
+      box-shadow: 0 0 14px rgba(204, 153, 204, 0.35);
     }
 
     .header-actions {
@@ -121,14 +117,14 @@
       color: #000;
       text-transform: uppercase;
       letter-spacing: 1px;
-      transition: opacity 0.15s ease, filter 0.15s ease;
+      transition: filter 0.15s ease;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .lcars-btn:hover {
-      filter: brightness(1.2);
+      filter: brightness(1.25);
     }
 
     .btn-phase {
@@ -183,20 +179,21 @@
       border-bottom-left-radius: 14px;
     }
 
-    /* Map Box Stage Floating in Space */
+    /* Tactical Map Stage Framed over Cosmos */
     #map-wrapper {
       position: relative;
       flex: 1;
       height: 100%;
-      background: radial-gradient(circle at center, rgba(11, 19, 43, 0.7) 0%, rgba(2, 6, 23, 0.95) 100%);
-      border: 2px solid rgba(85, 102, 119, 0.55);
+      background: rgba(3, 7, 18, 0.6);
+      backdrop-filter: blur(4px);
+      border: 2px solid rgba(85, 102, 119, 0.65);
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       user-select: none;
-      box-shadow: inset 0 0 35px rgba(0, 0, 0, 0.9), 0 0 20px rgba(15, 23, 42, 0.8);
+      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.95), 0 0 24px rgba(15, 23, 42, 0.8);
     }
 
     #stage-container {
@@ -213,7 +210,7 @@
       height: 100%;
       max-height: calc(100vh - 66px);
       object-fit: contain;
-      filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.9));
+      filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.95));
     }
 
     #overlay-layer {
@@ -281,12 +278,12 @@
       box-shadow: 0 0 6px #ffffff;
     }
 
-    /* LCARS Sidebar Translucent Against Space */
+    /* LCARS Sidebar PADD */
     #sidebar-panel {
       width: 320px;
       min-width: 320px;
       height: 100%;
-      background: rgba(3, 7, 18, 0.88);
+      background: rgba(3, 7, 18, 0.92);
       backdrop-filter: blur(8px);
       border: 2px solid var(--lcars-orange);
       border-radius: 0 16px 16px 0;
@@ -295,7 +292,7 @@
       overflow-y: auto;
       padding: 0.85rem;
       gap: 0.5rem;
-      box-shadow: 0 0 25px rgba(0, 0, 0, 0.9);
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.95);
     }
 
     #sidebar-panel.hidden {
@@ -419,6 +416,9 @@
 </head>
 <body>
 
+  <!-- Space Backdrop Canvas -->
+  <canvas id="space-canvas"></canvas>
+
   <div id="landscape-prompt">
     <svg viewBox="0 0 24 24">
       <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
@@ -464,6 +464,59 @@
   </div>
 
   <script>
+    // --- Dynamic Space Canvas Generator ---
+    (function initCosmos() {
+      const canvas = document.getElementById('space-canvas');
+      const ctx = canvas.getContext('2d');
+
+      function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+      }
+
+      function draw() {
+        ctx.fillStyle = '#020617';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Nebula atmospheric gradients
+        const g1 = ctx.createRadialGradient(canvas.width * 0.2, canvas.height * 0.3, 10, canvas.width * 0.2, canvas.height * 0.3, canvas.width * 0.45);
+        g1.addColorStop(0, 'rgba(30, 58, 138, 0.4)');
+        g1.addColorStop(1, 'transparent');
+        ctx.fillStyle = g1;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const g2 = ctx.createRadialGradient(canvas.width * 0.8, canvas.height * 0.7, 10, canvas.width * 0.8, canvas.height * 0.7, canvas.width * 0.45);
+        g2.addColorStop(0, 'rgba(88, 28, 135, 0.35)');
+        g2.addColorStop(1, 'transparent');
+        ctx.fillStyle = g2;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Deterministic Starfield
+        let seed = 42;
+        function random() {
+          const x = Math.sin(seed++) * 10000;
+          return x - Math.floor(x);
+        }
+
+        const numStars = Math.floor((canvas.width * canvas.height) / 2400);
+        for (let i = 0; i < numStars; i++) {
+          const x = random() * canvas.width;
+          const y = random() * canvas.height;
+          const radius = random() * 1.5;
+          const alpha = 0.3 + random() * 0.7;
+
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = (i % 7 === 0) ? `rgba(153, 204, 255, ${alpha})` : `rgba(255, 255, 255, ${alpha})`;
+          ctx.fill();
+        }
+      }
+
+      window.addEventListener('resize', resize);
+      resize();
+    })();
+
     const API_URL = "https://script.google.com/macros/s/AKfycby908UFG7N8UXnPCoswOY1HHMTv5n-D4Q10LSJO8zJYXJFH1f1XNR0w1tTteMRrB39QOA/exec";
 
     const GM_PASSCODE = "1701";
@@ -502,6 +555,19 @@
         border: `hsl(${hue}, 90%, 75%)`,
         text: '#ffffff'
       };
+    }
+
+    // Helper: Sanitizes Google Sheets values that were converted into Date strings
+    function formatLanes(val) {
+      if (!val) return 'NONE';
+      const str = String(val).trim();
+      if (str.includes('T') && str.includes('-') && !isNaN(Date.parse(str))) {
+        const d = new Date(str);
+        const day = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        return `SEC ${day}, SEC ${month}`;
+      }
+      return str.replace(/-/g, ', ').replace(/SEC\s*/gi, 'SEC ');
     }
 
     async function fetchCampaignData() {
@@ -671,7 +737,7 @@
           </div>
           <div class="sidebar-field">
             <div class="field-label">CONNECTED HYPERLANES</div>
-            <div class="field-value">${sec.connected_lanes || 'NONE'}</div>
+            <div class="field-value">${formatLanes(sec.connected_lanes)}</div>
           </div>
         </div>
         <div class="sidebar-notes" style="margin-top: 0.5rem;">
