@@ -150,7 +150,6 @@
       overflow: hidden;
     }
 
-    /* LCARS Left Side Rail with Interactive Settings Button */
     .lcars-side-rail {
       width: 60px;
       min-width: 60px;
@@ -181,15 +180,11 @@
       color: #000;
       letter-spacing: 1px;
       padding: 4px;
-      transition: filter 0.15s ease, background 0.15s ease;
+      transition: filter 0.15s ease;
     }
 
     .rail-btn-settings:hover {
       filter: brightness(1.3);
-    }
-
-    .rail-btn-settings.active {
-      background: var(--lcars-gold);
     }
 
     .rail-block-mid {
@@ -609,7 +604,6 @@
     </header>
 
     <div id="theater-layout">
-      <!-- Left LCARS Rail with Settings Submenu Toggle -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
         <button id="btn-rail-settings" class="rail-btn-settings" onclick="toggleSettingsMenu()" title="Open System Security & PIN Settings">
@@ -689,7 +683,6 @@
     })();
 
     const API_URL = "https://script.google.com/macros/s/AKfycby908UFG7N8UXnPCoswOY1HHMTv5n-D4Q10LSJO8zJYXJFH1f1XNR0w1tTteMRrB39QOA/exec";
-    const GM_PASSCODE = "1701";
 
     const PHASES = [
       "Phase I: Resource Gathering",
@@ -877,10 +870,7 @@
 
       const entry = prompt("SECURITY OVERRIDE: Enter Command Passcode to cycle phase:");
       if (entry === null) return;
-      if (entry.trim() !== GM_PASSCODE) {
-        alert("ACCESS DENIED: Invalid command authorization.");
-        return;
-      }
+      const gmHash = await hashPin(entry);
 
       let nextIndex = PHASES.indexOf(currentPhase) + 1;
       if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
@@ -891,15 +881,20 @@
       for (const k in unlockedForEdit) delete unlockedForEdit[k];
 
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'update_phase', newPhase: newPhase })
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'update_phase', newPhase: newPhase, gmHash: gmHash })
         });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("ACCESS DENIED: Invalid command passcode.");
+          document.getElementById('phase-display').textContent = currentPhase;
+          return;
+        }
+
         state['Current Phase'] = newPhase;
         document.getElementById('phase-display').textContent = newPhase;
-
         setTimeout(fetchCampaignData, 1200);
       } catch (e) {
         console.error("Failed to update phase", e);
@@ -907,7 +902,6 @@
       }
     }
 
-    // Toggle LCARS Settings / Security Submenu
     function toggleSettingsMenu() {
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
@@ -916,7 +910,7 @@
 
       sidebar.style.borderColor = 'var(--lcars-blue)';
       header.style.background = 'var(--lcars-blue)';
-      title.textContent = "SYSTEM SECURITY & PIN CONFIG";
+      title.textContent = "SYSTEM CONFIGURATION";
 
       const playerOptions = (campaignData.players || []).map(p => {
         const isConfigured = p.has_pin_set ? "[PIN ACTIVE]" : "[PIN UNSET]";
@@ -926,11 +920,12 @@
       content.innerHTML = `
         <div class="sidebar-notes" style="border-left-color: var(--lcars-blue); margin-bottom: 0.5rem;">
           <div class="field-label" style="color: var(--lcars-blue); margin-bottom: 2px;">SECURITY PROTOCOL</div>
-          PLAYER PINS ARE LOCALLY HASHED USING SHA-256 BEFORE TRANSMISSION. PASSCODES ARE NEVER READABLE IN PLAIN TEXT.
+          PASSCODES ARE HASHED VIA CLIENT-SIDE SHA-256. NO PLAIN-TEXT KEYS ARE VISIBLE IN SOURCE CODE OR SPREADSHEETS.
         </div>
 
+        <!-- Section 1: Player PIN Management -->
         <div class="order-box" style="border-color: var(--lcars-blue);">
-          <div class="field-label" style="color: var(--lcars-blue);">SELECT ALLEGIANCE</div>
+          <div class="field-label" style="color: var(--lcars-blue);">PLAYER PIN CONFIGURATION</div>
           <select id="settings-player-select" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);" onchange="updateSettingsPinFields()">
             ${playerOptions}
           </select>
@@ -951,7 +946,17 @@
           </div>
 
           <button id="btn-save-pin" class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executePinUpdate()">
-            SAVE ENCRYPTED PIN
+            SAVE PLAYER PIN
+          </button>
+        </div>
+
+        <!-- Section 2: GM Master Override Passcode -->
+        <div class="order-box" style="border-color: var(--lcars-red); margin-top: 0.75rem;">
+          <div class="field-label" style="color: var(--lcars-red);">GM MASTER OVERRIDE CODE</div>
+          <input id="settings-gm-current" type="password" class="order-input" placeholder="CURRENT GM PASSCODE" style="margin-top: 0.25rem;">
+          <input id="settings-gm-new" type="password" class="order-input" placeholder="NEW GM PASSCODE" style="margin-top: 0.25rem;">
+          <button id="btn-save-gm" class="btn-submit-order" style="background: var(--lcars-red); color: #fff; margin-top: 0.5rem;" onclick="executeGmPasscodeUpdate()">
+            UPDATE GM PASSCODE
           </button>
         </div>
       `;
@@ -1010,10 +1015,9 @@
       const newPinHash = await hashPin(newPinVal);
 
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'set_pin',
             playerName: playerName,
@@ -1021,14 +1025,64 @@
             newPinHash: newPinHash
           })
         });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("SECURITY ERROR: Existing PIN was incorrect.");
+          btn.textContent = "SAVE PLAYER PIN";
+          btn.disabled = false;
+          return;
+        }
 
         if (pRecord) pRecord.has_pin_set = true;
-        alert(`SECURITY ENCRYPTED: PIN configured for ${playerName}. The raw code is never stored and remains confidential.`);
+        alert(`SECURITY ENCRYPTED: PIN configured for ${playerName}.`);
         closeSidebar();
         fetchCampaignData();
       } catch (err) {
         alert("TRANSMISSION ERROR: " + err);
-        btn.textContent = "SAVE ENCRYPTED PIN";
+        btn.textContent = "SAVE PLAYER PIN";
+        btn.disabled = false;
+      }
+    }
+
+    async function executeGmPasscodeUpdate() {
+      const curVal = document.getElementById('settings-gm-current').value;
+      const newVal = document.getElementById('settings-gm-new').value;
+
+      if (!curVal || !newVal) {
+        alert("INPUT ERROR: Please supply both current and new GM passcodes.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-save-gm');
+      btn.textContent = "UPDATING...";
+      btn.disabled = true;
+
+      const curHash = await hashPin(curVal);
+      const newHash = await hashPin(newVal);
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'set_gm_passcode',
+            currentGmHash: curHash,
+            newGmHash: newHash
+          })
+        });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("SECURITY BREACH: Current GM passcode was incorrect.");
+          btn.textContent = "UPDATE GM PASSCODE";
+          btn.disabled = false;
+          return;
+        }
+
+        alert("GM COMMAND PROTOCOL: Master override code successfully updated.");
+        closeSidebar();
+      } catch (err) {
+        alert("TRANSMISSION ERROR: " + err);
+        btn.textContent = "UPDATE GM PASSCODE";
         btn.disabled = false;
       }
     }
@@ -1036,15 +1090,13 @@
     async function submitSecretOrder(taskForceId, assignedPlayer) {
       const pRecord = getPlayerRecord(assignedPlayer);
       if (!pRecord) {
-        alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined in the Players tab of your Google Sheet.`);
+        alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined in the Players tab.`);
         return;
       }
 
       if (!pRecord.has_pin_set) {
         const setup = confirm(`SECURITY ALERT: ${assignedPlayer} has not set a secret PIN yet. Would you like to open Settings to set one now?`);
-        if (setup) {
-          toggleSettingsMenu();
-        }
+        if (setup) toggleSettingsMenu();
         return;
       }
 
@@ -1061,10 +1113,9 @@
       btn.disabled = true;
 
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'submit_order',
             taskForceId: taskForceId,
@@ -1073,6 +1124,13 @@
             destinationSectorId: destSector
           })
         });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("SECURITY BREACH: Incorrect player PIN. Order transmission aborted.");
+          btn.textContent = "TRANSMIT ENCRYPTED ORDERS";
+          btn.disabled = false;
+          return;
+        }
 
         delete unlockedForEdit[taskForceId];
         const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
@@ -1103,8 +1161,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'clear_order',
             taskForceId: taskForceId,
@@ -1120,13 +1177,10 @@
       showFleetSidebar(tf, sec);
     }
 
-    function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
+    async function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
       if (pass === null) return;
-      if (pass.trim() !== GM_PASSCODE) {
-        alert("ACCESS DENIED: Invalid command passcode.");
-        return;
-      }
+      const gmHash = await hashPin(pass);
 
       const pNorm = norm(assignedPlayer);
       const curId = String(rawSectorId).padStart(2, '0');
@@ -1160,7 +1214,7 @@
         <select id="retreat-dest-${taskForceId}" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);">
           ${optionsHtml}
         </select>
-        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}')">
+        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}', '${gmHash}')">
           CONFIRM RETREAT VECTOR
         </button>
       `;
@@ -1168,22 +1222,27 @@
       container.appendChild(retreatBox);
     }
 
-    async function confirmRetreatExecution(taskForceId) {
+    async function confirmRetreatExecution(taskForceId, gmHash) {
       const select = document.getElementById(`retreat-dest-${taskForceId}`);
       if (!select) return;
       const retreatSec = select.value;
 
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'retreat_fleet',
             taskForceId: taskForceId,
-            retreatSectorId: retreatSec
+            retreatSectorId: retreatSec,
+            gmHash: gmHash
           })
         });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("ACCESS DENIED: GM Authorization failed.");
+          return;
+        }
 
         alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${retreatSec}.`);
         closeSidebar();
@@ -1196,21 +1255,22 @@
     async function destroyFleet(taskForceId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to decommission/destroy fleet:");
       if (pass === null) return;
-      if (pass.trim() !== GM_PASSCODE) {
-        alert("ACCESS DENIED: Invalid command passcode.");
-        return;
-      }
+      const gmHash = await hashPin(pass);
 
       const conf = confirm(`RED ALERT: Confirm destruction and removal of ${taskForceId} from the campaign roster?`);
       if (!conf) return;
 
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId })
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash })
         });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("ACCESS DENIED: GM Authorization failed.");
+          return;
+        }
 
         alert(`COMMAND LOG: ${taskForceId} decommissioned.`);
         closeSidebar();
@@ -1426,7 +1486,6 @@
         `;
       }
 
-      // No in-card PIN button; keeping fleet cards purely tactical
       document.getElementById('sidebar-content').innerHTML = `
         <div class="sidebar-field-grid">
           <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
