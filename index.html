@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Star Trek: Attack Wing - Sector War</title>
+  <style>
+    :root {
+      --bg-color: #0b0f19;
+      --card-bg: #161e2e;
+      --text: #f3f4f6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-color);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    header {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 0.85rem 1.25rem;
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      border: 1px solid #2d3748;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .status-badge {
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 5px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      color: #38bdf8;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 0.45rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-phase {
+      background: #d97706;
+      color: #fff;
+    }
+    .btn-phase:hover { background: #b45309; }
+
+    .btn-refresh {
+      background: #2563eb;
+      color: #fff;
+    }
+    .btn-refresh:hover { background: #1d4ed8; }
+
+    #map-wrapper {
+      position: relative;
+      width: 100%;
+      max-width: 1200px;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid #374151;
+      background: #000;
+      user-select: none;
+    }
+
+    #campaign-map {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    #overlay-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    /* Sector Number Badge */
+    .sector-number-badge {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      font-size: 11.5px;
+      font-weight: 800;
+      line-height: 1;
+      padding: 3.5px 7px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+      border: 1.5px solid transparent;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      z-index: 10;
+    }
+
+    .sector-number-badge:hover {
+      transform: translate(-50%, -50%) scale(1.25);
+      z-index: 25;
+      box-shadow: 0 0 10px #facc15;
+    }
+
+    /* Fleet Tokens */
+    .fleet-token-pill {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 2.5px 7.5px;
+      border-radius: 9999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+      transition: transform 0.15s ease;
+      z-index: 15;
+    }
+
+    .fleet-token-pill:hover {
+      transform: translate(-50%, -50%) scale(1.15);
+      z-index: 30;
+    }
+
+    .fleet-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ffffff;
+      box-shadow: 0 0 3px #fff;
+    }
+
+    /* Tactical Detail Card */
+    #info-card {
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 1200px;
+      background: var(--card-bg);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      display: none;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .info-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #2d3748;
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .info-field {
+      background: #0f172a;
+      padding: 0.5rem 0.75rem;
+      border-radius: 5px;
+      border: 1px solid #1e293b;
+    }
+
+    .field-label {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    .field-value {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #f1f5f9;
+      margin-top: 2px;
+    }
+
+    .info-notes {
+      background: #0f172a;
+      padding: 0.75rem;
+      border-radius: 5px;
+      border-left: 3px solid #facc15;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <h3 style="font-size: 1.1rem; letter-spacing: 0.5px;">ST: Attack Wing - Sector War</h3>
+      <span id="phase-display" class="status-badge">Loading phase...</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-phase" onclick="advancePhase()">Next Phase &raquo;</button>
+      <button class="btn btn-refresh" onclick="fetchCampaignData()">Refresh</button>
+    </div>
+  </header>
+
+  <div id="map-wrapper">
+    <img id="campaign-map" src="map.png" alt="Archanis-Badlands Front Map">
+    <div id="overlay-layer"></div>
+  </div>
+
+  <div id="info-card">
+    <div class="info-header">
+      <h3 id="card-title" style="color: #facc15;">Sector Details</h3>
+      <button onclick="document.getElementById('info-card').style.display='none'" style="background:none; border:none; color:#94a3b8; font-size:1.1rem; cursor:pointer;">&times;</button>
+    </div>
+    <div id="card-content"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycby908UFG7N8UXnPCoswOY1HHMTv5n-D4Q10LSJO8zJYXJFH1f1XNR0w1tTteMRrB39QOA/exec";
+
+    const PHASES = [
+      "Phase I: Resource Gathering",
+      "Phase II: The Operations Order",
+      "Phase III: Tactical Resolution",
+      "Phase IV: Attrition, Repairs & Expansion"
+    ];
+
+    let campaignData = null;
+
+    const KNOWN_COLORS = {
+      'player a': { bg: 'rgba(30, 64, 175, 0.88)', border: '#60a5fa', text: '#ffffff' },
+      'player b': { bg: 'rgba(185, 28, 28, 0.88)', border: '#f87171', text: '#ffffff' },
+      'player c': { bg: 'rgba(21, 128, 61, 0.88)', border: '#4ade80', text: '#ffffff' },
+      'player d': { bg: 'rgba(194, 65, 12, 0.88)', border: '#fb923c', text: '#ffffff' },
+      'neutral':  { bg: 'rgba(30, 41, 59, 0.85)',  border: '#facc15', text: '#facc15' }
+    };
+
+    function getPlayerColorTheme(name) {
+      if (!name) return KNOWN_COLORS['neutral'];
+      const key = String(name).trim().toLowerCase();
+
+      if (KNOWN_COLORS[key]) return KNOWN_COLORS[key];
+      if (key.includes('neutral') || key === 'uncontrolled' || key === '') return KNOWN_COLORS['neutral'];
+      if (key.includes('player a') || key.includes('federation')) return KNOWN_COLORS['player a'];
+      if (key.includes('player b') || key.includes('klingon')) return KNOWN_COLORS['player b'];
+
+      let hash = 0;
+      for (let i = 0; i < key.length; i++) hash = key.charCodeAt(i) + ((hash << 5) - hash);
+      const hue = Math.abs(hash) % 360;
+      return {
+        bg: `hsla(${hue}, 70%, 35%, 0.9)`,
+        border: `hsl(${hue}, 80%, 70%)`,
+        text: '#ffffff'
+      };
+    }
+
+    async function fetchCampaignData() {
+      try {
+        const response = await fetch(API_URL);
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          campaignData = data;
+          renderHeader();
+          renderMap();
+        } else {
+          console.error(data.message);
+        }
+      } catch (err) {
+        console.error("Fetch failed", err);
+      }
+    }
+
+    function renderHeader() {
+      const state = campaignData.campaignState || {};
+      const currentPhase = state['Current Phase'] || PHASES[0];
+      document.getElementById('phase-display').textContent = currentPhase;
+    }
+
+    async function advancePhase() {
+      const state = campaignData.campaignState || {};
+      const currentPhase = state['Current Phase'] || PHASES[0];
+      let nextIndex = PHASES.indexOf(currentPhase) + 1;
+      if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
+
+      const newPhase = PHASES[nextIndex];
+      document.getElementById('phase-display').textContent = `${newPhase} (saving...)`;
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'update_phase', newPhase: newPhase })
+        });
+        state['Current Phase'] = newPhase;
+        document.getElementById('phase-display').textContent = newPhase;
+      } catch (e) {
+        console.error("Failed to update phase", e);
+        document.getElementById('phase-display').textContent = currentPhase;
+      }
+    }
+
+    function renderMap() {
+      const layer = document.getElementById('overlay-layer');
+      layer.innerHTML = '';
+
+      const sectors = campaignData.sectors || [];
+      const fleets = campaignData.taskForces || [];
+
+      const fleetsBySector = {};
+      fleets.forEach(fleet => {
+        const secId = String(fleet.sector_id).padStart(2, '0');
+        if (!fleetsBySector[secId]) fleetsBySector[secId] = [];
+        fleetsBySector[secId].push(fleet);
+      });
+
+      // 1. Render Clickable Sector Numbers (Shifted upward for clearance)
+      sectors.forEach(sec => {
+        const secId = String(sec.sector_id).padStart(2, '0');
+        let xPct = parseFloat(sec.x_pct);
+        let yPct = parseFloat(sec.y_pct);
+        if (secId === '01') xPct = 10.0;
+
+        const theme = getPlayerColorTheme(sec.controller);
+
+        const btn = document.createElement('div');
+        btn.className = 'sector-number-badge';
+        btn.style.left = `${xPct}%`;
+        btn.style.top = `calc(${yPct}% - 12px)`;
+        btn.style.background = theme.bg;
+        btn.style.borderColor = theme.border;
+        btn.style.color = theme.text;
+        btn.textContent = secId;
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          showSectorDetails(sec);
+        });
+
+        layer.appendChild(btn);
+      });
+
+      // 2. Render Vertically Stacked Fleets (Shifted downward for clearance)
+      sectors.forEach(sec => {
+        const secId = String(sec.sector_id).padStart(2, '0');
+        const stationFleets = fleetsBySector[secId] || [];
+
+        let xPct = parseFloat(sec.x_pct);
+        let yPct = parseFloat(sec.y_pct);
+        if (secId === '01') xPct = 10.0;
+
+        const verticalStepPx = 22;
+
+        stationFleets.forEach((fleet, idx) => {
+          const el = document.createElement('div');
+          const verticalOffset = idx * verticalStepPx;
+
+          el.className = 'fleet-token-pill';
+          el.style.left = `${xPct}%`;
+          el.style.top = `calc(${yPct}% + 14px + ${verticalOffset}px)`;
+
+          const fleetTheme = getPlayerColorTheme(fleet.player || fleet.faction);
+          el.style.background = fleetTheme.bg;
+          el.style.borderColor = fleetTheme.border;
+          el.style.color = fleetTheme.text;
+          el.style.borderWidth = '1.5px';
+          el.style.borderStyle = 'solid';
+
+          el.innerHTML = `
+            <span class="fleet-dot" style="background: ${fleetTheme.border};"></span>
+            <span>${fleet.task_force_id}</span>
+          `;
+
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showFleetDetails(fleet, sec);
+          });
+
+          layer.appendChild(el);
+        });
+      });
+    }
+
+    function showSectorDetails(sec) {
+      const card = document.getElementById('info-card');
+      const secId = String(sec.sector_id).padStart(2, '0');
+      document.getElementById('card-title').textContent = `Sector ${secId}: ${sec.sector_name}`;
+
+      document.getElementById('card-content').innerHTML = `
+        <div class="info-grid">
+          <div class="info-field">
+            <div class="field-label">Controller</div>
+            <div class="field-value">${sec.controller || 'Neutral'}</div>
+          </div>
+          <div class="info-field">
+            <div class="field-label">Classification</div>
+            <div class="field-value">${sec.classification || 'Standard'}</div>
+          </div>
+          <div class="info-field">
+            <div class="field-label">Resource Yield</div>
+            <div class="field-value">+${sec.rp_yield || '0'} RP / turn</div>
+          </div>
+          <div class="info-field">
+            <div class="field-label">Connected Lanes</div>
+            <div class="field-value">${sec.connected_lanes || 'None'}</div>
+          </div>
+        </div>
+        <div class="info-notes">
+          <strong>Strategic Trait:</strong> ${sec.notes || 'No special sector traits.'}
+        </div>
+      `;
+      card.style.display = 'block';
+    }
+
+    function showFleetDetails(fleet, sec) {
+      const card = document.getElementById('info-card');
+      document.getElementById('card-title').textContent = `Task Force: ${fleet.task_force_id}`;
+
+      document.getElementById('card-content').innerHTML = `
+        <div class="info-grid">
+          <div class="info-field">
+            <div class="field-label">Player</div>
+            <div class="field-value">${fleet.player || 'N/A'}</div>
+          </div>
+          <div class="info-field">
+            <div class="field-label">Faction</div>
+            <div class="field-value">${fleet.faction || 'N/A'}</div>
+          </div>
+          <div class="info-field">
+            <div class="field-label">Current Sector</div>
+            <div class="field-value">${sec.sector_name} (${String(sec.sector_id).padStart(2, '0')})</div>
+          </div>
+        </div>
+      `;
+      card.style.display = 'block';
+    }
+
+    fetchCampaignData();
+  </script>
+</body>
+</html>
