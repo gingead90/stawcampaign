@@ -795,7 +795,6 @@
       const currentPhase = state['Current Phase'] || PHASES[0];
       const isPhase3 = currentPhase.toLowerCase().includes("phase iii");
 
-      // Verify that no contested sectors remain unresolved at the end of Phase III
       if (isPhase3) {
         const fleets = campaignData.taskForces || [];
         const fleetsBySector = {};
@@ -935,8 +934,8 @@
       showFleetSidebar(tf, sec);
     }
 
-    // Retreat Fleet: Protected by GM Passcode
-    async function retreatFleet(taskForceId, assignedPlayer, sec) {
+    // Interactive in-sidebar retreat vector selection
+    function retreatFleet(taskForceId, assignedPlayer, sec) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
       if (pass === null) return;
       if (pass.trim() !== GM_PASSCODE) {
@@ -945,22 +944,45 @@
       }
 
       const pNorm = norm(assignedPlayer);
-      const friendlyNeighbors = getSectorNeighbors(String(sec.sector_id).padStart(2, '0'), campaignData.sectors)
-        .filter(nId => {
-          const sObj = campaignData.sectors.find(s => String(s.sector_id).padStart(2, '0') === nId);
-          return sObj && norm(sObj.controller) === pNorm;
-        });
+      const curId = String(sec.sector_id).padStart(2, '0');
+      const neighbors = getSectorNeighbors(curId, campaignData.sectors);
 
-      if (friendlyNeighbors.length === 0) {
-        alert("TACTICAL TRAP: No adjacent friendly sectors available for retreat! Fleet must hold station or be destroyed.");
+      const optionsHtml = neighbors.map(nId => {
+        const sObj = campaignData.sectors.find(s => String(s.sector_id).padStart(2, '0') === nId);
+        const name = sObj ? (sObj.sector_name || `Sector ${nId}`) : `Sector ${nId}`;
+        const ctrl = sObj ? (sObj.controller || 'Neutral') : 'Unknown';
+        const isFriendly = (norm(ctrl) === pNorm);
+        return `<option value="${nId}">SEC ${nId}: ${name} [${ctrl.toUpperCase()}${isFriendly ? ' - FRIENDLY' : ''}]</option>`;
+      }).join('');
+
+      if (neighbors.length === 0) {
+        alert("TACTICAL ALERT: No connected hyperlanes detected for this sector.");
         return;
       }
 
-      const retreatSec = prompt(`TACTICAL RETREAT: Enter friendly retreat sector ID (${friendlyNeighbors.join(', ')}):`);
-      if (!retreatSec || !friendlyNeighbors.includes(retreatSec.trim().padStart(2, '0'))) {
-        alert("RETREAT ABORTED: Invalid retreat vector.");
-        return;
-      }
+      const container = document.getElementById('sidebar-content');
+      const retreatBox = document.createElement('div');
+      retreatBox.className = 'order-box';
+      retreatBox.style.borderColor = 'var(--lcars-blue)';
+      retreatBox.style.marginTop = '0.75rem';
+
+      retreatBox.innerHTML = `
+        <div class="field-label" style="color: var(--lcars-blue);">AUTHORIZATION GRANTED // SELECT RETREAT VECTOR</div>
+        <select id="retreat-dest-${taskForceId}" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);">
+          ${optionsHtml}
+        </select>
+        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}')">
+          CONFIRM RETREAT VECTOR
+        </button>
+      `;
+
+      container.appendChild(retreatBox);
+    }
+
+    async function confirmRetreatExecution(taskForceId) {
+      const select = document.getElementById(`retreat-dest-${taskForceId}`);
+      if (!select) return;
+      const retreatSec = select.value;
 
       try {
         await fetch(API_URL, {
@@ -970,7 +992,7 @@
           body: JSON.stringify({
             action: 'retreat_fleet',
             taskForceId: taskForceId,
-            retreatSectorId: retreatSec.trim()
+            retreatSectorId: retreatSec
           })
         });
 
@@ -982,7 +1004,6 @@
       }
     }
 
-    // Destroy Fleet: Protected by GM Passcode
     async function destroyFleet(taskForceId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to decommission/destroy fleet:");
       if (pass === null) return;
@@ -1156,7 +1177,7 @@
 
       document.getElementById('sidebar-title').textContent = `${fleet.task_force_id} LOG`;
 
-      // Strict word-boundary regex checks so Phase II does not match Phase III
+      // Word boundary regex: strictly matches Phase II, ignoring Phase III
       const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
       const isPhase2 = /\bphase ii\b/i.test(currentPhase);
       const isPhase3 = /\bphase iii\b/i.test(currentPhase);
