@@ -150,6 +150,7 @@
       overflow: hidden;
     }
 
+    /* LCARS Left Side Rail with RP Ledger and Settings Buttons */
     .lcars-side-rail {
       width: 60px;
       min-width: 60px;
@@ -160,14 +161,13 @@
     }
 
     .rail-block-top {
-      height: 40px;
+      height: 34px;
       background: var(--lcars-orange);
       border-bottom-left-radius: 14px;
     }
 
-    .rail-btn-settings {
-      height: 70px;
-      background: var(--lcars-blue);
+    .rail-btn {
+      height: 56px;
       border: none;
       cursor: pointer;
       display: flex;
@@ -176,15 +176,23 @@
       justify-content: center;
       font-family: 'Antonio', sans-serif;
       font-weight: 700;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: #000;
       letter-spacing: 1px;
-      padding: 4px;
+      padding: 2px;
       transition: filter 0.15s ease;
     }
 
-    .rail-btn-settings:hover {
+    .rail-btn:hover {
       filter: brightness(1.3);
+    }
+
+    .rail-btn-rp {
+      background: var(--lcars-gold);
+    }
+
+    .rail-btn-settings {
+      background: var(--lcars-blue);
     }
 
     .rail-block-mid {
@@ -194,7 +202,7 @@
     }
 
     .rail-block-bottom {
-      height: 70px;
+      height: 60px;
       background: var(--lcars-amber);
       border-top-left-radius: 14px;
       border-bottom-left-radius: 14px;
@@ -604,11 +612,16 @@
     </header>
 
     <div id="theater-layout">
+      <!-- Left LCARS Side Rail with RP Treasury and Config Buttons -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
-        <button id="btn-rail-settings" class="rail-btn-settings" onclick="toggleSettingsMenu()" title="Open System Security & PIN Settings">
+        <button class="rail-btn rail-btn-rp" onclick="openRpLedgerMenu()" title="Open Confidential RP Treasury">
+          <span>RP</span>
+          <span style="font-size: 0.62rem; color: #1e293b;">TREASURY</span>
+        </button>
+        <button class="rail-btn rail-btn-settings" onclick="toggleSettingsMenu()" title="Open System Security & PIN Settings">
           <span>CONFIG</span>
-          <span style="font-size: 0.65rem; color: #1e293b;">SECURITY</span>
+          <span style="font-size: 0.62rem; color: #1e293b;">SECURITY</span>
         </button>
         <div class="rail-block-mid"></div>
         <div class="rail-block-bottom"></div>
@@ -902,6 +915,185 @@
       }
     }
 
+    // --- RP LEDGER & TREASURY SYSTEM ---
+    function openRpLedgerMenu() {
+      const sidebar = document.getElementById('sidebar-panel');
+      const header = document.getElementById('sidebar-header');
+      const title = document.getElementById('sidebar-title');
+      const content = document.getElementById('sidebar-content');
+
+      sidebar.style.borderColor = 'var(--lcars-gold)';
+      header.style.background = 'var(--lcars-gold)';
+      title.textContent = "RESOURCE POINT LEDGER";
+
+      const playerOptions = (campaignData.players || []).map(p => {
+        return `<option value="${p.player_name}">${p.player_name}</option>`;
+      }).join('');
+
+      content.innerHTML = `
+        <div class="sidebar-notes" style="border-left-color: var(--lcars-gold); margin-bottom: 0.5rem;">
+          <div class="field-label" style="color: var(--lcars-gold); margin-bottom: 2px;">TREASURY PROTOCOL</div>
+          RESOURCE POINTS ARE HARVESTED IN PHASE I ACCORDING TO CONTROLLED SECTORS. ENTER PIN TO ACCESS YOUR SECURE LEDGER.
+        </div>
+
+        <div class="order-box" style="border-color: var(--lcars-gold);">
+          <div class="field-label" style="color: var(--lcars-gold);">SELECT ALLEGIANCE</div>
+          <select id="rp-player-select" class="order-select" style="border-color: var(--lcars-gold); color: var(--lcars-gold);">
+            ${playerOptions}
+          </select>
+
+          <div style="margin-top: 0.35rem;">
+            <div class="field-label" style="color: var(--lcars-amber);">SECRET PIN</div>
+            <input id="rp-pin-input" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN">
+          </div>
+
+          <button id="btn-auth-rp" class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">
+            AUTHENTICATE & VIEW LEDGER
+          </button>
+        </div>
+
+        <div id="rp-account-display" style="display: none; margin-top: 0.75rem;"></div>
+      `;
+
+      sidebar.classList.remove('hidden');
+    }
+
+    async function authenticateRpLedger() {
+      const select = document.getElementById('rp-player-select');
+      const pinInput = document.getElementById('rp-pin-input');
+      const btn = document.getElementById('btn-auth-rp');
+
+      if (!select || !pinInput) return;
+
+      const playerName = select.value;
+      const rawPin = pinInput.value;
+
+      if (!rawPin || rawPin.trim() === '') {
+        alert("INPUT REQUIRED: Enter your PIN.");
+        return;
+      }
+
+      btn.textContent = "DECRYPTING TREASURY...";
+      btn.disabled = true;
+
+      const pinHash = await hashPin(rawPin);
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'get_rp',
+            playerName: playerName,
+            pinHash: pinHash
+          })
+        });
+        const respData = await res.json();
+
+        if (respData.status === 'auth_failed') {
+          alert("SECURITY BREACH: Invalid PIN for " + playerName);
+          btn.textContent = "AUTHENTICATE & VIEW LEDGER";
+          btn.disabled = false;
+          return;
+        }
+
+        renderRpAccountView(respData, pinHash);
+      } catch (err) {
+        alert("NETWORK ERROR: " + err);
+        btn.textContent = "AUTHENTICATE & VIEW LEDGER";
+        btn.disabled = false;
+      }
+    }
+
+    function renderRpAccountView(accData, pinHash) {
+      const display = document.getElementById('rp-account-display');
+      display.style.display = 'block';
+
+      const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
+      const isPhase4 = /\bphase iv\b/i.test(currentPhase);
+
+      display.innerHTML = `
+        <div class="sidebar-field-grid">
+          <div class="sidebar-field" style="border-left-color: var(--lcars-gold);">
+            <div class="field-label">CURRENT BALANCE</div>
+            <div class="field-value" style="color: #4ade80; font-size: 1.4rem;">${accData.currentRp} RP</div>
+          </div>
+          <div class="sidebar-field" style="border-left-color: var(--lcars-blue);">
+            <div class="field-label">ROUND HARVEST YIELD</div>
+            <div class="field-value">+${accData.roundYield} RP / ROUND</div>
+          </div>
+        </div>
+
+        <div class="order-box" style="border-color: var(--lcars-amber); margin-top: 0.75rem;">
+          <div class="field-label" style="color: var(--lcars-amber);">EXPENDITURE DIRECTIVE</div>
+          <select id="spend-type-select" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">
+            <option value="Fleet Maintenance">FLEET MAINTENANCE / ATTRITION</option>
+            <option value="Fleet Repairs">DAMAGE REPAIRS</option>
+            <option value="Commission Task Force">COMMISSION NEW TASK FORCE</option>
+            <option value="Sector Fortification">SECTOR FORTIFICATION / EXPANSION</option>
+            <option value="Custom">OTHER EXPENDITURE</option>
+          </select>
+
+          <div style="margin-top: 0.35rem;">
+            <div class="field-label" style="color: var(--lcars-amber);">RP AMOUNT TO DEDUCT</div>
+            <input id="spend-amount-input" type="number" min="1" max="${accData.currentRp}" class="order-input" placeholder="ENTER RP AMOUNT">
+          </div>
+
+          <button id="btn-spend-rp" class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.5rem;" onclick="executeRpSpend('${accData.playerName}', '${pinHash}')">
+            TRANSMIT EXPENDITURE
+          </button>
+        </div>
+      `;
+    }
+
+    async function executeRpSpend(playerName, pinHash) {
+      const spendType = document.getElementById('spend-type-select').value;
+      const amountInput = document.getElementById('spend-amount-input');
+      const amt = Number(amountInput.value);
+
+      if (!amt || amt <= 0) {
+        alert("INPUT ERROR: Please provide a valid expenditure amount.");
+        return;
+      }
+
+      const conf = confirm(`CONFIRMATION: Authorize payment of ${amt} RP for ${spendType}?`);
+      if (!conf) return;
+
+      const btn = document.getElementById('btn-spend-rp');
+      btn.textContent = "PROCESSING PAYMENT...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'spend_rp',
+            playerName: playerName,
+            pinHash: pinHash,
+            amount: amt,
+            description: spendType
+          })
+        });
+        const respData = await res.json();
+
+        if (respData.status === 'insufficient_funds') {
+          alert("TRANSACTION DECLINED: Insufficient RP balance.");
+          btn.textContent = "TRANSMIT EXPENDITURE";
+          btn.disabled = false;
+          return;
+        }
+
+        alert(`TRANSACTION APPROVED: Deducted ${amt} RP. Remaining Treasury: ${respData.newBalance} RP.`);
+        openRpLedgerMenu();
+      } catch (err) {
+        alert("COMMUNICATION ERROR: " + err);
+        btn.textContent = "TRANSMIT EXPENDITURE";
+        btn.disabled = false;
+      }
+    }
+
+    // --- SYSTEM SECURITY & PIN CONFIG ---
     function toggleSettingsMenu() {
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
@@ -923,7 +1115,6 @@
           PASSCODES ARE HASHED VIA CLIENT-SIDE SHA-256. NO PLAIN-TEXT KEYS ARE VISIBLE IN SOURCE CODE OR SPREADSHEETS.
         </div>
 
-        <!-- Section 1: Player PIN Management -->
         <div class="order-box" style="border-color: var(--lcars-blue);">
           <div class="field-label" style="color: var(--lcars-blue);">PLAYER PIN CONFIGURATION</div>
           <select id="settings-player-select" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);" onchange="updateSettingsPinFields()">
@@ -950,7 +1141,6 @@
           </button>
         </div>
 
-        <!-- Section 2: GM Master Override Passcode -->
         <div class="order-box" style="border-color: var(--lcars-red); margin-top: 0.75rem;">
           <div class="field-label" style="color: var(--lcars-red);">GM MASTER OVERRIDE CODE</div>
           <input id="settings-gm-current" type="password" class="order-input" placeholder="CURRENT GM PASSCODE" style="margin-top: 0.25rem;">
@@ -1177,10 +1367,9 @@
       showFleetSidebar(tf, sec);
     }
 
-    async function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
+    function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
       if (pass === null) return;
-      const gmHash = await hashPin(pass);
 
       const pNorm = norm(assignedPlayer);
       const curId = String(rawSectorId).padStart(2, '0');
@@ -1214,7 +1403,7 @@
         <select id="retreat-dest-${taskForceId}" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);">
           ${optionsHtml}
         </select>
-        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}', '${gmHash}')">
+        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}', '${pass}')">
           CONFIRM RETREAT VECTOR
         </button>
       `;
@@ -1222,10 +1411,11 @@
       container.appendChild(retreatBox);
     }
 
-    async function confirmRetreatExecution(taskForceId, gmHash) {
+    async function confirmRetreatExecution(taskForceId, rawPass) {
       const select = document.getElementById(`retreat-dest-${taskForceId}`);
       if (!select) return;
       const retreatSec = select.value;
+      const gmHash = await hashPin(rawPass);
 
       try {
         const res = await fetch(API_URL, {
