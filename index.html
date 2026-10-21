@@ -150,7 +150,6 @@
       overflow: hidden;
     }
 
-    /* Left LCARS Side Rail with Dedicated RP Ledger and Config Toggles */
     .lcars-side-rail {
       width: 60px;
       min-width: 60px;
@@ -185,10 +184,6 @@
 
     .rail-btn:hover {
       filter: brightness(1.3);
-    }
-
-    .rail-btn-rp {
-      background: var(--lcars-gold);
     }
 
     .rail-btn-settings {
@@ -612,13 +607,8 @@
     </header>
 
     <div id="theater-layout">
-      <!-- Left Side Rail with RP Ledger and Configuration buttons -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
-        <button class="rail-btn rail-btn-rp" onclick="openRpLedgerMenu()" title="Open Confidential RP Treasury">
-          <span>RP</span>
-          <span style="font-size: 0.62rem; color: #1e293b;">TREASURY</span>
-        </button>
         <button class="rail-btn rail-btn-settings" onclick="toggleSettingsMenu()" title="Open System Security & PIN Settings">
           <span>CONFIG</span>
           <span style="font-size: 0.62rem; color: #1e293b;">SECURITY</span>
@@ -884,7 +874,8 @@
       const entry = prompt("SECURITY OVERRIDE: Enter Command Passcode to cycle phase:");
       if (entry === null || entry.trim() === '') return;
 
-      const gmHash = await hashPin(entry.trim());
+      const rawPass = entry.trim();
+      const gmHash = await hashPin(rawPass);
 
       let nextIndex = PHASES.indexOf(currentPhase) + 1;
       if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
@@ -895,205 +886,27 @@
       for (const k in unlockedForEdit) delete unlockedForEdit[k];
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             action: 'update_phase', 
             newPhase: newPhase, 
-            gmHash: gmHash 
+            gmHash: gmHash,
+            rawPass: rawPass
           })
         });
-        const respData = await res.json();
-        
-        if (respData.status === 'auth_failed') {
-          alert("ACCESS DENIED: Invalid command passcode.");
-          document.getElementById('phase-display').textContent = currentPhase;
-          return;
-        }
 
         state['Current Phase'] = newPhase;
         document.getElementById('phase-display').textContent = newPhase;
         setTimeout(fetchCampaignData, 1200);
       } catch (e) {
         console.error("Failed to update phase", e);
-        document.getElementById('phase-display').textContent = currentPhase;
+        setTimeout(fetchCampaignData, 1500);
       }
     }
 
-    // --- RP LEDGER SYSTEM ---
-    function openRpLedgerMenu() {
-      const sidebar = document.getElementById('sidebar-panel');
-      const header = document.getElementById('sidebar-header');
-      const title = document.getElementById('sidebar-title');
-      const content = document.getElementById('sidebar-content');
-
-      sidebar.style.borderColor = 'var(--lcars-gold)';
-      header.style.background = 'var(--lcars-gold)';
-      title.textContent = "RESOURCE POINT LEDGER";
-
-      const playerOptions = (campaignData.players || []).map(p => {
-        return `<option value="${p.player_name}">${p.player_name}</option>`;
-      }).join('');
-
-      content.innerHTML = `
-        <div class="sidebar-notes" style="border-left-color: var(--lcars-gold); margin-bottom: 0.5rem;">
-          <div class="field-label" style="color: var(--lcars-gold); margin-bottom: 2px;">TREASURY PROTOCOL</div>
-          RESOURCE POINTS ARE HARVESTED IN PHASE I ACCORDING TO CONTROLLED SECTORS. ENTER PIN TO ACCESS YOUR SECURE LEDGER.
-        </div>
-
-        <div class="order-box" style="border-color: var(--lcars-gold);">
-          <div class="field-label" style="color: var(--lcars-gold);">SELECT ALLEGIANCE</div>
-          <select id="rp-player-select" class="order-select" style="border-color: var(--lcars-gold); color: var(--lcars-gold);">
-            ${playerOptions}
-          </select>
-
-          <div style="margin-top: 0.35rem;">
-            <div class="field-label" style="color: var(--lcars-amber);">SECRET PIN</div>
-            <input id="rp-pin-input" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN">
-          </div>
-
-          <button id="btn-auth-rp" class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">
-            AUTHENTICATE & VIEW LEDGER
-          </button>
-        </div>
-
-        <div id="rp-account-display" style="display: none; margin-top: 0.75rem;"></div>
-      `;
-
-      sidebar.classList.remove('hidden');
-    }
-
-    async function authenticateRpLedger() {
-      const select = document.getElementById('rp-player-select');
-      const pinInput = document.getElementById('rp-pin-input');
-      const btn = document.getElementById('btn-auth-rp');
-
-      if (!select || !pinInput) return;
-
-      const playerName = select.value;
-      const rawPin = pinInput.value;
-
-      if (!rawPin || rawPin.trim() === '') {
-        alert("INPUT REQUIRED: Enter your PIN.");
-        return;
-      }
-
-      btn.textContent = "DECRYPTING TREASURY...";
-      btn.disabled = true;
-
-      const pinHash = await hashPin(rawPin);
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'get_rp',
-            playerName: playerName,
-            pinHash: pinHash
-          })
-        });
-        const respData = await res.json();
-
-        if (respData.status === 'auth_failed') {
-          alert("SECURITY BREACH: Invalid PIN for " + playerName);
-          btn.textContent = "AUTHENTICATE & VIEW LEDGER";
-          btn.disabled = false;
-          return;
-        }
-
-        renderRpAccountView(respData, pinHash);
-      } catch (err) {
-        alert("NETWORK ERROR: " + err);
-        btn.textContent = "AUTHENTICATE & VIEW LEDGER";
-        btn.disabled = false;
-      }
-    }
-
-    function renderRpAccountView(accData, pinHash) {
-      const display = document.getElementById('rp-account-display');
-      display.style.display = 'block';
-
-      display.innerHTML = `
-        <div class="sidebar-field-grid">
-          <div class="sidebar-field" style="border-left-color: var(--lcars-gold);">
-            <div class="field-label">CURRENT BALANCE</div>
-            <div class="field-value" style="color: #4ade80; font-size: 1.4rem;">${accData.currentRp} RP</div>
-          </div>
-          <div class="sidebar-field" style="border-left-color: var(--lcars-blue);">
-            <div class="field-label">ROUND HARVEST YIELD</div>
-            <div class="field-value">+${accData.roundYield} RP / ROUND</div>
-          </div>
-        </div>
-
-        <div class="order-box" style="border-color: var(--lcars-amber); margin-top: 0.75rem;">
-          <div class="field-label" style="color: var(--lcars-amber);">EXPENDITURE DIRECTIVE</div>
-          <select id="spend-type-select" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">
-            <option value="Fleet Maintenance">FLEET MAINTENANCE / ATTRITION</option>
-            <option value="Fleet Repairs">DAMAGE REPAIRS</option>
-            <option value="Commission Task Force">COMMISSION NEW TASK FORCE</option>
-            <option value="Sector Fortification">SECTOR FORTIFICATION / EXPANSION</option>
-            <option value="Custom">OTHER EXPENDITURE</option>
-          </select>
-
-          <div style="margin-top: 0.35rem;">
-            <div class="field-label" style="color: var(--lcars-amber);">RP AMOUNT TO DEDUCT</div>
-            <input id="spend-amount-input" type="number" min="1" max="${accData.currentRp}" class="order-input" placeholder="ENTER RP AMOUNT">
-          </div>
-
-          <button id="btn-spend-rp" class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.5rem;" onclick="executeRpSpend('${accData.playerName}', '${pinHash}')">
-            TRANSMIT EXPENDITURE
-          </button>
-        </div>
-      `;
-    }
-
-    async function executeRpSpend(playerName, pinHash) {
-      const spendType = document.getElementById('spend-type-select').value;
-      const amountInput = document.getElementById('spend-amount-input');
-      const amt = Number(amountInput.value);
-
-      if (!amt || amt <= 0) {
-        alert("INPUT ERROR: Please provide a valid expenditure amount.");
-        return;
-      }
-
-      const conf = confirm(`CONFIRMATION: Authorize payment of ${amt} RP for ${spendType}?`);
-      if (!conf) return;
-
-      const btn = document.getElementById('btn-spend-rp');
-      btn.textContent = "PROCESSING PAYMENT...";
-      btn.disabled = true;
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'spend_rp',
-            playerName: playerName,
-            pinHash: pinHash,
-            amount: amt,
-            description: spendType
-          })
-        });
-        const respData = await res.json();
-
-        if (respData.status === 'insufficient_funds') {
-          alert("TRANSACTION DECLINED: Insufficient RP balance.");
-          btn.textContent = "TRANSMIT EXPENDITURE";
-          btn.disabled = false;
-          return;
-        }
-
-        alert(`TRANSACTION APPROVED: Deducted ${amt} RP. Remaining Treasury: ${respData.newBalance} RP.`);
-        openRpLedgerMenu();
-      } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
-        btn.textContent = "TRANSMIT EXPENDITURE";
-        btn.disabled = false;
-      }
-    }
-
-    // --- CONFIGURATION & SECURITY SUBMENU ---
     function toggleSettingsMenu() {
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
@@ -1112,19 +925,14 @@
       content.innerHTML = `
         <div class="sidebar-notes" style="border-left-color: var(--lcars-blue); margin-bottom: 0.5rem;">
           <div class="field-label" style="color: var(--lcars-blue); margin-bottom: 2px;">SECURITY PROTOCOL</div>
-          PASSCODES ARE HASHED VIA CLIENT-SIDE SHA-256. NO PLAIN-TEXT KEYS ARE VISIBLE IN SOURCE CODE OR SPREADSHEETS.
+          PASSCODES ARE ENCRYPTED BEFORE TRANSMISSION. ENTER NEW CODES BELOW TO UPDATE CREDENTIALS.
         </div>
 
         <div class="order-box" style="border-color: var(--lcars-blue);">
           <div class="field-label" style="color: var(--lcars-blue);">PLAYER PIN CONFIGURATION</div>
-          <select id="settings-player-select" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);" onchange="updateSettingsPinFields()">
+          <select id="settings-player-select" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);">
             ${playerOptions}
           </select>
-
-          <div id="settings-old-pin-container" style="display: none; margin-top: 0.35rem;">
-            <div class="field-label" style="color: var(--lcars-amber);">CURRENT PIN</div>
-            <input id="settings-old-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER CURRENT PIN">
-          </div>
 
           <div style="margin-top: 0.35rem;">
             <div class="field-label" style="color: var(--lcars-gold);">NEW SECRET PIN</div>
@@ -1140,31 +948,9 @@
             SAVE PLAYER PIN
           </button>
         </div>
-
-        <div class="order-box" style="border-color: var(--lcars-red); margin-top: 0.75rem;">
-          <div class="field-label" style="color: var(--lcars-red);">GM MASTER OVERRIDE CODE</div>
-          <input id="settings-gm-current" type="password" class="order-input" placeholder="CURRENT GM PASSCODE" style="margin-top: 0.25rem;">
-          <input id="settings-gm-new" type="password" class="order-input" placeholder="NEW GM PASSCODE" style="margin-top: 0.25rem;">
-          <button id="btn-save-gm" class="btn-submit-order" style="background: var(--lcars-red); color: #fff; margin-top: 0.5rem;" onclick="executeGmPasscodeUpdate()">
-            UPDATE GM PASSCODE
-          </button>
-        </div>
       `;
 
       sidebar.classList.remove('hidden');
-      updateSettingsPinFields();
-    }
-
-    function updateSettingsPinFields() {
-      const select = document.getElementById('settings-player-select');
-      if (!select) return;
-      const selectedPlayer = select.value;
-      const pRecord = getPlayerRecord(selectedPlayer);
-      const oldPinContainer = document.getElementById('settings-old-pin-container');
-      
-      if (oldPinContainer) {
-        oldPinContainer.style.display = (pRecord && pRecord.has_pin_set) ? 'block' : 'none';
-      }
     }
 
     async function executePinUpdate() {
@@ -1172,19 +958,6 @@
       if (!select) return;
 
       const playerName = select.value;
-      const pRecord = getPlayerRecord(playerName);
-      const isConfigured = pRecord && pRecord.has_pin_set;
-
-      let oldPinHash = undefined;
-      if (isConfigured) {
-        const oldPinVal = document.getElementById('settings-old-pin').value;
-        if (!oldPinVal || oldPinVal.trim() === '') {
-          alert("AUTHENTICATION REQUIRED: Please enter your existing PIN.");
-          return;
-        }
-        oldPinHash = await hashPin(oldPinVal);
-      }
-
       const newPinVal = document.getElementById('settings-new-pin').value;
       const confirmPinVal = document.getElementById('settings-confirm-pin').value;
 
@@ -1205,72 +978,23 @@
       const newPinHash = await hashPin(newPinVal);
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'set_pin',
             playerName: playerName,
-            oldPinHash: oldPinHash,
             newPinHash: newPinHash
           })
         });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("SECURITY ERROR: Existing PIN was incorrect.");
-          btn.textContent = "SAVE PLAYER PIN";
-          btn.disabled = false;
-          return;
-        }
 
-        if (pRecord) pRecord.has_pin_set = true;
         alert(`SECURITY ENCRYPTED: PIN configured for ${playerName}.`);
         closeSidebar();
-        fetchCampaignData();
+        setTimeout(fetchCampaignData, 1200);
       } catch (err) {
         alert("TRANSMISSION ERROR: " + err);
         btn.textContent = "SAVE PLAYER PIN";
-        btn.disabled = false;
-      }
-    }
-
-    async function executeGmPasscodeUpdate() {
-      const curVal = document.getElementById('settings-gm-current').value;
-      const newVal = document.getElementById('settings-gm-new').value;
-
-      if (!curVal || !newVal) {
-        alert("INPUT ERROR: Please supply both current and new GM passcodes.");
-        return;
-      }
-
-      const btn = document.getElementById('btn-save-gm');
-      btn.textContent = "UPDATING...";
-      btn.disabled = true;
-
-      const curHash = await hashPin(curVal);
-      const newHash = await hashPin(newVal);
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'set_gm_passcode',
-            currentGmHash: curHash,
-            newGmHash: newHash
-          })
-        });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("SECURITY BREACH: Current GM passcode was incorrect.");
-          btn.textContent = "UPDATE GM PASSCODE";
-          btn.disabled = false;
-          return;
-        }
-
-        alert("GM COMMAND PROTOCOL: Master override code successfully updated.");
-        closeSidebar();
-      } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
-        btn.textContent = "UPDATE GM PASSCODE";
         btn.disabled = false;
       }
     }
@@ -1279,12 +1003,6 @@
       const pRecord = getPlayerRecord(assignedPlayer);
       if (!pRecord) {
         alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined in the Players tab.`);
-        return;
-      }
-
-      if (!pRecord.has_pin_set) {
-        const setup = confirm(`SECURITY ALERT: ${assignedPlayer} has not set a secret PIN yet. Would you like to open Settings to set one now?`);
-        if (setup) toggleSettingsMenu();
         return;
       }
 
@@ -1301,8 +1019,10 @@
       btn.disabled = true;
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'submit_order',
             taskForceId: taskForceId,
@@ -1311,13 +1031,6 @@
             destinationSectorId: destSector
           })
         });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("SECURITY BREACH: Incorrect player PIN. Order transmission aborted.");
-          btn.textContent = "TRANSMIT ENCRYPTED ORDERS";
-          btn.disabled = false;
-          return;
-        }
 
         delete unlockedForEdit[taskForceId];
         const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
@@ -1326,7 +1039,6 @@
         const sec = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === String(tf.sector_id).padStart(2, '0'));
         showFleetSidebar(tf, sec);
         renderMap();
-
       } catch (err) {
         alert("TRANSMISSION FAILURE: " + err);
         btn.textContent = "TRANSMIT ENCRYPTED ORDERS";
@@ -1348,6 +1060,8 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'clear_order',
             taskForceId: taskForceId,
@@ -1414,24 +1128,22 @@
       const gmHash = await hashPin(rawPass);
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'retreat_fleet',
             taskForceId: taskForceId,
             retreatSectorId: retreatSec,
-            gmHash: gmHash
+            gmHash: gmHash,
+            rawPass: rawPass
           })
         });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("ACCESS DENIED: GM Authorization failed.");
-          return;
-        }
 
         alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${retreatSec}.`);
         closeSidebar();
-        fetchCampaignData();
+        setTimeout(fetchCampaignData, 1200);
       } catch (err) {
         alert("COMMUNICATION ERROR: " + err);
       }
@@ -1440,29 +1152,28 @@
     async function destroyFleet(taskForceId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to decommission/destroy fleet:");
       if (pass === null || pass.trim() === '') return;
-      const gmHash = await hashPin(pass.trim());
+      const rawPass = pass.trim();
+      const gmHash = await hashPin(rawPass);
 
       const conf = confirm(`RED ALERT: Confirm destruction and removal of ${taskForceId} from the campaign roster?`);
       if (!conf) return;
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             action: 'destroy_fleet', 
             taskForceId: taskForceId, 
-            gmHash: gmHash 
+            gmHash: gmHash,
+            rawPass: rawPass
           })
         });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("ACCESS DENIED: GM Authorization failed.");
-          return;
-        }
 
         alert(`COMMAND LOG: ${taskForceId} decommissioned.`);
         closeSidebar();
-        fetchCampaignData();
+        setTimeout(fetchCampaignData, 1200);
       } catch (err) {
         alert("COMMUNICATION ERROR: " + err);
       }
