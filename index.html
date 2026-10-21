@@ -433,10 +433,7 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycby908UFG7N8UXnPCoswOY1HHMTv5n-D4Q10LSJO8zJYXJFH1f1XNR0w1tTteMRrB39QOA/exec";
 
-    // -------------------------------------------------------------
-    // COMMAND PASSCODE PROTECTION (Change this code to whatever you want)
-    // -------------------------------------------------------------
-    const GM_PASSCODE = "10324";
+    const GM_PASSCODE = "1701";
 
     const PHASES = [
       "Phase I: Resource Gathering",
@@ -496,9 +493,8 @@
     }
 
     async function advancePhase() {
-      // 3. Password Verification Prompt
       const entry = prompt("SECURITY OVERRIDE: Enter Command Passcode to cycle phase:");
-      if (entry === null) return; // Player clicked cancel
+      if (entry === null) return;
       if (entry.trim() !== GM_PASSCODE) {
         alert("ACCESS DENIED: Invalid command authorization.");
         return;
@@ -541,15 +537,14 @@
         fleetsBySector[secId].push(fleet);
       });
 
-      // 1 & 2. Render Sector Numbers with Sector 03 elevated
+      // Render Sector Numbers
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
         let xPct = parseFloat(sec.x_pct);
         let yPct = parseFloat(sec.y_pct);
         
-        // Manual coordinate overrides
         if (secId === '01') xPct = 10.0;
-        if (secId === '03') yPct = 18.0; // Nudged upward
+        if (secId === '03') yPct = 28.0; // Corrected to rest properly inside Sector 03
 
         const theme = getPlayerColorTheme(sec.controller);
 
@@ -560,7 +555,7 @@
         btn.style.background = theme.bg;
         btn.style.borderColor = theme.border;
         btn.style.color = theme.text;
-        btn.textContent = secId; // Plain number only
+        btn.textContent = secId;
 
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -578,7 +573,7 @@
         let xPct = parseFloat(sec.x_pct);
         let yPct = parseFloat(sec.y_pct);
         if (secId === '01') xPct = 10.0;
-        if (secId === '03') yPct = 18.0;
+        if (secId === '03') yPct = 28.0;
 
         const verticalStepPx = 22;
 
