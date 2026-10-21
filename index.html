@@ -567,12 +567,10 @@
 
     let campaignData = null;
 
-    // Helper: Normalize strings for reliable comparisons
     function norm(str) {
       return String(str || '').trim().toLowerCase();
     }
 
-    // Dynamic Player Resolution from the Google Sheet 'Players' tab
     function getPlayerRecord(name) {
       const list = (campaignData && campaignData.players) || [];
       const target = norm(name);
@@ -589,13 +587,11 @@
         };
       }
 
-      // Default Neutral Fallback
       const n = norm(name);
       if (!n || n.includes('neutral') || n === 'uncontrolled') {
         return { bg: '#223344', border: '#ffcc00', text: '#ffcc00' };
       }
 
-      // Fallback deterministic hue generator if player is not in the Players tab
       let hash = 0;
       for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
       const hue = Math.abs(hash) % 360;
@@ -625,7 +621,6 @@
       return matches.map(m => String(m).padStart(2, '0'));
     }
 
-    // 2-Hop Rule: 1 hop anywhere; 2 hops ONLY if intermediate sector is controlled by this player
     function calculateLegalDestinations(currentSec, controllingPlayer, sectors) {
       const currentId = String(currentSec.sector_id).padStart(2, '0');
       const destinations = [];
@@ -636,17 +631,19 @@
         label: `HOLD STATION (SEC ${currentId})`
       });
 
+      // 1-Hop: Standard Transit
       const directNeighbors = getSectorNeighbors(currentId, sectors);
       directNeighbors.forEach(nbrId => {
         const nbrObj = sectors.find(s => String(s.sector_id).padStart(2, '0') === nbrId);
-        const name = nbrObj ? nbrObj.sector_name : `SEC ${nbrId}`;
+        const name = nbrObj ? nbrObj.sector_name : `Sector ${nbrId}`;
         destinations.push({
           id: nbrId,
           dist: 1,
-          label: `STANDARD TRANSIT [1 HOP]: ${name} (${nbrId})`
+          label: `STANDARD TRANSIT: ${name} (${nbrId})`
         });
       });
 
+      // 2-Hops: Tactical Flank via friendly intermediary
       directNeighbors.forEach(step1Id => {
         const step1Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step1Id);
         if (step1Sec) {
@@ -656,11 +653,11 @@
             step2Neighbors.forEach(step2Id => {
               if (step2Id !== currentId && !destinations.some(d => d.id === step2Id)) {
                 const step2Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step2Id);
-                const name = step2Sec ? step2Sec.sector_name : `SEC ${step2Id}`;
+                const name = step2Sec ? step2Sec.sector_name : `Sector ${step2Id}`;
                 destinations.push({
                   id: step2Id,
                   dist: 2,
-                  label: `TACTICAL FLANK [2 HOPS VIA ${step1Id}]: ${name} (${step2Id})`
+                  label: `TACTICAL FLANK: ${name} (${step2Id} via Sector ${step1Id})`
                 });
               }
             });
@@ -725,7 +722,6 @@
       }
     }
 
-    // Submit Secret Order with spreadsheet-verified PIN
     async function submitSecretOrder(taskForceId, assignedPlayer) {
       const playerRecord = getPlayerRecord(assignedPlayer);
       const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
