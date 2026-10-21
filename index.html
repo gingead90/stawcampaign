@@ -934,8 +934,8 @@
       showFleetSidebar(tf, sec);
     }
 
-    // Interactive in-sidebar retreat vector selection
-    function retreatFleet(taskForceId, assignedPlayer, sec) {
+    // Interactive in-sidebar retreat vector selection with clean parameters
+    function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
       if (pass === null) return;
       if (pass.trim() !== GM_PASSCODE) {
@@ -944,24 +944,28 @@
       }
 
       const pNorm = norm(assignedPlayer);
-      const curId = String(sec.sector_id).padStart(2, '0');
-      const neighbors = getSectorNeighbors(curId, campaignData.sectors);
+      const curId = String(rawSectorId).padStart(2, '0');
+      const neighbors = getSectorNeighbors(curId, campaignData.sectors || []);
+
+      if (neighbors.length === 0) {
+        alert("TACTICAL ALERT: No connected hyperlanes found for Sector " + curId);
+        return;
+      }
 
       const optionsHtml = neighbors.map(nId => {
-        const sObj = campaignData.sectors.find(s => String(s.sector_id).padStart(2, '0') === nId);
+        const sObj = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === nId);
         const name = sObj ? (sObj.sector_name || `Sector ${nId}`) : `Sector ${nId}`;
         const ctrl = sObj ? (sObj.controller || 'Neutral') : 'Unknown';
         const isFriendly = (norm(ctrl) === pNorm);
         return `<option value="${nId}">SEC ${nId}: ${name} [${ctrl.toUpperCase()}${isFriendly ? ' - FRIENDLY' : ''}]</option>`;
       }).join('');
 
-      if (neighbors.length === 0) {
-        alert("TACTICAL ALERT: No connected hyperlanes detected for this sector.");
-        return;
-      }
+      const existingBox = document.getElementById(`retreat-box-${taskForceId}`);
+      if (existingBox) existingBox.remove();
 
       const container = document.getElementById('sidebar-content');
       const retreatBox = document.createElement('div');
+      retreatBox.id = `retreat-box-${taskForceId}`;
       retreatBox.className = 'order-box';
       retreatBox.style.borderColor = 'var(--lcars-blue)';
       retreatBox.style.marginTop = '0.75rem';
@@ -1177,7 +1181,6 @@
 
       document.getElementById('sidebar-title').textContent = `${fleet.task_force_id} LOG`;
 
-      // Word boundary regex: strictly matches Phase II, ignoring Phase III
       const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
       const isPhase2 = /\bphase ii\b/i.test(currentPhase);
       const isPhase3 = /\bphase iii\b/i.test(currentPhase);
@@ -1229,7 +1232,7 @@
           <div class="order-box" style="border-color: var(--lcars-red);">
             <div class="field-label" style="color: var(--lcars-red);">TACTICAL ENGAGEMENT STATUS</div>
             <div class="combat-action-grid">
-              <button class="btn-combat-retreat" onclick="retreatFleet('${fleet.task_force_id}', '${fleet.player}', campaignData.sectors.find(s => String(s.sector_id).padStart(2,'0') === String(fleet.sector_id).padStart(2,'0')))">
+              <button class="btn-combat-retreat" onclick="retreatFleet('${fleet.task_force_id}', '${fleet.player}', '${fleet.sector_id}')">
                 RETREAT FLEET
               </button>
               <button class="btn-combat-destroy" onclick="destroyFleet('${fleet.task_force_id}')">
