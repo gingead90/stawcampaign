@@ -150,7 +150,7 @@
       overflow: hidden;
     }
 
-    /* LCARS Left Side Rail with RP Ledger and Settings Buttons */
+    /* Left LCARS Side Rail with Dedicated RP Ledger and Config Toggles */
     .lcars-side-rail {
       width: 60px;
       min-width: 60px;
@@ -612,7 +612,7 @@
     </header>
 
     <div id="theater-layout">
-      <!-- Left LCARS Side Rail with RP Treasury and Config Buttons -->
+      <!-- Left Side Rail with RP Ledger and Configuration buttons -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
         <button class="rail-btn rail-btn-rp" onclick="openRpLedgerMenu()" title="Open Confidential RP Treasury">
@@ -882,8 +882,9 @@
       }
 
       const entry = prompt("SECURITY OVERRIDE: Enter Command Passcode to cycle phase:");
-      if (entry === null) return;
-      const gmHash = await hashPin(entry);
+      if (entry === null || entry.trim() === '') return;
+
+      const gmHash = await hashPin(entry.trim());
 
       let nextIndex = PHASES.indexOf(currentPhase) + 1;
       if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
@@ -896,10 +897,14 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'update_phase', newPhase: newPhase, gmHash: gmHash })
+          body: JSON.stringify({ 
+            action: 'update_phase', 
+            newPhase: newPhase, 
+            gmHash: gmHash 
+          })
         });
         const respData = await res.json();
+        
         if (respData.status === 'auth_failed') {
           alert("ACCESS DENIED: Invalid command passcode.");
           document.getElementById('phase-display').textContent = currentPhase;
@@ -915,7 +920,7 @@
       }
     }
 
-    // --- RP LEDGER & TREASURY SYSTEM ---
+    // --- RP LEDGER SYSTEM ---
     function openRpLedgerMenu() {
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
@@ -981,7 +986,6 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'get_rp',
             playerName: playerName,
@@ -1008,9 +1012,6 @@
     function renderRpAccountView(accData, pinHash) {
       const display = document.getElementById('rp-account-display');
       display.style.display = 'block';
-
-      const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
-      const isPhase4 = /\bphase iv\b/i.test(currentPhase);
 
       display.innerHTML = `
         <div class="sidebar-field-grid">
@@ -1066,7 +1067,6 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'spend_rp',
             playerName: playerName,
@@ -1093,7 +1093,7 @@
       }
     }
 
-    // --- SYSTEM SECURITY & PIN CONFIG ---
+    // --- CONFIGURATION & SECURITY SUBMENU ---
     function toggleSettingsMenu() {
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
@@ -1207,7 +1207,6 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'set_pin',
             playerName: playerName,
@@ -1253,7 +1252,6 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'set_gm_passcode',
             currentGmHash: curHash,
@@ -1291,7 +1289,7 @@
       }
 
       const enteredPin = prompt(`TACTICAL AUTHENTICATION: Enter secret PIN for ${assignedPlayer}:`);
-      if (enteredPin === null) return;
+      if (enteredPin === null || enteredPin.trim() === '') return;
       const pinHash = await hashPin(enteredPin);
 
       const select = document.getElementById(`order-dest-${taskForceId}`);
@@ -1305,7 +1303,6 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'submit_order',
             taskForceId: taskForceId,
@@ -1339,7 +1336,7 @@
 
     async function unlockOrderModification(taskForceId, assignedPlayer) {
       const enteredPin = prompt(`SECURITY CLEARANCE: Enter secret PIN for ${assignedPlayer} to modify orders:`);
-      if (enteredPin === null) return;
+      if (enteredPin === null || enteredPin.trim() === '') return;
       const pinHash = await hashPin(enteredPin);
 
       unlockedForEdit[taskForceId] = true;
@@ -1351,7 +1348,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'clear_order',
             taskForceId: taskForceId,
@@ -1369,7 +1365,7 @@
 
     function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
-      if (pass === null) return;
+      if (pass === null || pass.trim() === '') return;
 
       const pNorm = norm(assignedPlayer);
       const curId = String(rawSectorId).padStart(2, '0');
@@ -1403,7 +1399,7 @@
         <select id="retreat-dest-${taskForceId}" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);">
           ${optionsHtml}
         </select>
-        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}', '${pass}')">
+        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}', '${pass.trim()}')">
           CONFIRM RETREAT VECTOR
         </button>
       `;
@@ -1420,7 +1416,6 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'retreat_fleet',
             taskForceId: taskForceId,
@@ -1444,8 +1439,8 @@
 
     async function destroyFleet(taskForceId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to decommission/destroy fleet:");
-      if (pass === null) return;
-      const gmHash = await hashPin(pass);
+      if (pass === null || pass.trim() === '') return;
+      const gmHash = await hashPin(pass.trim());
 
       const conf = confirm(`RED ALERT: Confirm destruction and removal of ${taskForceId} from the campaign roster?`);
       if (!conf) return;
@@ -1453,8 +1448,11 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash })
+          body: JSON.stringify({ 
+            action: 'destroy_fleet', 
+            taskForceId: taskForceId, 
+            gmHash: gmHash 
+          })
         });
         const respData = await res.json();
         if (respData.status === 'auth_failed') {
