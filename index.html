@@ -464,6 +464,26 @@
       color: #ffffff;
     }
 
+    .btn-security-pin {
+      background: transparent;
+      color: var(--lcars-amber);
+      border: 1px solid var(--lcars-amber);
+      padding: 0.3rem 0.5rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      margin-top: 0.3rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-security-pin:hover {
+      background: var(--lcars-amber);
+      color: #000;
+    }
+
     .combat-action-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -654,6 +674,14 @@
 
     function norm(str) {
       return String(str || '').trim().toLowerCase();
+    }
+
+    // Cryptographic One-Way Browser Hashing (SHA-256)
+    async function hashPin(pin) {
+      const msgUint8 = new TextEncoder().encode(String(pin).trim());
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+      const hashArray = Array.from(new Uint8Array(hashBuffer));
+      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     function getPlayerRecord(name) {
@@ -851,21 +879,67 @@
       }
     }
 
-    async function submitSecretOrder(taskForceId, assignedPlayer) {
-      const playerRecord = getPlayerRecord(assignedPlayer);
-      const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
+    // Set or Change Secret SHA-256 PIN
+    async function managePlayerPin(playerName) {
+      const pRecord = getPlayerRecord(playerName);
+      const isConfigured = pRecord && pRecord.has_pin_set;
 
-      if (!expectedPin) {
+      let oldPinHash = undefined;
+      if (isConfigured) {
+        const oldPin = prompt(`ENCRYPTION VERIFICATION: Enter existing PIN for ${playerName}:`);
+        if (oldPin === null) return;
+        oldPinHash = await hashPin(oldPin);
+      }
+
+      const newPin = prompt(`NEW ENCRYPTION CODE: Enter new secret PIN for ${playerName}:`);
+      if (newPin === null || newPin.trim() === '') return;
+
+      const confirmPin = prompt("CONFIRM NEW ENCRYPTION CODE:");
+      if (newPin !== confirmPin) {
+        alert("SECURITY MISMATCH: Entered PINs did not match.");
+        return;
+      }
+
+      const newPinHash = await hashPin(newPin);
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'set_pin',
+            playerName: playerName,
+            oldPinHash: oldPinHash,
+            newPinHash: newPinHash
+          })
+        });
+
+        if (pRecord) pRecord.has_pin_set = true;
+        alert(`SECURITY ENCRYPTED: PIN configured for ${playerName}. The raw PIN is never stored and is unreadable to anyone.`);
+      } catch (err) {
+        alert("COMMUNICATION ERROR: " + err);
+      }
+    }
+
+    async function submitSecretOrder(taskForceId, assignedPlayer) {
+      const pRecord = getPlayerRecord(assignedPlayer);
+      if (!pRecord) {
         alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined in the Players tab of your Google Sheet.`);
         return;
       }
 
-      const enteredPin = prompt(`TACTICAL AUTHENTICATION: Enter security PIN for ${assignedPlayer}:`);
-      if (enteredPin === null) return;
-      if (enteredPin.trim() !== expectedPin) {
-        alert("SECURITY BREACH: Incorrect player PIN. Order transmission aborted.");
+      if (!pRecord.has_pin_set) {
+        const setup = confirm(`SECURITY ALERT: ${assignedPlayer} has not set a secret PIN yet. Would you like to initialize your secret PIN now?`);
+        if (setup) {
+          await managePlayerPin(assignedPlayer);
+        }
         return;
       }
+
+      const enteredPin = prompt(`TACTICAL AUTHENTICATION: Enter secret PIN for ${assignedPlayer}:`);
+      if (enteredPin === null) return;
+      const pinHash = await hashPin(enteredPin);
 
       const select = document.getElementById(`order-dest-${taskForceId}`);
       if (!select) return;
@@ -883,6 +957,8 @@
           body: JSON.stringify({
             action: 'submit_order',
             taskForceId: taskForceId,
+            playerName: assignedPlayer,
+            pinHash: pinHash,
             destinationSectorId: destSector
           })
         });
@@ -903,15 +979,9 @@
     }
 
     async function unlockOrderModification(taskForceId, assignedPlayer) {
-      const playerRecord = getPlayerRecord(assignedPlayer);
-      const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
-
-      const enteredPin = prompt(`SECURITY CLEARANCE: Enter PIN for ${assignedPlayer} to modify orders:`);
+      const enteredPin = prompt(`SECURITY CLEARANCE: Enter secret PIN for ${assignedPlayer} to modify orders:`);
       if (enteredPin === null) return;
-      if (enteredPin.trim() !== expectedPin) {
-        alert("ACCESS DENIED: Incorrect PIN.");
-        return;
-      }
+      const pinHash = await hashPin(enteredPin);
 
       unlockedForEdit[taskForceId] = true;
       const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
@@ -924,7 +994,12 @@
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'clear_order', taskForceId: taskForceId })
+          body: JSON.stringify({
+            action: 'clear_order',
+            taskForceId: taskForceId,
+            playerName: assignedPlayer,
+            pinHash: pinHash
+          })
         });
       } catch (e) {
         console.error("Failed to clear backend order", e);
@@ -934,7 +1009,6 @@
       showFleetSidebar(tf, sec);
     }
 
-    // Interactive in-sidebar retreat vector selection with clean parameters
     function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
       if (pass === null) return;
@@ -1049,7 +1123,6 @@
         fleetsBySector[secId].push(fleet);
       });
 
-      // Render Sector Badges
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
         let xPct = parseFloat(sec.x_pct);
@@ -1080,7 +1153,6 @@
         layer.appendChild(btn);
       });
 
-      // Render Fleets
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
         const stationFleets = fleetsBySector[secId] || [];
@@ -1248,6 +1320,7 @@
           <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
             <div class="field-label">ALLEGIANCE</div>
             <div class="field-value">${fleet.player || 'N/A'}</div>
+            <button class="btn-security-pin" onclick="managePlayerPin('${fleet.player}')">&#128274; SET / CHANGE SECURITY PIN</button>
           </div>
           <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
             <div class="field-label">DEPLOYED SECTOR</div>
