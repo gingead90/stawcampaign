@@ -281,7 +281,7 @@
       width: 320px;
       min-width: 320px;
       height: 100%;
-      background: rgba(3, 7, 18, 0.92);
+      background: rgba(3, 7, 18, 0.94);
       backdrop-filter: blur(8px);
       border: 2px solid var(--lcars-orange);
       border-radius: 0 16px 16px 0;
@@ -369,6 +369,48 @@
       color: #e2e8f0;
       line-height: 1.35;
       transition: border-left-color 0.25s ease;
+    }
+
+    /* Secret Orders UI */
+    .order-box {
+      margin-top: 0.5rem;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid var(--lcars-amber);
+      border-radius: 4px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .order-select {
+      width: 100%;
+      background: #000;
+      color: #ffaa00;
+      border: 1px solid #ff9900;
+      padding: 0.4rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 1rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+    }
+
+    .btn-submit-order {
+      background: var(--lcars-gold);
+      color: #000;
+      border: none;
+      padding: 0.5rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      transition: filter 0.15s ease;
+    }
+
+    .btn-submit-order:hover {
+      filter: brightness(1.2);
     }
 
     #landscape-prompt {
@@ -567,6 +609,20 @@
       return str.replace(/-/g, ', ').replace(/SEC\s*/gi, 'SEC ');
     }
 
+    function parseAdjacentSectorIds(sec) {
+      const currentId = String(sec.sector_id).padStart(2, '0');
+      const list = [currentId]; // Option to hold station
+      const str = String(sec.connected_lanes || '');
+      const matches = str.match(/\d+/g);
+      if (matches) {
+        matches.forEach(m => {
+          const padded = String(m).padStart(2, '0');
+          if (!list.includes(padded)) list.push(padded);
+        });
+      }
+      return list;
+    }
+
     async function fetchCampaignData() {
       try {
         const response = await fetch(API_URL);
@@ -613,9 +669,44 @@
         });
         state['Current Phase'] = newPhase;
         document.getElementById('phase-display').textContent = newPhase;
+
+        // Auto-refresh map so simultaneous movements render immediately on Phase III
+        setTimeout(fetchCampaignData, 1200);
       } catch (e) {
         console.error("Failed to update phase", e);
         document.getElementById('phase-display').textContent = currentPhase;
+      }
+    }
+
+    // Submit Secret Fleet Movement Order
+    async function submitSecretOrder(taskForceId) {
+      const select = document.getElementById(`order-dest-${taskForceId}`);
+      if (!select) return;
+
+      const destSector = select.value;
+      const btn = document.getElementById(`btn-order-${taskForceId}`);
+      btn.textContent = "TRANSMITTING...";
+      btn.disabled = true;
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'submit_order',
+            taskForceId: taskForceId,
+            destinationSectorId: destSector
+          })
+        });
+
+        btn.textContent = "ORDERS TRANSMITTED & ENCRYPTED";
+        btn.style.background = "#22c55e";
+        btn.style.color = "#000";
+      } catch (err) {
+        alert("TRANSMISSION ERROR: " + err);
+        btn.textContent = "TRANSMIT ENCRYPTED ORDERS";
+        btn.disabled = false;
       }
     }
 
@@ -715,7 +806,6 @@
       const secId = String(sec.sector_id).padStart(2, '0');
       const theme = getPlayerColorTheme(sec.controller);
 
-      // 2. Dynamic LCARS player color theme applied to sidebar frame
       sidebar.style.borderColor = theme.border;
       header.style.background = theme.border;
 
@@ -762,7 +852,30 @@
 
       document.getElementById('sidebar-title').textContent = `${fleet.task_force_id} LOG`;
 
-      // 1. Removed Commanding Power; Operator renamed to Allegiance
+      const currentPhase = (campaignData.campaignState || {})['Current Phase'] || '';
+      const isPhase2 = currentPhase.includes("Phase II");
+
+      let ordersHtml = '';
+      if (isPhase2) {
+        const legalDestinations = parseAdjacentSectorIds(sec);
+        const optionsHtml = legalDestinations.map(d => {
+          const isHold = (d === String(sec.sector_id).padStart(2, '0'));
+          return `<option value="${d}">${isHold ? `HOLD STATION (SEC ${d})` : `TRANSIT TO SEC ${d}`}</option>`;
+        }).join('');
+
+        ordersHtml = `
+          <div class="order-box">
+            <div class="field-label" style="color: var(--lcars-gold);">CONFIDENTIAL MOVEMENT DIRECTIVE</div>
+            <select id="order-dest-${fleet.task_force_id}" class="order-select">
+              ${optionsHtml}
+            </select>
+            <button id="btn-order-${fleet.task_force_id}" class="btn-submit-order" onclick="submitSecretOrder('${fleet.task_force_id}')">
+              TRANSMIT ENCRYPTED ORDERS
+            </button>
+          </div>
+        `;
+      }
+
       document.getElementById('sidebar-content').innerHTML = `
         <div class="sidebar-field-grid">
           <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
@@ -774,6 +887,7 @@
             <div class="field-value">${sec.sector_name} (SEC ${String(sec.sector_id).padStart(2, '0')})</div>
           </div>
         </div>
+        ${ordersHtml}
       `;
       sidebar.classList.remove('hidden');
     }
