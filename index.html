@@ -150,9 +150,10 @@
       overflow: hidden;
     }
 
+    /* LCARS Left Side Rail with Interactive Settings Button */
     .lcars-side-rail {
-      width: 42px;
-      min-width: 42px;
+      width: 60px;
+      min-width: 60px;
       height: 100%;
       display: flex;
       flex-direction: column;
@@ -163,6 +164,32 @@
       height: 40px;
       background: var(--lcars-orange);
       border-bottom-left-radius: 14px;
+    }
+
+    .rail-btn-settings {
+      height: 70px;
+      background: var(--lcars-blue);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Antonio', sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: #000;
+      letter-spacing: 1px;
+      padding: 4px;
+      transition: filter 0.15s ease, background 0.15s ease;
+    }
+
+    .rail-btn-settings:hover {
+      filter: brightness(1.3);
+    }
+
+    .rail-btn-settings.active {
+      background: var(--lcars-gold);
     }
 
     .rail-block-mid {
@@ -427,6 +454,23 @@
       text-transform: uppercase;
     }
 
+    .order-input {
+      width: 100%;
+      background: #000;
+      color: #ffffff;
+      border: 1px solid var(--lcars-slate);
+      padding: 0.45rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 1rem;
+      border-radius: 4px;
+      letter-spacing: 2px;
+    }
+
+    .order-input:focus {
+      outline: none;
+      border-color: var(--lcars-gold);
+    }
+
     .btn-submit-order {
       background: var(--lcars-gold);
       color: #000;
@@ -462,26 +506,6 @@
     .btn-modify-order:hover {
       background: #475569;
       color: #ffffff;
-    }
-
-    .btn-security-pin {
-      background: transparent;
-      color: var(--lcars-amber);
-      border: 1px solid var(--lcars-amber);
-      padding: 0.3rem 0.5rem;
-      font-family: 'Antonio', sans-serif;
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      border-radius: 4px;
-      letter-spacing: 1px;
-      margin-top: 0.3rem;
-      transition: all 0.15s ease;
-    }
-
-    .btn-security-pin:hover {
-      background: var(--lcars-amber);
-      color: #000;
     }
 
     .combat-action-grid {
@@ -585,8 +609,13 @@
     </header>
 
     <div id="theater-layout">
+      <!-- Left LCARS Rail with Settings Submenu Toggle -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
+        <button id="btn-rail-settings" class="rail-btn-settings" onclick="toggleSettingsMenu()" title="Open System Security & PIN Settings">
+          <span>CONFIG</span>
+          <span style="font-size: 0.65rem; color: #1e293b;">SECURITY</span>
+        </button>
         <div class="rail-block-mid"></div>
         <div class="rail-block-bottom"></div>
       </div>
@@ -676,7 +705,6 @@
       return String(str || '').trim().toLowerCase();
     }
 
-    // Cryptographic One-Way Browser Hashing (SHA-256)
     async function hashPin(pin) {
       const msgUint8 = new TextEncoder().encode(String(pin).trim());
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
@@ -879,28 +907,107 @@
       }
     }
 
-    // Set or Change Secret SHA-256 PIN
-    async function managePlayerPin(playerName) {
+    // Toggle LCARS Settings / Security Submenu
+    function toggleSettingsMenu() {
+      const sidebar = document.getElementById('sidebar-panel');
+      const header = document.getElementById('sidebar-header');
+      const title = document.getElementById('sidebar-title');
+      const content = document.getElementById('sidebar-content');
+
+      sidebar.style.borderColor = 'var(--lcars-blue)';
+      header.style.background = 'var(--lcars-blue)';
+      title.textContent = "SYSTEM SECURITY & PIN CONFIG";
+
+      const playerOptions = (campaignData.players || []).map(p => {
+        const isConfigured = p.has_pin_set ? "[PIN ACTIVE]" : "[PIN UNSET]";
+        return `<option value="${p.player_name}">${p.player_name} ${isConfigured}</option>`;
+      }).join('');
+
+      content.innerHTML = `
+        <div class="sidebar-notes" style="border-left-color: var(--lcars-blue); margin-bottom: 0.5rem;">
+          <div class="field-label" style="color: var(--lcars-blue); margin-bottom: 2px;">SECURITY PROTOCOL</div>
+          PLAYER PINS ARE LOCALLY HASHED USING SHA-256 BEFORE TRANSMISSION. PASSCODES ARE NEVER READABLE IN PLAIN TEXT.
+        </div>
+
+        <div class="order-box" style="border-color: var(--lcars-blue);">
+          <div class="field-label" style="color: var(--lcars-blue);">SELECT ALLEGIANCE</div>
+          <select id="settings-player-select" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);" onchange="updateSettingsPinFields()">
+            ${playerOptions}
+          </select>
+
+          <div id="settings-old-pin-container" style="display: none; margin-top: 0.35rem;">
+            <div class="field-label" style="color: var(--lcars-amber);">CURRENT PIN</div>
+            <input id="settings-old-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER CURRENT PIN">
+          </div>
+
+          <div style="margin-top: 0.35rem;">
+            <div class="field-label" style="color: var(--lcars-gold);">NEW SECRET PIN</div>
+            <input id="settings-new-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER NEW PIN">
+          </div>
+
+          <div style="margin-top: 0.35rem;">
+            <div class="field-label" style="color: var(--lcars-gold);">CONFIRM NEW PIN</div>
+            <input id="settings-confirm-pin" type="password" maxlength="8" class="order-input" placeholder="RE-ENTER NEW PIN">
+          </div>
+
+          <button id="btn-save-pin" class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executePinUpdate()">
+            SAVE ENCRYPTED PIN
+          </button>
+        </div>
+      `;
+
+      sidebar.classList.remove('hidden');
+      updateSettingsPinFields();
+    }
+
+    function updateSettingsPinFields() {
+      const select = document.getElementById('settings-player-select');
+      if (!select) return;
+      const selectedPlayer = select.value;
+      const pRecord = getPlayerRecord(selectedPlayer);
+      const oldPinContainer = document.getElementById('settings-old-pin-container');
+      
+      if (oldPinContainer) {
+        oldPinContainer.style.display = (pRecord && pRecord.has_pin_set) ? 'block' : 'none';
+      }
+    }
+
+    async function executePinUpdate() {
+      const select = document.getElementById('settings-player-select');
+      if (!select) return;
+
+      const playerName = select.value;
       const pRecord = getPlayerRecord(playerName);
       const isConfigured = pRecord && pRecord.has_pin_set;
 
       let oldPinHash = undefined;
       if (isConfigured) {
-        const oldPin = prompt(`ENCRYPTION VERIFICATION: Enter existing PIN for ${playerName}:`);
-        if (oldPin === null) return;
-        oldPinHash = await hashPin(oldPin);
+        const oldPinVal = document.getElementById('settings-old-pin').value;
+        if (!oldPinVal || oldPinVal.trim() === '') {
+          alert("AUTHENTICATION REQUIRED: Please enter your existing PIN.");
+          return;
+        }
+        oldPinHash = await hashPin(oldPinVal);
       }
 
-      const newPin = prompt(`NEW ENCRYPTION CODE: Enter new secret PIN for ${playerName}:`);
-      if (newPin === null || newPin.trim() === '') return;
+      const newPinVal = document.getElementById('settings-new-pin').value;
+      const confirmPinVal = document.getElementById('settings-confirm-pin').value;
 
-      const confirmPin = prompt("CONFIRM NEW ENCRYPTION CODE:");
-      if (newPin !== confirmPin) {
-        alert("SECURITY MISMATCH: Entered PINs did not match.");
+      if (!newPinVal || newPinVal.trim() === '') {
+        alert("INPUT ERROR: Please provide a new PIN.");
         return;
       }
 
-      const newPinHash = await hashPin(newPin);
+      if (newPinVal !== confirmPinVal) {
+        alert("SECURITY MISMATCH: The new PIN confirmation does not match.");
+        return;
+      }
+
+      const btn = document.getElementById('btn-save-pin');
+      btn.textContent = "ENCRYPTING & TRANSMITTING...";
+      btn.disabled = true;
+
+      const newPinHash = await hashPin(newPinVal);
 
       try {
         await fetch(API_URL, {
@@ -916,9 +1023,13 @@
         });
 
         if (pRecord) pRecord.has_pin_set = true;
-        alert(`SECURITY ENCRYPTED: PIN configured for ${playerName}. The raw PIN is never stored and is unreadable to anyone.`);
+        alert(`SECURITY ENCRYPTED: PIN configured for ${playerName}. The raw code is never stored and remains confidential.`);
+        closeSidebar();
+        fetchCampaignData();
       } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
+        alert("TRANSMISSION ERROR: " + err);
+        btn.textContent = "SAVE ENCRYPTED PIN";
+        btn.disabled = false;
       }
     }
 
@@ -930,9 +1041,9 @@
       }
 
       if (!pRecord.has_pin_set) {
-        const setup = confirm(`SECURITY ALERT: ${assignedPlayer} has not set a secret PIN yet. Would you like to initialize your secret PIN now?`);
+        const setup = confirm(`SECURITY ALERT: ${assignedPlayer} has not set a secret PIN yet. Would you like to open Settings to set one now?`);
         if (setup) {
-          await managePlayerPin(assignedPlayer);
+          toggleSettingsMenu();
         }
         return;
       }
@@ -1315,12 +1426,12 @@
         `;
       }
 
+      // No in-card PIN button; keeping fleet cards purely tactical
       document.getElementById('sidebar-content').innerHTML = `
         <div class="sidebar-field-grid">
           <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
             <div class="field-label">ALLEGIANCE</div>
             <div class="field-value">${fleet.player || 'N/A'}</div>
-            <button class="btn-security-pin" onclick="managePlayerPin('${fleet.player}')">&#128274; SET / CHANGE SECURITY PIN</button>
           </div>
           <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
             <div class="field-label">DEPLOYED SECTOR</div>
