@@ -543,8 +543,12 @@
         let xPct = parseFloat(sec.x_pct);
         let yPct = parseFloat(sec.y_pct);
         
+        // Manual coordinate overrides
         if (secId === '01') xPct = 10.0;
-        if (secId === '03') yPct = 28.0; // Corrected to rest properly inside Sector 03
+        if (secId === '03') {
+          xPct = 23.5;
+          yPct = 60.0;
+        }
 
         const theme = getPlayerColorTheme(sec.controller);
 
@@ -573,7 +577,10 @@
         let xPct = parseFloat(sec.x_pct);
         let yPct = parseFloat(sec.y_pct);
         if (secId === '01') xPct = 10.0;
-        if (secId === '03') yPct = 28.0;
+        if (secId === '03') {
+          xPct = 23.5;
+          yPct = 60.0;
+        }
 
         const verticalStepPx = 22;
 
