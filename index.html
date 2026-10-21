@@ -3,27 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Star Trek: Attack Wing - Sector War</title>
+  <title>LCARS Tactical Display</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #070a12;
-      --card-bg: #111827;
-      --panel-bg: #0f172a;
-      --border-color: #1f2937;
-      --text: #f3f4f6;
-      --text-muted: #94a3b8;
-      --accent-gold: #facc15;
+      --lcars-orange: #ff9900;
+      --lcars-amber: #ffaa00;
+      --lcars-gold: #ffcc00;
+      --lcars-purple: #cc99cc;
+      --lcars-blue: #99ccff;
+      --lcars-red: #cc6666;
+      --lcars-dark-red: #990000;
+      --lcars-dark-blue: #0044aa;
+      --lcars-slate: #556677;
+      --lcars-black: #000000;
+      --lcars-panel: #0a0e17;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    
+
     html, body {
       width: 100%;
       height: 100vh;
-      overflow: hidden; /* Locks page to one viewport - zero page scrolling */
-      background: var(--bg-color);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow: hidden;
+      background: var(--lcars-black);
+      color: #ffffff;
+      font-family: 'Antonio', -apple-system, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     #app-container {
@@ -31,89 +40,139 @@
       flex-direction: column;
       width: 100vw;
       height: 100vh;
-      padding: 0.5rem;
-      gap: 0.5rem;
+      padding: 0.5rem 0.75rem 0.75rem 0.75rem;
+      gap: 0.4rem;
     }
 
-    /* Compact Header */
+    /* LCARS Top Elbow & Banner */
     header {
       width: 100%;
-      height: 48px;
-      min-height: 48px;
+      height: 44px;
+      min-height: 44px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      background: var(--card-bg);
-      padding: 0 1rem;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
+      gap: 8px;
       z-index: 50;
     }
 
-    .header-left {
+    .lcars-elbow-top {
+      width: 110px;
+      height: 44px;
+      background: var(--lcars-orange);
+      border-top-left-radius: 22px;
+      border-bottom-left-radius: 6px;
       display: flex;
       align-items: center;
-      gap: 12px;
-    }
-
-    .header-title {
-      font-size: 1rem;
+      justify-content: flex-end;
+      padding-right: 12px;
       font-weight: 700;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
+      font-size: 1rem;
+      color: var(--lcars-black);
+      flex-shrink: 0;
     }
 
-    .status-badge {
-      font-size: 0.8rem;
-      font-weight: 600;
-      padding: 0.25rem 0.6rem;
-      border-radius: 4px;
-      background: #1e293b;
-      border: 1px solid #334155;
-      color: #38bdf8;
+    .lcars-pill-bar {
+      flex: 1;
+      height: 44px;
+      background: var(--lcars-purple);
+      display: flex;
+      align-items: center;
+      padding: 0 1rem;
+      color: var(--lcars-black);
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 1.5px;
+      overflow: hidden;
       white-space: nowrap;
+      text-overflow: ellipsis;
     }
 
     .header-actions {
       display: flex;
       gap: 6px;
+      height: 44px;
     }
 
-    .btn {
-      padding: 0.35rem 0.75rem;
-      font-size: 0.78rem;
-      font-weight: 600;
+    .lcars-btn {
+      height: 44px;
+      padding: 0 1.2rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
       cursor: pointer;
       border: none;
-      border-radius: 4px;
-      transition: background 0.15s ease;
-      white-space: nowrap;
+      color: var(--lcars-black);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: opacity 0.15s ease, filter 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .btn-phase { background: #d97706; color: #fff; }
-    .btn-phase:hover { background: #b45309; }
-    .btn-refresh { background: #2563eb; color: #fff; }
-    .btn-refresh:hover { background: #1d4ed8; }
+    .lcars-btn:hover {
+      filter: brightness(1.2);
+    }
 
-    /* Main Theater Layout (Map + Sidebar) */
+    .btn-phase {
+      background: var(--lcars-amber);
+      border-radius: 0;
+    }
+
+    .btn-refresh {
+      background: var(--lcars-blue);
+      border-top-right-radius: 22px;
+      border-bottom-right-radius: 22px;
+      padding-right: 1.5rem;
+    }
+
+    /* Main Theater Layout */
     #theater-layout {
       display: flex;
       flex: 1;
       width: 100%;
-      height: calc(100vh - 64px);
+      height: calc(100vh - 60px);
       gap: 0.5rem;
       position: relative;
       overflow: hidden;
     }
 
-    /* Map Box auto-fits available viewport without dropping below fold */
+    /* Left LCARS Decorative Frame Rail */
+    .lcars-side-rail {
+      width: 42px;
+      min-width: 42px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .rail-block-top {
+      height: 40px;
+      background: var(--lcars-orange);
+      border-bottom-left-radius: 14px;
+    }
+
+    .rail-block-mid {
+      flex: 1;
+      background: var(--lcars-purple);
+      opacity: 0.85;
+    }
+
+    .rail-block-bottom {
+      height: 70px;
+      background: var(--lcars-amber);
+      border-top-left-radius: 14px;
+      border-bottom-left-radius: 14px;
+    }
+
+    /* Map Box Stage */
     #map-wrapper {
       position: relative;
       flex: 1;
       height: 100%;
       background: #000;
-      border-radius: 6px;
-      border: 1px solid var(--border-color);
+      border: 2px solid var(--lcars-slate);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -126,14 +185,14 @@
       max-width: 100%;
       max-height: 100%;
       display: inline-block;
-      aspect-ratio: 2 / 1; /* Standard ratio matching campaign theater */
+      aspect-ratio: 2 / 1;
     }
 
     #campaign-map {
       display: block;
       width: 100%;
       height: 100%;
-      max-height: calc(100vh - 68px);
+      max-height: calc(100vh - 66px);
       object-fit: contain;
     }
 
@@ -146,52 +205,54 @@
       pointer-events: none;
     }
 
-    /* Sector Markers */
+    /* LCARS Sector Number Badges */
     .sector-number-badge {
       position: absolute;
       transform: translate(-50%, -50%);
       pointer-events: auto;
-      font-size: 11px;
-      font-weight: 800;
+      font-size: 13px;
+      font-weight: 700;
       line-height: 1;
       padding: 3px 6px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.95);
       border: 1.5px solid transparent;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.95);
       cursor: pointer;
-      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      transition: transform 0.15s ease, filter 0.15s ease;
       z-index: 10;
+      letter-spacing: 0.5px;
     }
 
     .sector-number-badge:hover {
-      transform: translate(-50%, -50%) scale(1.25);
+      transform: translate(-50%, -50%) scale(1.3);
+      filter: brightness(1.3);
       z-index: 25;
-      box-shadow: 0 0 10px var(--accent-gold);
     }
 
-    /* Fleet Tokens */
+    /* LCARS Fleet Badges */
     .fleet-token-pill {
       position: absolute;
       transform: translate(-50%, -50%);
       pointer-events: auto;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 2px 7px;
-      border-radius: 9999px;
-      font-size: 10px;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 11px;
       font-weight: 700;
       white-space: nowrap;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
       transition: transform 0.15s ease;
       z-index: 15;
+      letter-spacing: 1px;
     }
 
     .fleet-token-pill:hover {
-      transform: translate(-50%, -50%) scale(1.15);
+      transform: translate(-50%, -50%) scale(1.18);
       z-index: 30;
+      filter: brightness(1.25);
     }
 
     .fleet-dot {
@@ -199,22 +260,22 @@
       height: 6px;
       border-radius: 50%;
       background: #ffffff;
-      box-shadow: 0 0 3px #fff;
+      box-shadow: 0 0 4px #ffffff;
     }
 
-    /* Right-Hand Tactical Sidebar */
+    /* LCARS Tactical Sidebar (PADD / Terminal) */
     #sidebar-panel {
       width: 320px;
       min-width: 320px;
       height: 100%;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
+      background: var(--lcars-black);
+      border: 2px solid var(--lcars-orange);
+      border-radius: 0 16px 16px 0;
       display: flex;
       flex-direction: column;
       overflow-y: auto;
-      padding: 1rem;
-      transition: margin-right 0.25s ease, opacity 0.25s ease;
+      padding: 0.85rem;
+      gap: 0.5rem;
     }
 
     #sidebar-panel.hidden {
@@ -225,64 +286,63 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid #1f2937;
-      padding-bottom: 0.5rem;
-      margin-bottom: 0.75rem;
+      background: var(--lcars-orange);
+      color: var(--lcars-black);
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-weight: 700;
     }
 
     .sidebar-title {
-      color: var(--accent-gold);
-      font-size: 1rem;
-      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 1.5px;
     }
 
     .close-btn {
       background: none;
       border: none;
-      color: var(--text-muted);
-      font-size: 1.25rem;
+      color: var(--lcars-black);
+      font-size: 1.4rem;
+      font-weight: 700;
       cursor: pointer;
       line-height: 1;
+      font-family: 'Antonio', sans-serif;
     }
-
-    .close-btn:hover { color: #fff; }
 
     .sidebar-field-grid {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 0.5rem;
-      margin-bottom: 0.75rem;
+      gap: 0.4rem;
     }
 
     .sidebar-field {
-      background: var(--panel-bg);
-      padding: 0.5rem 0.65rem;
-      border-radius: 4px;
-      border: 1px solid #1e293b;
+      background: var(--lcars-panel);
+      padding: 0.45rem 0.65rem;
+      border-left: 5px solid var(--lcars-purple);
+      border-radius: 0 4px 4px 0;
     }
 
     .field-label {
-      font-size: 0.68rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
+      font-size: 0.72rem;
+      color: var(--lcars-amber);
       font-weight: 700;
-      letter-spacing: 0.5px;
+      letter-spacing: 1px;
     }
 
     .field-value {
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #f1f5f9;
-      margin-top: 2px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-top: 1px;
     }
 
     .sidebar-notes {
-      background: var(--panel-bg);
+      background: var(--lcars-panel);
       padding: 0.65rem;
-      border-radius: 4px;
-      border-left: 3px solid var(--accent-gold);
-      font-size: 0.8rem;
-      color: #cbd5e1;
+      border-left: 5px solid var(--lcars-gold);
+      border-radius: 0 4px 4px 0;
+      font-size: 0.9rem;
+      color: #e2e8f0;
       line-height: 1.35;
     }
 
@@ -291,7 +351,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(3, 7, 18, 0.96);
+      background: rgba(0, 0, 0, 0.98);
       z-index: 9999;
       flex-direction: column;
       align-items: center;
@@ -301,9 +361,9 @@
     }
 
     #landscape-prompt svg {
-      width: 54px;
-      height: 54px;
-      fill: var(--accent-gold);
+      width: 58px;
+      height: 58px;
+      fill: var(--lcars-orange);
       margin-bottom: 1rem;
       animation: rotateDevice 2s infinite ease-in-out;
     }
@@ -313,25 +373,22 @@
       50% { transform: rotate(90deg); }
     }
 
-    /* Show prompt on phones/tablets held in portrait mode */
     @media screen and (max-width: 899px) and (orientation: portrait) {
-      #landscape-prompt {
-        display: flex;
-      }
+      #landscape-prompt { display: flex; }
     }
 
-    /* On smaller landscape screens, float the sidebar over the map */
     @media screen and (max-width: 900px) {
       #sidebar-panel {
         position: absolute;
         right: 0;
         top: 0;
         bottom: 0;
-        width: 270px;
-        min-width: 270px;
-        box-shadow: -5px 0 20px rgba(0,0,0,0.85);
+        width: 280px;
+        min-width: 280px;
+        box-shadow: -6px 0 24px rgba(0,0,0,0.95);
         z-index: 40;
       }
+      .lcars-side-rail { display: none; }
     }
   </style>
 </head>
@@ -342,37 +399,43 @@
     <svg viewBox="0 0 24 24">
       <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
     </svg>
-    <h3 style="color: #facc15; margin-bottom: 0.5rem;">Rotate Device</h3>
-    <p style="color: #cbd5e1; font-size: 0.9rem; max-width: 260px;">
-      Sector War Theater Command requires <strong>Landscape Mode</strong>.
+    <h3 style="color: #ff9900; margin-bottom: 0.5rem; font-size: 1.4rem;">ORIENTATION MISMATCH</h3>
+    <p style="color: #99ccff; font-size: 1rem; max-width: 280px;">
+      ROTATE TERMINAL TO LANDSCAPE ORIENTATION FOR LCARS THEATER INTERFACE.
     </p>
   </div>
 
   <div id="app-container">
+    <!-- LCARS Header Frame -->
     <header>
-      <div class="header-left">
-        <span class="header-title">STAW: Sector War</span>
-        <span id="phase-display" class="status-badge">Phase: Loading...</span>
-      </div>
+      <div class="lcars-elbow-top">LCARS 47</div>
+      <div id="phase-display" class="lcars-pill-bar">INITIALIZING TACTICAL STATUS...</div>
       <div class="header-actions">
-        <button class="btn btn-phase" onclick="advancePhase()">Next Phase &raquo;</button>
-        <button class="btn btn-refresh" onclick="fetchCampaignData()">Refresh</button>
+        <button class="lcars-btn btn-phase" onclick="advancePhase()">CYCLE PHASE &raquo;</button>
+        <button class="lcars-btn btn-refresh" onclick="fetchCampaignData()">SYNC</button>
       </div>
     </header>
 
     <div id="theater-layout">
-      <!-- Sector Map Stage -->
+      <!-- Decorative LCARS Side Spine -->
+      <div class="lcars-side-rail">
+        <div class="rail-block-top"></div>
+        <div class="rail-block-mid"></div>
+        <div class="rail-block-bottom"></div>
+      </div>
+
+      <!-- Main Sector Map Stage -->
       <div id="map-wrapper">
         <div id="stage-container">
-          <img id="campaign-map" src="map.png" alt="Campaign Map">
+          <img id="campaign-map" src="map.png" alt="LCARS Campaign Map">
           <div id="overlay-layer"></div>
         </div>
       </div>
 
-      <!-- Right Tactical Sidebar -->
+      <!-- LCARS Tactical Readout Terminal -->
       <aside id="sidebar-panel" class="hidden">
         <div class="sidebar-header">
-          <h3 id="sidebar-title" class="sidebar-title">Tactical Intel</h3>
+          <span id="sidebar-title" class="sidebar-title">TACTICAL DOSSIER</span>
           <button class="close-btn" onclick="closeSidebar()">&times;</button>
         </div>
         <div id="sidebar-content"></div>
@@ -392,12 +455,13 @@
 
     let campaignData = null;
 
+    // Authentic LCARS Palette Mappings
     const KNOWN_COLORS = {
-      'player a': { bg: 'rgba(30, 64, 175, 0.88)', border: '#60a5fa', text: '#ffffff' },
-      'player b': { bg: 'rgba(185, 28, 28, 0.88)', border: '#f87171', text: '#ffffff' },
-      'player c': { bg: 'rgba(21, 128, 61, 0.88)', border: '#4ade80', text: '#ffffff' },
-      'player d': { bg: 'rgba(194, 65, 12, 0.88)', border: '#fb923c', text: '#ffffff' },
-      'neutral':  { bg: 'rgba(30, 41, 59, 0.85)',  border: '#facc15', text: '#facc15' }
+      'player a': { bg: '#0044aa', border: '#99ccff', text: '#ffffff' }, // Federation Blue
+      'player b': { bg: '#990000', border: '#ff6666', text: '#ffffff' }, // Klingon Red
+      'player c': { bg: '#006633', border: '#66ff99', text: '#ffffff' }, // Romulan Green
+      'player d': { bg: '#cc6600', border: '#ffaa00', text: '#ffffff' }, // Cardassian Amber
+      'neutral':  { bg: '#223344', border: '#ffcc00', text: '#ffcc00' }  // LCARS Dark/Gold
     };
 
     function getPlayerColorTheme(name) {
@@ -413,8 +477,8 @@
       for (let i = 0; i < key.length; i++) hash = key.charCodeAt(i) + ((hash << 5) - hash);
       const hue = Math.abs(hash) % 360;
       return {
-        bg: `hsla(${hue}, 70%, 35%, 0.9)`,
-        border: `hsl(${hue}, 80%, 70%)`,
+        bg: `hsl(${hue}, 80%, 28%)`,
+        border: `hsl(${hue}, 90%, 75%)`,
         text: '#ffffff'
       };
     }
@@ -447,7 +511,7 @@
       if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
 
       const newPhase = PHASES[nextIndex];
-      document.getElementById('phase-display').textContent = `${newPhase} (saving...)`;
+      document.getElementById('phase-display').textContent = `${newPhase} [UPDATING...]`;
 
       try {
         await fetch(API_URL, {
@@ -478,7 +542,7 @@
         fleetsBySector[secId].push(fleet);
       });
 
-      // Render Sector Markers
+      // Render LCARS Sector Badges
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
         let xPct = parseFloat(sec.x_pct);
@@ -494,7 +558,7 @@
         btn.style.background = theme.bg;
         btn.style.borderColor = theme.border;
         btn.style.color = theme.text;
-        btn.textContent = secId;
+        btn.textContent = `SEC ${secId}`;
 
         btn.addEventListener('click', (e) => {
           e.stopPropagation();
@@ -504,7 +568,7 @@
         layer.appendChild(btn);
       });
 
-      // Render Stacked Fleets
+      // Render LCARS Vertically Stacked Fleets
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
         const stationFleets = fleetsBySector[secId] || [];
@@ -513,7 +577,7 @@
         let yPct = parseFloat(sec.y_pct);
         if (secId === '01') xPct = 10.0;
 
-        const verticalStepPx = 20;
+        const verticalStepPx = 22;
 
         stationFleets.forEach((fleet, idx) => {
           const el = document.createElement('div');
@@ -548,34 +612,34 @@
     function showSectorSidebar(sec) {
       const sidebar = document.getElementById('sidebar-panel');
       const secId = String(sec.sector_id).padStart(2, '0');
-      document.getElementById('sidebar-title').textContent = `Sector ${secId}`;
+      document.getElementById('sidebar-title').textContent = `SECTOR ${secId} DOSSIER`;
 
       document.getElementById('sidebar-content').innerHTML = `
         <div class="sidebar-field-grid">
           <div class="sidebar-field">
-            <div class="field-label">Name</div>
+            <div class="field-label">DESIGNATION</div>
             <div class="field-value">${sec.sector_name}</div>
           </div>
           <div class="sidebar-field">
-            <div class="field-label">Controller</div>
-            <div class="field-value">${sec.controller || 'Neutral'}</div>
+            <div class="field-label">TACTICAL CONTROL</div>
+            <div class="field-value">${sec.controller || 'NEUTRAL SPACE'}</div>
           </div>
           <div class="sidebar-field">
-            <div class="field-label">Classification</div>
-            <div class="field-value">${sec.classification || 'Standard'}</div>
+            <div class="field-label">STELLAR CLASSIFICATION</div>
+            <div class="field-value">${sec.classification || 'STANDARD'}</div>
           </div>
           <div class="sidebar-field">
-            <div class="field-label">Resource Yield</div>
-            <div class="field-value">+${sec.rp_yield || '0'} RP / turn</div>
+            <div class="field-label">RESOURCE HARVEST</div>
+            <div class="field-value">+${sec.rp_yield || '0'} RP / CYCLE</div>
           </div>
           <div class="sidebar-field">
-            <div class="field-label">Connected Hyperlanes</div>
-            <div class="field-value">${sec.connected_lanes || 'None'}</div>
+            <div class="field-label">CONNECTED HYPERLANES</div>
+            <div class="field-value">${sec.connected_lanes || 'NONE'}</div>
           </div>
         </div>
-        <div class="sidebar-notes">
-          <strong>Strategic Trait:</strong><br>
-          ${sec.notes || 'Standard operational space.'}
+        <div class="sidebar-notes" style="margin-top: 0.5rem;">
+          <div class="field-label" style="color: var(--lcars-gold); margin-bottom: 2px;">TACTICAL ASSESSMENT</div>
+          ${sec.notes || 'NO SPECIAL ANOMALIES RECORDED.'}
         </div>
       `;
       sidebar.classList.remove('hidden');
@@ -583,21 +647,21 @@
 
     function showFleetSidebar(fleet, sec) {
       const sidebar = document.getElementById('sidebar-panel');
-      document.getElementById('sidebar-title').textContent = `${fleet.task_force_id}`;
+      document.getElementById('sidebar-title').textContent = `${fleet.task_force_id} LOG`;
 
       document.getElementById('sidebar-content').innerHTML = `
         <div class="sidebar-field-grid">
           <div class="sidebar-field">
-            <div class="field-label">Commanding Faction</div>
+            <div class="field-label">COMMANDING POWER</div>
             <div class="field-value">${fleet.faction || 'N/A'}</div>
           </div>
           <div class="sidebar-field">
-            <div class="field-label">Player Roster</div>
+            <div class="field-label">OPERATOR</div>
             <div class="field-value">${fleet.player || 'N/A'}</div>
           </div>
           <div class="sidebar-field">
-            <div class="field-label">Stationed Sector</div>
-            <div class="field-value">${sec.sector_name} (${String(sec.sector_id).padStart(2, '0')})</div>
+            <div class="field-label">DEPLOYED SECTOR</div>
+            <div class="field-value">${sec.sector_name} (SEC ${String(sec.sector_id).padStart(2, '0')})</div>
           </div>
         </div>
       `;
