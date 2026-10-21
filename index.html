@@ -370,7 +370,6 @@
       transition: border-left-color 0.25s ease;
     }
 
-    /* Secret Orders UI */
     .order-box {
       margin-top: 0.5rem;
       background: rgba(15, 23, 42, 0.85);
@@ -597,8 +596,6 @@
     ];
 
     let campaignData = null;
-
-    // Local lock state map for currently submitted fleet orders in Phase II
     const submittedOrders = {};
 
     function norm(str) {
@@ -655,22 +652,27 @@
       return matches.map(m => String(m).padStart(2, '0'));
     }
 
-    // 1. Rule Enforcement: 1 hop anywhere; 2 hops ONLY if intermediate AND destination sectors are controlled by the player
+    // Strict 1-hop vs 2-hop movement rule:
+    // 0 Hops: Hold station
+    // 1 Hop: Any directly connected hyperlane sector
+    // 2 Hops (Tactical Flank): ONLY if Start, Intermediate Waypoint, AND Destination are ALL player controlled
     function calculateLegalDestinations(currentSec, controllingPlayer, sectors) {
       const currentId = String(currentSec.sector_id).padStart(2, '0');
       const destinations = [];
+      const pNorm = norm(controllingPlayer);
 
+      // 0 Hops: Hold station
       destinations.push({
         id: currentId,
         dist: 0,
         label: `HOLD STATION (SEC ${currentId})`
       });
 
-      // 1-Hop: Standard Transit to any adjacent hyperlane
+      // 1 Hop: All immediate connected neighbors
       const directNeighbors = getSectorNeighbors(currentId, sectors);
       directNeighbors.forEach(nbrId => {
         const nbrObj = sectors.find(s => String(s.sector_id).padStart(2, '0') === nbrId);
-        const name = nbrObj ? nbrObj.sector_name : `Sector ${nbrId}`;
+        const name = nbrObj ? (nbrObj.sector_name || `Sector ${nbrId}`) : `Sector ${nbrId}`;
         destinations.push({
           id: nbrId,
           dist: 1,
@@ -678,33 +680,37 @@
         });
       });
 
-      // 2-Hops: Tactical Flank ONLY if both intermediate (step1) AND destination (step2) are controlled by player
-      directNeighbors.forEach(step1Id => {
-        const step1Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step1Id);
-        if (step1Sec) {
-          const isFriendlyStep1 = (norm(step1Sec.controller) === norm(controllingPlayer));
-          if (isFriendlyStep1) {
+      // 2 Hops (Tactical Flank):
+      // Strict prerequisite: The origin sector itself MUST be controlled by the player
+      const startIsFriendly = (norm(currentSec.controller) === pNorm);
+
+      if (startIsFriendly) {
+        directNeighbors.forEach(step1Id => {
+          const step1Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step1Id);
+          if (step1Sec && norm(step1Sec.controller) === pNorm) {
+            // Intermediate waypoint is friendly; check its immediate neighbors
             const step2Neighbors = getSectorNeighbors(step1Id, sectors);
+
             step2Neighbors.forEach(step2Id => {
-              if (step2Id !== currentId && !destinations.some(d => d.id === step2Id)) {
+              const isNotOrigin = (step2Id !== currentId);
+              const isNotDirectNeighbor = !directNeighbors.includes(step2Id);
+              const notAlreadyListed = !destinations.some(d => d.id === step2Id);
+
+              if (isNotOrigin && isNotDirectNeighbor && notAlreadyListed) {
                 const step2Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step2Id);
-                if (step2Sec) {
-                  const isFriendlyStep2 = (norm(step2Sec.controller) === norm(controllingPlayer));
-                  // Destination must also be player controlled
-                  if (isFriendlyStep2) {
-                    const name = step2Sec.sector_name || `Sector ${step2Id}`;
-                    destinations.push({
-                      id: step2Id,
-                      dist: 2,
-                      label: `TACTICAL FLANK: ${name} (${step2Id} via Sector ${step1Id})`
-                    });
-                  }
+                if (step2Sec && norm(step2Sec.controller) === pNorm) {
+                  const name = step2Sec.sector_name || `Sector ${step2Id}`;
+                  destinations.push({
+                    id: step2Id,
+                    dist: 2,
+                    label: `TACTICAL FLANK: ${name} (${step2Id} via Sector ${step1Id})`
+                  });
                 }
               }
             });
           }
-        }
-      });
+        });
+      }
 
       return destinations;
     }
@@ -746,7 +752,6 @@
       const newPhase = PHASES[nextIndex];
       document.getElementById('phase-display').textContent = `${newPhase} [UPDATING...]`;
 
-      // Reset locked local orders when cycling to a new turn phase
       for (const k in submittedOrders) delete submittedOrders[k];
 
       try {
@@ -766,7 +771,6 @@
       }
     }
 
-    // 2. Submit Secret Order with PIN authentication and lock-out protection
     async function submitSecretOrder(taskForceId, assignedPlayer) {
       const playerRecord = getPlayerRecord(assignedPlayer);
       const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
@@ -803,16 +807,13 @@
           })
         });
 
-        // Store locked state locally for this fleet
         submittedOrders[taskForceId] = destSector;
 
-        // Lock controls
         select.disabled = true;
         btn.textContent = "ENCRYPTED ORDERS ON FILE [LOCKED]";
         btn.style.background = "#15803d";
         btn.style.color = "#ffffff";
 
-        // Display Modify Orders option
         const modBtn = document.getElementById(`btn-mod-${taskForceId}`);
         if (modBtn) modBtn.style.display = "block";
 
@@ -823,7 +824,6 @@
       }
     }
 
-    // Unlock submitted order using player PIN
     function unlockOrderModification(taskForceId, assignedPlayer) {
       const playerRecord = getPlayerRecord(assignedPlayer);
       const expectedPin = (playerRecord && playerRecord.pin) ? String(playerRecord.pin).trim() : null;
