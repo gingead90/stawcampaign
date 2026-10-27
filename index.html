@@ -534,7 +534,7 @@
               <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
               <input id="captain-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" style="font-size: 1.1rem; padding: 0.75rem;">
             </div>
-            <button id="btn-auth-captains" class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
+            <button class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
               DECRYPT CAPTAIN XP ROSTER
             </button>
           </div>
@@ -548,14 +548,13 @@
     async function authenticateCaptainsRoster() {
       const pSelect = document.getElementById('captain-auth-player');
       const pinInput = document.getElementById('captain-auth-pin');
-      const btn = document.getElementById('btn-auth-captains');
-
       if (!pSelect || !pinInput) return;
       const playerName = pSelect.value;
       const rawPin = pinInput.value;
 
       if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
 
+      const btn = document.getElementById('btn-auth-captains');
       btn.textContent = "AUTHENTICATING..."; btn.disabled = true;
 
       const pinHash = await hashPin(rawPin);
@@ -792,7 +791,7 @@
             <div class="field-label" style="color: var(--lcars-amber);">SECRET PIN</div>
             <input id="rp-pin-input" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN">
           </div>
-          <button id="btn-auth-rp" class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">AUTHENTICATE & VIEW LEDGER</button>
+          <button class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">AUTHENTICATE & VIEW LEDGER</button>
         </div>
         <div id="rp-account-display" style="display: none; margin-top: 0.75rem;"></div>
       `;
@@ -844,7 +843,7 @@
             <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">TASK FORCE DESIGNATION</div><input id="new-tf-id" type="text" class="order-input" placeholder="E.G. TF-12 OR 3RD FLEET"></div>
             <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">DEPLOYMENT SHIPYARD (CONTROLLED SECTOR)</div><select id="new-tf-sector" class="order-select" style="border-color: var(--lcars-blue); color: #fff;">${ownedSectorOptions || '<option value="">NO CONTROLLED SECTORS AVAILABLE</option>'}</select></div>
             <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">CONSTRUCTION COST (RP)</div><input id="new-tf-cost" type="number" min="1" max="${accData.currentRp}" value="5" class="order-input"></div>
-            <button id="btn-commission-tf" class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executeFleetCommission('${accData.playerName}', '${pinHash}')">AUTHORIZE SHIPYARD CONSTRUCTION</button>
+            <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executeFleetCommission('${accData.playerName}', '${pinHash}')">AUTHORIZE SHIPYARD CONSTRUCTION</button>
           </div>
         `;
       }
@@ -864,7 +863,7 @@
             <option value="Custom">OTHER EXPENDITURE</option>
           </select>
           <div style="margin-top: 0.35rem;"><div class="field-label" style="color: var(--lcars-amber);">RP AMOUNT TO DEDUCT</div><input id="spend-amount-input" type="number" min="1" max="${accData.currentRp}" class="order-input" placeholder="ENTER RP AMOUNT"></div>
-          <button id="btn-spend-rp" class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.5rem;" onclick="executeRpSpend('${accData.playerName}', '${pinHash}')">TRANSMIT EXPENDITURE</button>
+          <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.5rem;" onclick="executeRpSpend('${accData.playerName}', '${pinHash}')">TRANSMIT EXPENDITURE</button>
         </div>
       `;
     }
@@ -1215,6 +1214,11 @@
           <div class="sidebar-field" style="border-left-color: ${theme.border};"><div class="field-label">TACTICAL CONTROL</div><div class="field-value">${sec.controller || 'NEUTRAL SPACE'}</div></div>
           <div class="sidebar-field" style="border-left-color: ${theme.border};"><div class="field-label">STELLAR CLASSIFICATION</div><div class="field-value">${sec.classification || 'STANDARD'}</div></div>
           <div class="sidebar-field" style="border-left-color: ${theme.border};"><div class="field-label">RESOURCE HARVEST</div><div class="field-value">+${sec.rp_yield || '0'} RP / CYCLE</div></div>
+          <div class="sidebar-field" style="border-left-color: ${theme.border};"><div class="field-label">CONNECTED HYPERLANES</div><div class="field-value">${formatLanes(sec.connected_lanes)}</div></div>
+        </div>
+        <div class="sidebar-notes" style="margin-top: 0.5rem; border-left-color: ${theme.border};">
+          <div class="field-label" style="color: ${theme.border}; margin-bottom: 2px;">TACTICAL ASSESSMENT</div>
+          ${sec.notes || 'NO SPECIAL ANOMALIES RECORDED.'}
         </div>
       `;
       sidebar.classList.remove('hidden');
