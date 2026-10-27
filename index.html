@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
   <title>LCARS Tactical Display</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,7 +25,8 @@
 
     html, body {
       width: 100%;
-      height: 100vh;
+      height: 100%;
+      height: 100dvh;
       overflow: hidden;
       background-color: #030712;
       color: #ffffff;
@@ -49,16 +50,17 @@
       display: flex;
       flex-direction: column;
       width: 100vw;
-      height: 100vh;
-      padding: 0.5rem 0.75rem 0.75rem 0.75rem;
-      gap: 0.4rem;
+      height: 100%;
+      height: 100dvh;
+      padding: 0.4rem 0.6rem 0.5rem 0.6rem;
+      gap: 0.35rem;
       z-index: 10;
     }
 
     header {
       width: 100%;
-      height: 44px;
-      min-height: 44px;
+      height: 42px;
+      min-height: 42px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -66,17 +68,17 @@
     }
 
     .lcars-elbow-top {
-      width: 110px;
-      height: 44px;
+      width: 100px;
+      height: 42px;
       background: var(--lcars-orange);
-      border-top-left-radius: 22px;
+      border-top-left-radius: 21px;
       border-bottom-left-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: flex-end;
       padding-right: 12px;
       font-weight: 700;
-      font-size: 1rem;
+      font-size: 0.95rem;
       color: #000;
       flex-shrink: 0;
       box-shadow: 0 0 14px rgba(255, 153, 0, 0.45);
@@ -84,14 +86,14 @@
 
     .lcars-pill-bar {
       flex: 1;
-      height: 44px;
+      height: 42px;
       background: var(--lcars-purple);
       display: flex;
       align-items: center;
-      padding: 0 1rem;
+      padding: 0 0.85rem;
       color: #000;
       font-weight: 700;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       letter-spacing: 1.5px;
       overflow: hidden;
       white-space: nowrap;
@@ -102,14 +104,14 @@
     .header-actions {
       display: flex;
       gap: 6px;
-      height: 44px;
+      height: 42px;
     }
 
     .lcars-btn {
-      height: 44px;
-      padding: 0 1.2rem;
+      height: 42px;
+      padding: 0 1rem;
       font-family: 'Antonio', sans-serif;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 700;
       cursor: pointer;
       border: none;
@@ -134,9 +136,9 @@
 
     .btn-refresh {
       background: var(--lcars-blue);
-      border-top-right-radius: 22px;
-      border-bottom-right-radius: 22px;
-      padding-right: 1.5rem;
+      border-top-right-radius: 21px;
+      border-bottom-right-radius: 21px;
+      padding-right: 1.25rem;
       box-shadow: 0 0 10px rgba(153, 204, 255, 0.35);
     }
 
@@ -144,29 +146,30 @@
       display: flex;
       flex: 1;
       width: 100%;
-      height: calc(100vh - 60px);
-      gap: 0.5rem;
+      height: calc(100dvh - 54px);
+      gap: 0.4rem;
       position: relative;
       overflow: hidden;
     }
 
+    /* Left LCARS Side Rail */
     .lcars-side-rail {
-      width: 60px;
-      min-width: 60px;
+      width: 58px;
+      min-width: 58px;
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 5px;
     }
 
     .rail-block-top {
-      height: 34px;
+      height: 30px;
       background: var(--lcars-orange);
-      border-bottom-left-radius: 14px;
+      border-bottom-left-radius: 12px;
     }
 
     .rail-btn {
-      height: 56px;
+      height: 52px;
       border: none;
       cursor: pointer;
       display: flex;
@@ -175,7 +178,7 @@
       justify-content: center;
       font-family: 'Antonio', sans-serif;
       font-weight: 700;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: #000;
       letter-spacing: 1px;
       padding: 2px;
@@ -201,10 +204,10 @@
     }
 
     .rail-block-bottom {
-      height: 60px;
+      height: 50px;
       background: var(--lcars-amber);
-      border-top-left-radius: 14px;
-      border-bottom-left-radius: 14px;
+      border-top-left-radius: 12px;
+      border-bottom-left-radius: 12px;
     }
 
     #map-wrapper {
@@ -220,24 +223,36 @@
       justify-content: center;
       overflow: hidden;
       user-select: none;
+      touch-action: none;
       box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.95), 0 0 24px rgba(15, 23, 42, 0.8);
     }
 
     #stage-container {
       position: relative;
+      width: auto;
+      height: 100%;
       max-width: 100%;
       max-height: 100%;
-      display: inline-block;
       aspect-ratio: 2 / 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: center center;
+      will-change: transform;
+      cursor: grab;
+    }
+
+    #stage-container:active {
+      cursor: grabbing;
     }
 
     #campaign-map {
       display: block;
       width: 100%;
       height: 100%;
-      max-height: calc(100vh - 66px);
       object-fit: contain;
       filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.95));
+      pointer-events: none;
     }
 
     #overlay-layer {
@@ -247,6 +262,53 @@
       width: 100%;
       height: 100%;
       pointer-events: none;
+    }
+
+    /* On-Screen LCARS Pan & Zoom Map Controls */
+    .map-controls {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      display: flex;
+      gap: 6px;
+      z-index: 35;
+      pointer-events: auto;
+    }
+
+    .map-ctrl-btn {
+      width: 34px;
+      height: 34px;
+      background: rgba(15, 23, 42, 0.88);
+      border: 1.5px solid var(--lcars-amber);
+      color: var(--lcars-amber);
+      font-family: 'Antonio', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      backdrop-filter: blur(4px);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.7);
+      transition: all 0.15s ease;
+    }
+
+    .map-ctrl-btn:hover, .map-ctrl-btn:active {
+      background: var(--lcars-amber);
+      color: #000;
+    }
+
+    .map-ctrl-btn.btn-fit {
+      width: 44px;
+      font-size: 0.8rem;
+      border-color: var(--lcars-blue);
+      color: var(--lcars-blue);
+    }
+
+    .map-ctrl-btn.btn-fit:hover, .map-ctrl-btn.btn-fit:active {
+      background: var(--lcars-blue);
+      color: #000;
     }
 
     .sector-number-badge {
@@ -316,10 +378,10 @@
     }
 
     #sidebar-panel {
-      width: 330px;
-      min-width: 330px;
+      width: 320px;
+      min-width: 320px;
       height: 100%;
-      background: rgba(3, 7, 18, 0.94);
+      background: rgba(3, 7, 18, 0.96);
       backdrop-filter: blur(8px);
       border: 2px solid var(--lcars-orange);
       border-radius: 0 16px 16px 0;
@@ -592,12 +654,19 @@
         right: 0;
         top: 0;
         bottom: 0;
-        width: 280px;
-        min-width: 280px;
-        box-shadow: -6px 0 24px rgba(0,0,0,0.95);
-        z-index: 40;
+        width: 290px;
+        min-width: 290px;
+        box-shadow: -8px 0 28px rgba(0,0,0,0.98);
+        z-index: 45;
       }
-      .lcars-side-rail { display: none; }
+      .lcars-side-rail {
+        width: 48px;
+        min-width: 48px;
+      }
+      .rail-btn {
+        font-size: 0.72rem;
+        height: 50px;
+      }
     }
   </style>
 </head>
@@ -645,6 +714,13 @@
         <div id="stage-container">
           <img id="campaign-map" src="map.png" alt="LCARS Campaign Map">
           <div id="overlay-layer"></div>
+        </div>
+
+        <!-- On-Screen LCARS Zoom & Fit Controls -->
+        <div class="map-controls">
+          <button class="map-ctrl-btn" onclick="zoomIn()" title="Zoom In">+</button>
+          <button class="map-ctrl-btn" onclick="zoomOut()" title="Zoom Out">&minus;</button>
+          <button class="map-ctrl-btn btn-fit" onclick="resetMap()" title="Fit Map to Screen">FIT</button>
         </div>
       </div>
 
@@ -844,6 +920,133 @@
 
       return destinations;
     }
+
+    // --- INTERACTIVE MOBILE PAN & PINCH-ZOOM ENGINE ---
+    let scale = 1.0;
+    let panX = 0;
+    let panY = 0;
+    const stageEl = document.getElementById('stage-container');
+    const mapWrapperEl = document.getElementById('map-wrapper');
+
+    function applyMapTransform() {
+      stageEl.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    }
+
+    function zoomIn() {
+      scale = Math.min(3.5, scale + 0.25);
+      applyMapTransform();
+    }
+
+    function zoomOut() {
+      scale = Math.max(0.65, scale - 0.25);
+      applyMapTransform();
+    }
+
+    function resetMap() {
+      scale = 1.0;
+      panX = 0;
+      panY = 0;
+      applyMapTransform();
+    }
+
+    // Touch Controls: One-finger Drag to Pan, Two-finger Pinch to Zoom
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartPanX = 0;
+    let touchStartPanY = 0;
+    let isTouching = false;
+    let isPinching = false;
+    let pinchStartDist = 0;
+    let pinchStartScale = 1.0;
+
+    mapWrapperEl.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.sector-number-badge, .fleet-token-pill, .map-ctrl-btn')) return;
+      if (e.touches.length === 1) {
+        isTouching = true;
+        isPinching = false;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartPanX = panX;
+        touchStartPanY = panY;
+      } else if (e.touches.length === 2) {
+        isTouching = false;
+        isPinching = true;
+        pinchStartDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        pinchStartScale = scale;
+      }
+    }, { passive: false });
+
+    mapWrapperEl.addEventListener('touchmove', (e) => {
+      if (e.target.closest('.sector-number-badge, .fleet-token-pill, .map-ctrl-btn')) return;
+      if (isTouching && e.touches.length === 1) {
+        e.preventDefault();
+        panX = touchStartPanX + (e.touches[0].clientX - touchStartX);
+        panY = touchStartPanY + (e.touches[0].clientY - touchStartY);
+        applyMapTransform();
+      } else if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const dist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        if (pinchStartDist > 0) {
+          const factor = dist / pinchStartDist;
+          scale = Math.min(3.5, Math.max(0.65, pinchStartScale * factor));
+          applyMapTransform();
+        }
+      }
+    }, { passive: false });
+
+    mapWrapperEl.addEventListener('touchend', (e) => {
+      if (e.touches.length === 0) {
+        isTouching = false;
+        isPinching = false;
+      } else if (e.touches.length === 1) {
+        isPinching = false;
+        isTouching = true;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchStartPanX = panX;
+        touchStartPanY = panY;
+      }
+    });
+
+    // Mouse Drag & Wheel Zoom
+    let isMouseDown = false;
+    let mouseStartX = 0;
+    let mouseStartY = 0;
+    let mouseStartPanX = 0;
+    let mouseStartPanY = 0;
+
+    mapWrapperEl.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.sector-number-badge, .fleet-token-pill, .map-ctrl-btn')) return;
+      isMouseDown = true;
+      mouseStartX = e.clientX;
+      mouseStartY = e.clientY;
+      mouseStartPanX = panX;
+      mouseStartPanY = panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isMouseDown) return;
+      panX = mouseStartPanX + (e.clientX - mouseStartX);
+      panY = mouseStartPanY + (e.clientY - mouseStartY);
+      applyMapTransform();
+    });
+
+    window.addEventListener('mouseup', () => {
+      isMouseDown = false;
+    });
+
+    mapWrapperEl.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const delta = e.deltaY < 0 ? 0.15 : -0.15;
+      scale = Math.min(3.5, Math.max(0.65, scale + delta));
+      applyMapTransform();
+    }, { passive: false });
 
     async function fetchCampaignData() {
       try {
