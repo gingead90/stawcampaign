@@ -382,8 +382,8 @@
     }
 
     #sidebar-panel {
-      width: 340px;
-      min-width: 340px;
+      width: 360px;
+      min-width: 360px;
       height: 100%;
       background: rgba(3, 7, 18, 0.96);
       backdrop-filter: blur(8px);
@@ -533,6 +533,56 @@
       filter: brightness(1.2);
     }
 
+    .btn-modify-order {
+      background: #334155;
+      color: #cbd5e1;
+      border: 1px solid #475569;
+      padding: 0.45rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+      letter-spacing: 1px;
+      transition: background 0.15s ease;
+    }
+
+    .btn-modify-order:hover {
+      background: #475569;
+      color: #ffffff;
+    }
+
+    .combat-action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin-top: 0.5rem;
+    }
+
+    .btn-combat-retreat {
+      background: var(--lcars-blue);
+      color: #000;
+      border: none;
+      padding: 0.45rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .btn-combat-destroy {
+      background: var(--lcars-dark-red);
+      color: #fff;
+      border: 1px solid var(--lcars-red);
+      padding: 0.45rem;
+      font-family: 'Antonio', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
     /* Captain Cards & Stats */
     .captain-card {
       background: rgba(15, 23, 42, 0.9);
@@ -549,6 +599,11 @@
     .captain-card.kia {
       border-left-color: var(--lcars-red);
       opacity: 0.75;
+    }
+    
+    .captain-card.mia {
+      border-left-color: var(--lcars-amber);
+      opacity: 0.85;
     }
 
     .captain-header {
@@ -569,28 +624,33 @@
     }
 
     .badge-skill {
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 5px;
+      background: var(--lcars-slate);
+      color: #fff;
+      border-radius: 3px;
+    }
+
+    .badge-skill.current {
       background: var(--lcars-amber);
       color: #000;
-      border-radius: 4px;
     }
 
     .badge-vet {
-      font-size: 0.8rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 2px 6px;
+      padding: 2px 5px;
       background: var(--lcars-teal);
       color: #000;
-      border-radius: 4px;
+      border-radius: 3px;
     }
 
     .captain-stats-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.75rem;
+      font-size: 0.78rem;
       color: #94a3b8;
       background: rgba(0, 0, 0, 0.4);
       padding: 4px 6px;
@@ -605,7 +665,7 @@
 
     .btn-xp-mod {
       flex: 1;
-      padding: 3px 0;
+      padding: 4px 0;
       background: #334155;
       color: #ffffff;
       border: 1px solid #475569;
@@ -622,7 +682,7 @@
     }
 
     .btn-status-kia {
-      padding: 3px 8px;
+      padding: 4px 8px;
       background: var(--lcars-dark-red);
       color: #fff;
       border: 1px solid var(--lcars-red);
@@ -631,6 +691,29 @@
       font-weight: 700;
       cursor: pointer;
       border-radius: 3px;
+    }
+    
+    .btn-status-mia {
+      padding: 4px 8px;
+      background: #b45309;
+      color: #fff;
+      border: 1px solid var(--lcars-orange);
+      font-family: 'Antonio', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+
+    .btn-edit-perk {
+      background: transparent;
+      border: 1px solid var(--lcars-slate);
+      color: var(--lcars-blue);
+      font-size: 0.65rem;
+      padding: 1px 4px;
+      cursor: pointer;
+      border-radius: 2px;
+      margin-left: 4px;
     }
 
     /* Fixed Landscape Blocker Overlay */
@@ -676,8 +759,8 @@
         right: 0;
         top: 0;
         bottom: 0;
-        width: 300px;
-        min-width: 300px;
+        width: 320px;
+        min-width: 320px;
         box-shadow: -8px 0 28px rgba(0,0,0,0.98);
         z-index: 45;
       }
@@ -763,49 +846,34 @@
     (function initCosmos() {
       const canvas = document.getElementById('space-canvas');
       const ctx = canvas.getContext('2d');
-
-      function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        draw();
-      }
-
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; draw(); }
       function draw() {
         ctx.fillStyle = '#020617';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         const g1 = ctx.createRadialGradient(canvas.width * 0.2, canvas.height * 0.3, 10, canvas.width * 0.2, canvas.height * 0.3, canvas.width * 0.45);
         g1.addColorStop(0, 'rgba(30, 58, 138, 0.4)');
         g1.addColorStop(1, 'transparent');
         ctx.fillStyle = g1;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         const g2 = ctx.createRadialGradient(canvas.width * 0.8, canvas.height * 0.7, 10, canvas.width * 0.8, canvas.height * 0.7, canvas.width * 0.45);
         g2.addColorStop(0, 'rgba(88, 28, 135, 0.35)');
         g2.addColorStop(1, 'transparent');
         ctx.fillStyle = g2;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         let seed = 42;
-        function random() {
-          const x = Math.sin(seed++) * 10000;
-          return x - Math.floor(x);
-        }
-
+        function random() { const x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
         const numStars = Math.floor((canvas.width * canvas.height) / 2400);
         for (let i = 0; i < numStars; i++) {
           const x = random() * canvas.width;
           const y = random() * canvas.height;
           const radius = random() * 1.5;
           const alpha = 0.3 + random() * 0.7;
-
           ctx.beginPath();
           ctx.arc(x, y, radius, 0, Math.PI * 2);
           ctx.fillStyle = (i % 7 === 0) ? `rgba(153, 204, 255, ${alpha})` : `rgba(255, 255, 255, ${alpha})`;
           ctx.fill();
         }
       }
-
       window.addEventListener('resize', resize);
       resize();
     })();
@@ -822,21 +890,15 @@
     let campaignData = null;
     const unlockedForEdit = {};
 
-    function norm(str) {
-      return String(str || '').trim().toLowerCase();
-    }
+    function norm(str) { return String(str || '').trim().toLowerCase(); }
 
     function enforceOrientation() {
       const promptEl = document.getElementById('landscape-prompt');
       if (!promptEl) return;
       const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) {
-        promptEl.style.setProperty('display', 'flex', 'important');
-      } else {
-        promptEl.style.display = 'none';
-      }
+      if (isPortrait) promptEl.style.setProperty('display', 'flex', 'important');
+      else promptEl.style.display = 'none';
     }
-
     window.addEventListener('resize', enforceOrientation);
     window.addEventListener('orientationchange', enforceOrientation);
     window.addEventListener('DOMContentLoaded', enforceOrientation);
@@ -850,19 +912,14 @@
 
     function getPlayerRecord(name) {
       const list = (campaignData && campaignData.players) || [];
-      const target = norm(name);
-      return list.find(p => norm(p.player_name) === target);
+      return list.find(p => norm(p.player_name) === norm(name));
     }
 
     function getPlayerColorTheme(name) {
       const rec = getPlayerRecord(name);
-      if (rec && rec.color_bg && rec.color_border) {
-        return { bg: rec.color_bg, border: rec.color_border, text: '#ffffff' };
-      }
+      if (rec && rec.color_bg && rec.color_border) return { bg: rec.color_bg, border: rec.color_border, text: '#ffffff' };
       const n = norm(name);
-      if (!n || n.includes('neutral') || n === 'uncontrolled') {
-        return { bg: '#223344', border: '#ffcc00', text: '#ffcc00' };
-      }
+      if (!n || n.includes('neutral') || n === 'uncontrolled') return { bg: '#223344', border: '#ffcc00', text: '#ffcc00' };
       let hash = 0;
       for (let i = 0; i < n.length; i++) hash = n.charCodeAt(i) + ((hash << 5) - hash);
       const hue = Math.abs(hash) % 360;
@@ -874,9 +931,7 @@
       const str = String(val).trim();
       if (str.includes('T') && str.includes('-') && !isNaN(Date.parse(str))) {
         const d = new Date(str);
-        const day = String(d.getDate()).padStart(2, '0');
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        return `SEC ${day}, SEC ${month}`;
+        return `SEC ${String(d.getDate()).padStart(2, '0')}, SEC ${String(d.getMonth() + 1).padStart(2, '0')}`;
       }
       return str.replace(/-/g, ', ').replace(/SEC\s*/gi, 'SEC ');
     }
@@ -887,9 +942,7 @@
       let rawLanes = String(targetSec.connected_lanes || '').trim();
       if (rawLanes.includes('T') && rawLanes.includes('-') && !isNaN(Date.parse(rawLanes))) {
         const d = new Date(rawLanes);
-        const d1 = String(d.getDate()).padStart(2, '0');
-        const d2 = String(d.getMonth() + 1).padStart(2, '0');
-        return [d1, d2];
+        return [String(d.getDate()).padStart(2, '0'), String(d.getMonth() + 1).padStart(2, '0')];
       }
       const matches = rawLanes.match(/\b\d{1,2}\b/g) || [];
       return matches.map(m => String(m).padStart(2, '0')).filter(id => id !== secId);
@@ -914,14 +967,10 @@
           if (step1Sec && norm(step1Sec.controller) === pNorm) {
             const step2Neighbors = getSectorNeighbors(step1Id, sectors);
             step2Neighbors.forEach(step2Id => {
-              const isNotOrigin = (step2Id !== currentId);
-              const isNotDirectNeighbor = !directNeighbors.includes(step2Id);
-              const notAlreadyListed = !destinations.some(d => d.id === step2Id);
-              if (isNotOrigin && isNotDirectNeighbor && notAlreadyListed) {
+              if (step2Id !== currentId && !directNeighbors.includes(step2Id) && !destinations.some(d => d.id === step2Id)) {
                 const step2Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step2Id);
                 if (step2Sec && norm(step2Sec.controller) === pNorm) {
-                  const name = step2Sec.sector_name || `Sector ${step2Id}`;
-                  destinations.push({ id: step2Id, dist: 2, label: `TACTICAL FLANK: ${name} (${step2Id} via Sector ${step1Id})` });
+                  destinations.push({ id: step2Id, dist: 2, label: `TACTICAL FLANK: ${step2Sec.sector_name || `Sector ${step2Id}`} (${step2Id} via Sector ${step1Id})` });
                 }
               }
             });
@@ -936,9 +985,7 @@
     const stageEl = document.getElementById('stage-container');
     const mapWrapperEl = document.getElementById('map-wrapper');
 
-    function applyMapTransform() {
-      stageEl.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
-    }
+    function applyMapTransform() { stageEl.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`; }
     function zoomIn() { scale = Math.min(3.5, scale + 0.25); applyMapTransform(); }
     function zoomOut() { scale = Math.max(0.65, scale - 0.25); applyMapTransform(); }
     function resetMap() { scale = 1.0; panX = 0; panY = 0; applyMapTransform(); }
@@ -1196,7 +1243,6 @@
       if (!container) return;
       container.style.display = 'block';
 
-      // Find player's active Task Forces for assignment dropdowns
       const myFleets = (campaignData.taskForces || []).filter(f => norm(f.player) === norm(authCaptainPlayer));
       const fleetOptions = `
         <option value="RESERVE">RESERVE / UNASSIGNED</option>
@@ -1213,9 +1259,15 @@
       } else {
         cardsHtml = authenticatedCaptains.map(c => {
           const isKia = norm(c.status) === 'kia' || norm(c.status) === 'destroyed';
-          const skill = Number(c.captain_skill) || 1;
+          const isMia = norm(c.status) === 'mia';
+          const bSkill = Number(c.base_skill) || 1;
+          const cSkill = Number(c.current_skill) || bSkill;
           const xp = Number(c.xp) || 0;
-          const vet = c.veteran_rank || 'Rookie';
+          const vet = c.tier || 'Tier I (Line Captain)';
+          const perks = String(c.perks || 'NONE').trim();
+          const miaTimer = Number(c.mia_timer) || 0;
+          const statusText = isMia ? `MIA (${miaTimer} TURN${miaTimer!==1?'S':''})` : (isKia ? 'KIA' : 'ACTIVE');
+          const isAssigned = !isKia && !isMia;
 
           const currentTfOptions = `
             <option value="RESERVE" ${norm(c.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>
@@ -1223,37 +1275,42 @@
           `;
 
           return `
-            <div class="captain-card ${isKia ? 'kia' : ''}">
+            <div class="captain-card ${isKia ? 'kia' : ''} ${isMia ? 'mia' : ''}">
               <div class="captain-header">
                 <span class="captain-name">${c.captain_name}</span>
                 <div class="captain-badges">
-                  <span class="badge-skill">SKILL ${skill}</span>
+                  <span class="badge-skill">BASE SKILL ${bSkill}</span>
+                  <span class="badge-skill current">CUR SKILL ${cSkill}</span>
                   <span class="badge-vet">${vet}</span>
                 </div>
               </div>
 
               <div class="captain-stats-row">
-                <span>XP ACCUMULATED: <strong style="color: var(--lcars-gold);">${xp}</strong></span>
-                <span style="color: ${isKia ? 'var(--lcars-red)' : '#4ade80'};">${c.status || 'ACTIVE'}</span>
+                <span>XP: <strong style="color: var(--lcars-gold);">${xp}</strong></span>
+                <span style="color: ${isKia ? 'var(--lcars-red)' : (isMia ? 'var(--lcars-orange)' : '#4ade80')};">${statusText}</span>
+              </div>
+              
+              <div style="font-size: 0.72rem; color: #cbd5e1; margin-top: 2px;">
+                PERKS: <span style="color: var(--lcars-blue);">${perks}</span>
+                <button class="btn-edit-perk" onclick="editCaptainPerks('${c.captain_id}', '${perks.replace(/'/g, "\\'")}')">[EDIT]</button>
               </div>
 
-              <!-- Fleet Assignment Selector -->
+              <!-- Fleet Assignment -->
               <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
-                <select id="assign-select-${c.captain_id}" class="order-select" style="font-size: 0.82rem; padding: 2px 4px; border-color: var(--lcars-teal); color: #fff;">
+                <select id="assign-select-${c.captain_id}" class="order-select" style="font-size: 0.82rem; padding: 2px 4px; border-color: var(--lcars-teal); color: #fff;" ${!isAssigned ? 'disabled' : ''}>
                   ${currentTfOptions}
                 </select>
-                <button class="btn-xp-mod" style="flex: none; padding: 3px 8px; background: var(--lcars-teal); color: #000;" onclick="assignCaptainToFleet('${c.captain_id}')">
+                <button class="btn-xp-mod" style="flex: none; padding: 3px 8px; background: var(--lcars-teal); color: #000;" onclick="assignCaptainToFleet('${c.captain_id}')" ${!isAssigned ? 'disabled' : ''}>
                   ASSIGN
                 </button>
               </div>
 
-              <!-- XP & Skill Modifiers -->
+              <!-- XP & Status Actions -->
               <div class="captain-btn-row">
-                <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 1, 0)">+1 XP</button>
-                <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 2, 0)">+2 XP</button>
-                <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 5, 0)">+5 XP</button>
-                <button class="btn-xp-mod" onclick="promptPromoteSkill('${c.captain_id}', ${skill})" title="Promote Captain Skill Rating">&uarr; SKILL</button>
-                <button class="btn-status-kia" onclick="toggleCaptainCasualty('${c.captain_id}', '${isKia ? 'ACTIVE' : 'KIA'}')">
+                <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 1, null)">+1 XP</button>
+                <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 2, null)">+2 XP</button>
+                <button class="btn-status-mia" onclick="toggleCaptainStatus('${c.captain_id}', 'MIA')">MIA</button>
+                <button class="btn-status-kia" onclick="toggleCaptainStatus('${c.captain_id}', '${isKia ? 'ACTIVE' : 'KIA'}')">
                   ${isKia ? 'REVIVE' : 'KIA'}
                 </button>
               </div>
@@ -1268,7 +1325,6 @@
         </div>
         ${cardsHtml}
 
-        <!-- Enlistment Box -->
         <div class="order-box" style="border-color: var(--lcars-amber); margin-top: 0.75rem;">
           <div class="field-label" style="color: var(--lcars-amber);">ENLIST NEW OFFICER</div>
           <input id="enlist-cap-name" type="text" class="order-input" placeholder="CAPTAIN NAME (E.G. JEAN-LUC PICARD)">
@@ -1296,6 +1352,33 @@
           </button>
         </div>
       `;
+    }
+
+    async function editCaptainPerks(captainId, currentPerks) {
+      const val = prompt(`EDIT VETERAN PERKS:\n(e.g., Combat Drift, Rapid Lock)`, currentPerks === 'NONE' ? '' : currentPerks);
+      if (val === null) return;
+      
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'modify_captain_stats',
+            playerName: authCaptainPlayer,
+            pinHash: authCaptainPinHash,
+            captainId: captainId,
+            perks: val.trim()
+          })
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+          if (cap) cap.perks = val.trim();
+          renderAuthenticatedCaptainsView();
+        }
+      } catch (err) {
+        alert("TRANSMISSION ERROR: " + err);
+      }
     }
 
     async function assignCaptainToFleet(captainId) {
@@ -1327,15 +1410,15 @@
       }
     }
 
-    async function adjustCaptainStats(captainId, addedXp, newSkill) {
+    async function adjustCaptainStats(captainId, addedXp, newStatus) {
       const payload = {
         action: 'modify_captain_stats',
         playerName: authCaptainPlayer,
         pinHash: authCaptainPinHash,
         captainId: captainId
       };
-      if (addedXp !== 0) payload.addedXp = addedXp;
-      if (newSkill > 0) payload.captainSkill = newSkill;
+      if (addedXp !== null && addedXp !== 0) payload.addedXp = addedXp;
+      if (newStatus !== null) payload.status = newStatus;
 
       try {
         const res = await fetch(API_URL, {
@@ -1345,15 +1428,14 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
-          if (cap) {
-            if (addedXp !== 0) {
-              cap.xp = Math.max(0, (Number(cap.xp) || 0) + addedXp);
-              const xpVal = Number(cap.xp);
-              cap.veteran_rank = xpVal >= 45 ? 'Master' : xpVal >= 25 ? 'Elite' : xpVal >= 12 ? 'Veteran' : xpVal >= 5 ? 'Seasoned' : 'Rookie';
-            }
-            if (newSkill > 0) cap.captain_skill = newSkill;
-          }
+          // Re-fetch to guarantee sync with tier/skill math from backend
+          const refRes = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'get_captains', playerName: authCaptainPlayer, pinHash: authCaptainPinHash })
+          });
+          const refData = await refRes.json();
+          authenticatedCaptains = refData.captains || [];
           renderAuthenticatedCaptainsView();
         }
       } catch (err) {
@@ -1361,42 +1443,16 @@
       }
     }
 
-    function promptPromoteSkill(captainId, currentSkill) {
-      const valStr = prompt("PROMOTION: Enter updated Captain Skill rating (1-9):", currentSkill);
-      if (valStr === null) return;
-      const num = Number(valStr);
-      if (num >= 1 && num <= 9) {
-        adjustCaptainStats(captainId, 0, num);
-      } else {
-        alert("INVALID SKILL: Rating must be between 1 and 9.");
+    async function toggleCaptainStatus(captainId, newStatus) {
+      let promptMsg = `CONFIRMATION: Mark captain as ${newStatus}?`;
+      if (newStatus === 'MIA') {
+        promptMsg = `WARNING: Marking a captain MIA drops their unspent XP by 50%, recalculates their Tier, and puts them out of action for 2 turns.\n\nProceed?`;
       }
-    }
-
-    async function toggleCaptainCasualty(captainId, newStatus) {
-      const conf = confirm(`CONFIRMATION: Mark captain as ${newStatus}?`);
+      const conf = confirm(promptMsg);
       if (!conf) return;
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'modify_captain_stats',
-            playerName: authCaptainPlayer,
-            pinHash: authCaptainPinHash,
-            captainId: captainId,
-            status: newStatus
-          })
-        });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
-          if (cap) cap.status = newStatus;
-          renderAuthenticatedCaptainsView();
-        }
-      } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
-      }
+      
+      // If GM override is requested, we can supply gmHash, but since we are logged in, player auth works
+      await adjustCaptainStats(captainId, 0, newStatus);
     }
 
     async function executeEnlistCaptain() {
@@ -1424,7 +1480,7 @@
             playerName: authCaptainPlayer,
             pinHash: authCaptainPinHash,
             captainName: name,
-            captainSkill: skill,
+            baseSkill: skill,
             initialXp: xp,
             taskForceId: tf
           })
@@ -1433,7 +1489,7 @@
         if (respData.status === 'success') {
           nameInput.value = '';
           alert(`COMMISSION REPORT: ${name} added to ${authCaptainPlayer}'s roster.`);
-          // Re-fetch updated captain roster
+          
           const refRes = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1763,7 +1819,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'set_pin', playerName: playerName, newPinHash: newPinHash })
         });
@@ -1800,7 +1855,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'submit_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash, destinationSectorId: destSector })
         });
@@ -1833,7 +1887,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'clear_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash })
         });
@@ -1898,7 +1951,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: retreatSec, gmHash: gmHash, rawPass: rawPass })
         });
@@ -1923,14 +1975,8 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            action: 'destroy_fleet', 
-            taskForceId: taskForceId, 
-            gmHash: gmHash, 
-            rawPass: rawPass 
-          })
+          body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: rawPass })
         });
 
         alert(`COMMAND LOG: ${taskForceId} decommissioned.`);
@@ -1961,10 +2007,7 @@
         let yPct = parseFloat(sec.y_pct);
         
         if (secId === '01') xPct = 10.0;
-        if (secId === '03') {
-          xPct = 23.5;
-          yPct = 60.0;
-        }
+        if (secId === '03') { xPct = 23.5; yPct = 60.0; }
 
         const theme = getPlayerColorTheme(sec.controller);
         const btn = document.createElement('div');
@@ -1991,10 +2034,7 @@
         let xPct = parseFloat(sec.x_pct);
         let yPct = parseFloat(sec.y_pct);
         if (secId === '01') xPct = 10.0;
-        if (secId === '03') {
-          xPct = 23.5;
-          yPct = 60.0;
-        }
+        if (secId === '03') { xPct = 23.5; yPct = 60.0; }
 
         const verticalStepPx = 22;
 
@@ -2088,6 +2128,21 @@
       const isPhase2 = /\bphase ii\b/i.test(currentPhase);
       const isPhase3 = /\bphase iii\b/i.test(currentPhase);
 
+      const assignedCap = (campaignData.captains || []).find(c => 
+        norm(c.player_name) === norm(fleet.player) && 
+        norm(c.task_force_id) === norm(fleet.task_force_id) && 
+        norm(c.status) !== 'kia' && norm(c.status) !== 'mia'
+      );
+
+      let captainBanner = `
+        <div class="sidebar-field" style="border-left-color: var(--lcars-teal);">
+          <div class="field-label">COMMANDING OFFICER</div>
+          <div class="field-value" style="color: var(--lcars-teal); font-size: 1.15rem;">
+            ${assignedCap ? `${assignedCap.captain_name} (SKILL ${assignedCap.current_skill || assignedCap.base_skill})` : 'NO OFFICER ASSIGNED'}
+          </div>
+        </div>
+      `;
+
       let ordersHtml = '';
 
       if (isPhase2) {
@@ -2154,6 +2209,7 @@
             <div class="field-label">DEPLOYED SECTOR</div>
             <div class="field-value">${sec.sector_name} (SEC ${String(sec.sector_id).padStart(2, '0')})</div>
           </div>
+          ${captainBanner}
         </div>
         ${ordersHtml}
         ${combatHtml}
@@ -2161,10 +2217,7 @@
       sidebar.classList.remove('hidden');
     }
 
-    function closeSidebar() {
-      document.getElementById('sidebar-panel').classList.add('hidden');
-    }
-
+    function closeSidebar() { document.getElementById('sidebar-panel').classList.add('hidden'); }
     fetchCampaignData();
   </script>
 </body>
