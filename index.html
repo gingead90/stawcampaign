@@ -381,6 +381,7 @@
       margin-left: 2px;
     }
 
+    /* Standard Right Sidebar for Map Info & RP */
     #sidebar-panel {
       width: 340px;
       min-width: 340px;
@@ -398,9 +399,7 @@
       transition: border-color 0.25s ease;
     }
 
-    #sidebar-panel.hidden {
-      display: none;
-    }
+    #sidebar-panel.hidden { display: none; }
 
     .sidebar-header {
       display: flex;
@@ -414,10 +413,7 @@
       transition: background 0.25s ease;
     }
 
-    .sidebar-title {
-      font-size: 1.1rem;
-      letter-spacing: 1.5px;
-    }
+    .sidebar-title { font-size: 1.1rem; letter-spacing: 1.5px; }
 
     .close-btn {
       background: none;
@@ -430,12 +426,7 @@
       font-family: 'Antonio', sans-serif;
     }
 
-    .sidebar-field-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 0.4rem;
-    }
-
+    .sidebar-field-grid { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
     .sidebar-field {
       background: var(--lcars-panel);
       padding: 0.45rem 0.65rem;
@@ -444,22 +435,9 @@
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       border-right: 1px solid rgba(255, 255, 255, 0.05);
       border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      transition: border-left-color 0.25s ease;
     }
-
-    .field-label {
-      font-size: 0.72rem;
-      color: var(--lcars-amber);
-      font-weight: 700;
-      letter-spacing: 1px;
-    }
-
-    .field-value {
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: #ffffff;
-      margin-top: 1px;
-    }
+    .field-label { font-size: 0.72rem; color: var(--lcars-amber); font-weight: 700; letter-spacing: 1px; }
+    .field-value { font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-top: 1px; }
 
     .sidebar-notes {
       background: var(--lcars-panel);
@@ -472,7 +450,6 @@
       font-size: 0.9rem;
       color: #e2e8f0;
       line-height: 1.35;
-      transition: border-left-color 0.25s ease;
     }
 
     .order-box {
@@ -485,6 +462,20 @@
       flex-direction: column;
       gap: 0.5rem;
     }
+
+    .order-classified-box {
+      background: #022c22;
+      border: 1px solid #22c55e;
+      border-radius: 4px;
+      padding: 0.75rem;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .order-classified-title { font-size: 0.95rem; font-weight: 700; color: #4ade80; letter-spacing: 1px; }
+    .order-classified-text { font-size: 0.78rem; color: #86efac; letter-spacing: 0.5px; }
 
     .order-select {
       width: 100%;
@@ -509,11 +500,7 @@
       border-radius: 4px;
       letter-spacing: 2px;
     }
-
-    .order-input:focus {
-      outline: none;
-      border-color: var(--lcars-gold);
-    }
+    .order-input:focus { outline: none; border-color: var(--lcars-gold); }
 
     .btn-submit-order {
       background: var(--lcars-gold);
@@ -528,10 +515,7 @@
       letter-spacing: 1px;
       transition: filter 0.15s ease;
     }
-
-    .btn-submit-order:hover {
-      filter: brightness(1.2);
-    }
+    .btn-submit-order:hover { filter: brightness(1.2); }
 
     .btn-modify-order {
       background: #334155;
@@ -544,20 +528,10 @@
       cursor: pointer;
       border-radius: 4px;
       letter-spacing: 1px;
-      transition: background 0.15s ease;
     }
+    .btn-modify-order:hover { background: #475569; color: #ffffff; }
 
-    .btn-modify-order:hover {
-      background: #475569;
-      color: #ffffff;
-    }
-
-    .combat-action-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-top: 0.5rem;
-    }
+    .combat-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 0.5rem; }
 
     .btn-combat-retreat {
       background: var(--lcars-blue);
@@ -570,7 +544,6 @@
       cursor: pointer;
       border-radius: 4px;
     }
-
     .btn-combat-destroy {
       background: var(--lcars-dark-red);
       color: #fff;
@@ -583,106 +556,103 @@
       border-radius: 4px;
     }
 
+    /* FULL-SCREEN MODAL FOR CAPTAINS */
+    .full-screen-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(3, 7, 18, 0.97);
+      backdrop-filter: blur(12px);
+      z-index: 80;
+      display: flex;
+      flex-direction: column;
+      padding: 0.6rem;
+      gap: 0.5rem;
+    }
+    .full-screen-modal.hidden { display: none !important; }
+
+    .modal-header { display: flex; gap: 8px; height: 44px; align-items: center; }
+    
+    .modal-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      border: 2px solid var(--lcars-teal);
+      border-radius: 8px;
+      background: rgba(10, 14, 23, 0.85);
+      box-shadow: inset 0 0 30px rgba(0,0,0,0.9);
+    }
+
+    .captains-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .enlist-panel {
+      max-width: 600px;
+      margin: 2rem auto 0 auto;
+      border: 1px solid var(--lcars-amber);
+      background: rgba(15, 23, 42, 0.9);
+      padding: 1rem;
+      border-radius: 8px;
+    }
+
     /* Captain Cards & Stats */
     .captain-card {
       background: rgba(15, 23, 42, 0.9);
       border: 1px solid var(--lcars-slate);
       border-left: 5px solid var(--lcars-teal);
-      border-radius: 4px;
-      padding: 0.65rem;
-      margin-top: 0.5rem;
+      border-radius: 6px;
+      padding: 0.85rem;
       display: flex;
       flex-direction: column;
-      gap: 0.35rem;
+      gap: 0.4rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
     }
+    .captain-card.kia { border-left-color: var(--lcars-red); opacity: 0.75; }
+    .captain-card.mia { border-left-color: var(--lcars-orange); opacity: 0.85; }
 
-    .captain-card.kia {
-      border-left-color: var(--lcars-red);
-      opacity: 0.75;
-    }
-    
-    .captain-card.mia {
-      border-left-color: var(--lcars-amber);
-      opacity: 0.85;
-    }
+    .captain-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .captain-name { font-size: 1.25rem; font-weight: 700; color: #ffffff; }
 
-    .captain-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
-
-    .captain-name {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #ffffff;
-    }
-
-    .captain-badges {
-      display: flex;
-      gap: 4px;
-    }
-
-    .badge-skill {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 2px 5px;
-      background: var(--lcars-slate);
-      color: #fff;
-      border-radius: 3px;
-    }
-
-    .badge-skill.current {
-      background: var(--lcars-amber);
-      color: #000;
-    }
-
-    .badge-vet {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 2px 5px;
-      background: var(--lcars-teal);
-      color: #000;
-      border-radius: 3px;
-    }
+    .captain-badges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end;}
+    .badge-skill { font-size: 0.72rem; font-weight: 700; padding: 2px 6px; background: var(--lcars-slate); color: #fff; border-radius: 3px; }
+    .badge-skill.current { background: var(--lcars-amber); color: #000; }
+    .badge-vet { font-size: 0.72rem; font-weight: 700; padding: 2px 6px; background: var(--lcars-teal); color: #000; border-radius: 3px; }
 
     .captain-stats-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      font-size: 0.78rem;
+      font-size: 0.85rem;
       color: #94a3b8;
-      background: rgba(0, 0, 0, 0.4);
-      padding: 4px 6px;
-      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 6px 8px;
+      border-radius: 4px;
+      margin-top: 4px;
     }
 
-    .captain-btn-row {
-      display: flex;
-      gap: 4px;
-      margin-top: 0.25rem;
-    }
+    .captain-btn-row { display: flex; gap: 5px; margin-top: 0.5rem; }
 
     .btn-xp-mod {
       flex: 1;
-      padding: 4px 0;
+      padding: 5px 0;
       background: #334155;
       color: #ffffff;
       border: 1px solid #475569;
       font-family: 'Antonio', sans-serif;
-      font-size: 0.78rem;
+      font-size: 0.8rem;
       font-weight: 700;
       cursor: pointer;
-      border-radius: 3px;
+      border-radius: 4px;
+      transition: background 0.15s ease;
     }
-
-    .btn-xp-mod:hover {
-      background: var(--lcars-amber);
-      color: #000;
-    }
+    .btn-xp-mod:hover:not(:disabled) { background: var(--lcars-amber); color: #000; }
+    .btn-xp-mod:disabled { opacity: 0.5; cursor: not-allowed; }
 
     .btn-status-kia {
-      padding: 4px 8px;
+      padding: 5px 10px;
       background: var(--lcars-dark-red);
       color: #fff;
       border: 1px solid var(--lcars-red);
@@ -690,11 +660,11 @@
       font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
-      border-radius: 3px;
+      border-radius: 4px;
     }
     
     .btn-status-mia {
-      padding: 4px 8px;
+      padding: 5px 10px;
       background: #b45309;
       color: #fff;
       border: 1px solid var(--lcars-orange);
@@ -702,7 +672,7 @@
       font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
-      border-radius: 3px;
+      border-radius: 4px;
     }
 
     /* Fixed Landscape Blocker Overlay */
@@ -737,9 +707,7 @@
     }
 
     @media (orientation: portrait), (max-aspect-ratio: 1/1) {
-      #landscape-prompt {
-        display: flex !important;
-      }
+      #landscape-prompt { display: flex !important; }
     }
 
     @media screen and (max-width: 900px) {
@@ -753,14 +721,8 @@
         box-shadow: -8px 0 28px rgba(0,0,0,0.98);
         z-index: 45;
       }
-      .lcars-side-rail {
-        width: 50px;
-        min-width: 50px;
-      }
-      .rail-btn {
-        font-size: 0.68rem;
-        height: 44px;
-      }
+      .lcars-side-rail { width: 50px; min-width: 50px; }
+      .rail-btn { font-size: 0.68rem; height: 44px; }
     }
   </style>
 </head>
@@ -829,6 +791,16 @@
         <div id="sidebar-content"></div>
       </aside>
     </div>
+  </div>
+
+  <!-- FULL SCREEN CAPTAINS MODAL -->
+  <div id="captains-modal" class="full-screen-modal hidden">
+    <div class="modal-header">
+      <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-teal);">CAPTAIN XP</div>
+      <div class="lcars-pill-bar" style="background: var(--lcars-blue);" id="captains-modal-title">PERSONNEL & OFFICERS LOG</div>
+      <button class="lcars-btn" style="background: var(--lcars-red); border-radius: 0 21px 21px 0;" onclick="closeCaptainsMenu()">CLOSE X</button>
+    </div>
+    <div id="captains-modal-content" class="modal-content"></div>
   </div>
 
   <script>
@@ -1130,7 +1102,7 @@
       }
     }
 
-    // --- CONFIDENTIAL CAPTAIN XP ROSTER (PIN PROTECTED) ---
+    // --- FULL SCREEN CAPTAIN XP ROSTER (PIN PROTECTED) ---
     let authCaptainPlayer = '';
     let authCaptainPinHash = '';
     let authenticatedCaptains = [];
@@ -1138,45 +1110,44 @@
     const OFFICIAL_PERKS = ['NONE', 'Combat Drift', 'Evasive Instinct', 'Rapid Lock', 'Lead by Example'];
 
     function openCaptainsMenu() {
-      const sidebar = document.getElementById('sidebar-panel');
-      const header = document.getElementById('sidebar-header');
-      const title = document.getElementById('sidebar-title');
-      const content = document.getElementById('sidebar-content');
-
-      sidebar.style.borderColor = 'var(--lcars-teal)';
-      header.style.background = 'var(--lcars-teal)';
-      title.textContent = "CAPTAIN XP ROSTER";
+      closeSidebar(); // Ensure right sidebar is closed
+      const modal = document.getElementById('captains-modal');
+      const content = document.getElementById('captains-modal-content');
 
       const playerOptions = (campaignData.players || []).map(p => {
         return `<option value="${p.player_name}">${p.player_name}</option>`;
       }).join('');
 
       content.innerHTML = `
-        <div class="sidebar-notes" style="border-left-color: var(--lcars-teal); margin-bottom: 0.5rem;">
-          <div class="field-label" style="color: var(--lcars-teal); margin-bottom: 2px;">CAPTAIN XP PROTOCOL</div>
-          TRACK CAPTAIN SKILL RATINGS (LEVEL 1-9), ACCUMULATED XP, VETERAN PERKS, AND COMBAT CASUALTY STATUS.
-        </div>
-
-        <div class="order-box" style="border-color: var(--lcars-teal);">
-          <div class="field-label" style="color: var(--lcars-teal);">SELECT ALLEGIANCE</div>
-          <select id="captain-auth-player" class="order-select" style="border-color: var(--lcars-teal); color: var(--lcars-teal);">
-            ${playerOptions}
-          </select>
-
-          <div style="margin-top: 0.35rem;">
-            <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
-            <input id="captain-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN">
+        <div style="max-width: 450px; margin: 3rem auto;">
+          <div class="sidebar-notes" style="border-left-color: var(--lcars-teal); margin-bottom: 1rem;">
+            <div class="field-label" style="color: var(--lcars-teal); margin-bottom: 2px;">CONFIDENTIAL DOSSIER</div>
+            OFFICER FILES ARE SEALED PER COMMAND LEVEL PROTOCOL. ENTER SECURITY PIN TO ACCESS YOUR PERSONNEL ROSTER.
           </div>
 
-          <button id="btn-auth-captains" class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 0.5rem;" onclick="authenticateCaptainsRoster()">
-            DECRYPT CAPTAIN XP ROSTER
-          </button>
-        </div>
+          <div class="order-box" style="border-color: var(--lcars-teal); padding: 1.5rem;">
+            <div class="field-label" style="color: var(--lcars-teal);">SELECT ALLEGIANCE</div>
+            <select id="captain-auth-player" class="order-select" style="border-color: var(--lcars-teal); color: var(--lcars-teal); font-size: 1.1rem; padding: 0.75rem;">
+              ${playerOptions}
+            </select>
 
-        <div id="captains-authenticated-view" style="display: none; margin-top: 0.75rem;"></div>
+            <div style="margin-top: 1rem;">
+              <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
+              <input id="captain-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" style="font-size: 1.1rem; padding: 0.75rem;">
+            </div>
+
+            <button id="btn-auth-captains" class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
+              DECRYPT CAPTAIN XP ROSTER
+            </button>
+          </div>
+        </div>
       `;
 
-      sidebar.classList.remove('hidden');
+      modal.classList.remove('hidden');
+    }
+
+    function closeCaptainsMenu() {
+      document.getElementById('captains-modal').classList.add('hidden');
     }
 
     async function authenticateCaptainsRoster() {
@@ -1230,9 +1201,8 @@
     }
 
     function renderAuthenticatedCaptainsView() {
-      const container = document.getElementById('captains-authenticated-view');
-      if (!container) return;
-      container.style.display = 'block';
+      const content = document.getElementById('captains-modal-content');
+      if (!content) return;
 
       const myFleets = (campaignData.taskForces || []).filter(f => norm(f.player) === norm(authCaptainPlayer));
       const fleetOptions = `
@@ -1243,8 +1213,8 @@
       let cardsHtml = '';
       if (authenticatedCaptains.length === 0) {
         cardsHtml = `
-          <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 1rem;">
-            NO CAPTAINS IN ROSTER. ENLIST YOUR FIRST CAPTAIN BELOW.
+          <div style="text-align: center; color: #94a3b8; font-size: 1rem; padding: 2rem; border: 1px dashed var(--lcars-slate); grid-column: 1 / -1; border-radius: 8px;">
+            NO COMMISSIONED OFFICERS IN ROSTER. ENLIST YOUR FIRST CAPTAIN BELOW.
           </div>
         `;
       } else {
@@ -1264,13 +1234,45 @@
             ${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(c.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}
           `;
 
-          // Parse existing perks array for the dual dropdowns
           const currentPerksArr = String(c.perks || 'NONE').split(',').map(s => s.trim());
           const p1Val = currentPerksArr[0] || 'NONE';
           const p2Val = currentPerksArr[1] || 'NONE';
-          
           const p1OptionsHtml = OFFICIAL_PERKS.map(p => `<option value="${p}" ${p1Val === p ? 'selected' : ''}>${p}</option>`).join('');
           const p2OptionsHtml = OFFICIAL_PERKS.map(p => `<option value="${p}" ${p2Val === p ? 'selected' : ''}>${p}</option>`).join('');
+
+          let perkHtml = '';
+          const isTier2 = vet.includes('Tier II');
+          const isTier3 = vet.includes('Tier III');
+
+          if (!isTier2 && !isTier3) {
+            perkHtml = `<div style="grid-column: span 2; color: var(--lcars-slate); font-size: 0.75rem; text-align: center; padding: 4px; border: 1px dashed var(--lcars-slate); border-radius: 4px; margin-top: 4px;">PERKS LOCKED (REQUIRES TIER II)</div>`;
+          } else {
+            perkHtml += `
+              <div style="display: flex; flex-direction: column;">
+                <span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 1:</span>
+                <select id="perk1-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 3px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">
+                  ${p1OptionsHtml}
+                </select>
+              </div>
+            `;
+            if (isTier3) {
+              perkHtml += `
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 2:</span>
+                  <select id="perk2-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 3px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">
+                    ${p2OptionsHtml}
+                  </select>
+                </div>
+              `;
+            } else {
+              perkHtml += `
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 0.65rem; color: var(--lcars-slate);">PERK 2:</span>
+                  <div style="font-size: 0.75rem; padding: 4px; color: var(--lcars-slate); border: 1px solid var(--lcars-slate); border-radius: 4px; text-align: center; background: rgba(0,0,0,0.5);">LOCKED (TIER III)</div>
+                </div>
+              `;
+            }
+          }
 
           return `
             <div class="captain-card ${isKia ? 'kia' : ''} ${isMia ? 'mia' : ''}">
@@ -1284,37 +1286,26 @@
               </div>
 
               <div class="captain-stats-row">
-                <span>XP: <strong style="color: var(--lcars-gold);">${xp}</strong></span>
-                <span style="color: ${isKia ? 'var(--lcars-red)' : (isMia ? 'var(--lcars-orange)' : '#4ade80')};">${statusText}</span>
+                <span>XP: <strong style="color: var(--lcars-gold); font-size: 1.1rem;">${xp}</strong></span>
+                <span style="color: ${isKia ? 'var(--lcars-red)' : (isMia ? 'var(--lcars-orange)' : '#4ade80')}; font-weight: 700;">${statusText}</span>
               </div>
               
-              <div style="font-size: 0.72rem; color: #cbd5e1; margin-top: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
-                <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 1:</span>
-                  <select id="perk1-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 2px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">
-                    ${p1OptionsHtml}
-                  </select>
-                </div>
-                <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 2:</span>
-                  <select id="perk2-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 2px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">
-                    ${p2OptionsHtml}
-                  </select>
-                </div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">
+                ${perkHtml}
               </div>
 
               <!-- Fleet Assignment -->
-              <div style="display: flex; gap: 4px; align-items: center; margin-top: 6px;">
-                <select id="assign-select-${c.captain_id}" class="order-select" style="font-size: 0.82rem; padding: 2px 4px; border-color: var(--lcars-teal); color: #fff;" ${!isAssigned ? 'disabled' : ''}>
+              <div style="display: flex; gap: 6px; align-items: center; margin-top: 8px;">
+                <select id="assign-select-${c.captain_id}" class="order-select" style="font-size: 0.85rem; padding: 4px; border-color: var(--lcars-teal); color: #fff;" ${!isAssigned ? 'disabled' : ''}>
                   ${currentTfOptions}
                 </select>
-                <button class="btn-xp-mod" style="flex: none; padding: 3px 8px; background: var(--lcars-teal); color: #000;" onclick="assignCaptainToFleet('${c.captain_id}')" ${!isAssigned ? 'disabled' : ''}>
+                <button class="btn-xp-mod" style="flex: none; padding: 4px 12px; background: var(--lcars-teal); color: #000;" onclick="assignCaptainToFleet('${c.captain_id}')" ${!isAssigned ? 'disabled' : ''}>
                   ASSIGN
                 </button>
               </div>
 
               <!-- XP & Status Actions -->
-              <div class="captain-btn-row">
+              <div class="captain-btn-row" style="margin-top: 8px;">
                 <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 1, null)">+1 XP</button>
                 <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 2, null)">+2 XP</button>
                 <button class="btn-status-mia" onclick="toggleCaptainStatus('${c.captain_id}', 'MIA')">MIA</button>
@@ -1327,17 +1318,22 @@
         }).join('');
       }
 
-      container.innerHTML = `
-        <div style="font-size: 0.85rem; color: var(--lcars-teal); font-weight: 700; margin-bottom: 4px;">
-          COMMANDING OFFICERS: ${authCaptainPlayer.toUpperCase()}
+      content.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <div style="font-size: 1.25rem; color: var(--lcars-teal); font-weight: 700;">
+            COMMANDING OFFICERS: ${authCaptainPlayer.toUpperCase()}
+          </div>
         </div>
-        ${cardsHtml}
+        
+        <div class="captains-grid">
+          ${cardsHtml}
+        </div>
 
-        <div class="order-box" style="border-color: var(--lcars-amber); margin-top: 0.75rem;">
-          <div class="field-label" style="color: var(--lcars-amber);">ENLIST NEW OFFICER</div>
+        <div class="enlist-panel">
+          <div class="field-label" style="color: var(--lcars-amber); font-size: 0.95rem; margin-bottom: 0.5rem;">ENLIST NEW OFFICER</div>
           <input id="enlist-cap-name" type="text" class="order-input" placeholder="CAPTAIN NAME (E.G. JEAN-LUC PICARD)">
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 0.25rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
             <div>
               <div class="field-label">BASE SKILL (1-9)</div>
               <input id="enlist-cap-skill" type="number" min="1" max="9" value="6" class="order-input">
@@ -1348,14 +1344,14 @@
             </div>
           </div>
 
-          <div style="margin-top: 0.25rem;">
+          <div style="margin-top: 0.75rem;">
             <div class="field-label">INITIAL ASSIGNMENT</div>
             <select id="enlist-cap-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">
               ${fleetOptions}
             </select>
           </div>
 
-          <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.4rem;" onclick="executeEnlistCaptain()">
+          <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 1rem; width: 100%;" onclick="executeEnlistCaptain()">
             COMMISSION NEW OFFICER
           </button>
         </div>
@@ -1363,8 +1359,11 @@
     }
 
     async function updateCaptainPerks(captainId) {
-      const p1 = document.getElementById(`perk1-${captainId}`).value;
-      const p2 = document.getElementById(`perk2-${captainId}`).value;
+      const p1El = document.getElementById(`perk1-${captainId}`);
+      const p2El = document.getElementById(`perk2-${captainId}`);
+      
+      const p1 = p1El ? p1El.value : 'NONE';
+      const p2 = p2El ? p2El.value : 'NONE';
       
       let combined = [p1, p2].filter(p => p !== 'NONE').join(', ');
       if (combined === '') combined = 'NONE';
@@ -1372,8 +1371,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'modify_captain_stats',
             playerName: authCaptainPlayer,
@@ -1382,7 +1380,6 @@
             perks: combined
           })
         });
-        
         const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
         if (cap) cap.perks = combined;
       } catch (err) {
@@ -1437,6 +1434,26 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
+          // Optimistic UI update before re-fetching
+          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+          if (cap && addedXp !== 0) {
+            cap.xp = Math.max(0, (Number(cap.xp) || 0) + addedXp);
+            const xpVal = Number(cap.xp);
+            let bSkill = Number(cap.base_skill) || 1;
+            if (xpVal >= 25) { 
+              cap.tier = 'Tier III (Fleet Legend)'; 
+              cap.current_skill = bSkill + 2; 
+            } else if (xpVal >= 10) { 
+              cap.tier = 'Tier II (Veteran)'; 
+              cap.current_skill = bSkill + 1; 
+            } else { 
+              cap.tier = 'Tier I (Line Captain)'; 
+              cap.current_skill = bSkill; 
+            }
+          }
+          
+          renderAuthenticatedCaptainsView();
+          
           const refRes = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1512,6 +1529,7 @@
 
     // --- RP LEDGER SYSTEM ---
     function openRpLedgerMenu() {
+      closeSidebar();
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
       const title = document.getElementById('sidebar-title');
@@ -1754,6 +1772,7 @@
 
     // --- CONFIGURATION & SECURITY SUBMENU ---
     function toggleSettingsMenu() {
+      closeSidebar();
       const sidebar = document.getElementById('sidebar-panel');
       const header = document.getElementById('sidebar-header');
       const title = document.getElementById('sidebar-title');
@@ -1825,7 +1844,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'set_pin', playerName: playerName, newPinHash: newPinHash })
         });
@@ -1862,7 +1880,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'submit_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash, destinationSectorId: destSector })
         });
@@ -1895,7 +1912,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'clear_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash })
         });
@@ -1960,7 +1976,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: retreatSec, gmHash: gmHash, rawPass: rawPass })
         });
@@ -1985,7 +2000,6 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: rawPass })
         });
