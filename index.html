@@ -534,7 +534,7 @@
               <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
               <input id="captain-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" style="font-size: 1.1rem; padding: 0.75rem;">
             </div>
-            <button class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
+            <button id="btn-auth-captains" class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
               DECRYPT CAPTAIN XP ROSTER
             </button>
           </div>
@@ -548,13 +548,14 @@
     async function authenticateCaptainsRoster() {
       const pSelect = document.getElementById('captain-auth-player');
       const pinInput = document.getElementById('captain-auth-pin');
+      const btn = document.getElementById('btn-auth-captains');
+
       if (!pSelect || !pinInput) return;
       const playerName = pSelect.value;
       const rawPin = pinInput.value;
 
       if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
 
-      const btn = document.getElementById('btn-auth-captains');
       btn.textContent = "AUTHENTICATING..."; btn.disabled = true;
 
       const pinHash = await hashPin(rawPin);
@@ -791,7 +792,7 @@
             <div class="field-label" style="color: var(--lcars-amber);">SECRET PIN</div>
             <input id="rp-pin-input" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN">
           </div>
-          <button class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">AUTHENTICATE & VIEW LEDGER</button>
+          <button id="btn-auth-rp" class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">AUTHENTICATE & VIEW LEDGER</button>
         </div>
         <div id="rp-account-display" style="display: none; margin-top: 0.75rem;"></div>
       `;
@@ -803,6 +804,9 @@
       const rawPin = document.getElementById('rp-pin-input').value;
       if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
 
+      const btn = document.getElementById('btn-auth-rp');
+      btn.textContent = "DECRYPTING TREASURY..."; btn.disabled = true;
+
       const pinHash = await hashPin(rawPin);
       try {
         const res = await fetch(API_URL, {
@@ -811,9 +815,16 @@
           body: JSON.stringify({ action: 'get_rp', playerName: playerName, pinHash: pinHash })
         });
         const respData = await res.json();
-        if (respData.status === 'auth_failed') { alert("SECURITY BREACH: Invalid PIN."); return; }
+        if (respData.status === 'auth_failed') { 
+          alert("SECURITY BREACH: Invalid PIN."); 
+          btn.textContent = "AUTHENTICATE & VIEW LEDGER"; btn.disabled = false;
+          return; 
+        }
         renderRpAccountView(respData, pinHash);
-      } catch (err) { alert("NETWORK ERROR: " + err); }
+      } catch (err) { 
+        alert("NETWORK ERROR: " + err); 
+        btn.textContent = "AUTHENTICATE & VIEW LEDGER"; btn.disabled = false;
+      }
     }
 
     function renderRpAccountView(accData, pinHash) {
@@ -833,7 +844,7 @@
             <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">TASK FORCE DESIGNATION</div><input id="new-tf-id" type="text" class="order-input" placeholder="E.G. TF-12 OR 3RD FLEET"></div>
             <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">DEPLOYMENT SHIPYARD (CONTROLLED SECTOR)</div><select id="new-tf-sector" class="order-select" style="border-color: var(--lcars-blue); color: #fff;">${ownedSectorOptions || '<option value="">NO CONTROLLED SECTORS AVAILABLE</option>'}</select></div>
             <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">CONSTRUCTION COST (RP)</div><input id="new-tf-cost" type="number" min="1" max="${accData.currentRp}" value="5" class="order-input"></div>
-            <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executeFleetCommission('${accData.playerName}', '${pinHash}')">AUTHORIZE SHIPYARD CONSTRUCTION</button>
+            <button id="btn-commission-tf" class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executeFleetCommission('${accData.playerName}', '${pinHash}')">AUTHORIZE SHIPYARD CONSTRUCTION</button>
           </div>
         `;
       }
@@ -853,7 +864,7 @@
             <option value="Custom">OTHER EXPENDITURE</option>
           </select>
           <div style="margin-top: 0.35rem;"><div class="field-label" style="color: var(--lcars-amber);">RP AMOUNT TO DEDUCT</div><input id="spend-amount-input" type="number" min="1" max="${accData.currentRp}" class="order-input" placeholder="ENTER RP AMOUNT"></div>
-          <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.5rem;" onclick="executeRpSpend('${accData.playerName}', '${pinHash}')">TRANSMIT EXPENDITURE</button>
+          <button id="btn-spend-rp" class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.5rem;" onclick="executeRpSpend('${accData.playerName}', '${pinHash}')">TRANSMIT EXPENDITURE</button>
         </div>
       `;
     }
@@ -866,6 +877,9 @@
       if (!tfId || !sectorId || !cost) { alert("INPUT ERROR: Please check all required commissioning fields."); return; }
       if (!confirm(`CONFIRM COMMISSIONING: Deploy ${tfId} to Sector ${sectorId} for ${cost} RP?`)) return;
 
+      const btn = document.getElementById('btn-commission-tf');
+      btn.textContent = "COMMISSIONING VESSEL..."; btn.disabled = true;
+
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -873,11 +887,18 @@
           body: JSON.stringify({ action: 'commission_fleet', playerName: playerName, pinHash: pinHash, taskForceId: tfId, sectorId: sectorId, cost: cost })
         });
         const respData = await res.json();
-        if (respData.status === 'insufficient_funds') { alert("SHIPYARD HALT: Insufficient RP balance."); return; }
+        if (respData.status === 'insufficient_funds') { 
+          alert("SHIPYARD HALT: Insufficient RP balance."); 
+          btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION"; btn.disabled = false;
+          return; 
+        }
         alert(`SHIPYARD REPORT: ${tfId} successfully deployed.`);
         openRpLedgerMenu();
         fetchCampaignData();
-      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
+      } catch (err) { 
+        alert("COMMUNICATION ERROR: " + err); 
+        btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION"; btn.disabled = false;
+      }
     }
 
     async function executeRpSpend(playerName, pinHash) {
@@ -887,6 +908,9 @@
       if (!amt || amt <= 0) { alert("INPUT ERROR: Please provide a valid expenditure amount."); return; }
       if (!confirm(`CONFIRMATION: Authorize payment of ${amt} RP for ${spendType}?`)) return;
 
+      const btn = document.getElementById('btn-spend-rp');
+      btn.textContent = "PROCESSING PAYMENT..."; btn.disabled = true;
+
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -894,10 +918,17 @@
           body: JSON.stringify({ action: 'spend_rp', playerName: playerName, pinHash: pinHash, amount: amt, description: spendType })
         });
         const respData = await res.json();
-        if (respData.status === 'insufficient_funds') { alert("TRANSACTION DECLINED: Insufficient RP balance."); return; }
+        if (respData.status === 'insufficient_funds') { 
+          alert("TRANSACTION DECLINED: Insufficient RP balance."); 
+          btn.textContent = "TRANSMIT EXPENDITURE"; btn.disabled = false;
+          return; 
+        }
         alert(`TRANSACTION APPROVED: Deducted ${amt} RP. Remaining: ${respData.newBalance} RP.`);
         openRpLedgerMenu();
-      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
+      } catch (err) { 
+        alert("COMMUNICATION ERROR: " + err); 
+        btn.textContent = "TRANSMIT EXPENDITURE"; btn.disabled = false;
+      }
     }
 
     // --- CONFIGURATION & SECURITY SUBMENU ---
@@ -1203,7 +1234,6 @@
 
       let captainBanner = '';
 
-      // Only decrypt the captain banner if the user has authenticated as the owner of this fleet
       if (authCaptainPlayer && norm(authCaptainPlayer) === norm(fleet.player)) {
         const assignedCap = authenticatedCaptains.find(c => 
           norm(c.task_force_id) === norm(fleet.task_force_id) && 
@@ -1218,7 +1248,6 @@
           </div>
         `;
       } else {
-        // Obscured for opponents and unauthenticated users to preserve Fog of War
         captainBanner = `
           <div class="sidebar-field" style="border-left-color: var(--lcars-slate);">
             <div class="field-label">COMMANDING OFFICER</div>
