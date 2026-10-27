@@ -98,7 +98,6 @@
     .captain-card { background: rgba(15, 23, 42, 0.9); border: 1px solid var(--lcars-slate); border-left: 5px solid var(--lcars-teal); border-radius: 6px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
     .captain-card.kia { border-left-color: var(--lcars-red); opacity: 0.75; }
     .captain-card.mia { border-left-color: var(--lcars-orange); opacity: 0.85; }
-
     .captain-header { display: flex; justify-content: space-between; align-items: baseline; }
     .captain-name { font-size: 1.25rem; font-weight: 700; color: #ffffff; }
     .captain-badges { display: flex; gap: 5px; flex-wrap: wrap; justify-content: flex-end;}
@@ -126,7 +125,9 @@
   </style>
 </head>
 <body>
+
   <canvas id="space-canvas"></canvas>
+
   <div id="landscape-prompt">
     <svg viewBox="0 0 24 24">
       <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
@@ -137,6 +138,7 @@
     </p>
   </div>
 
+  <!-- SITE ACCESS LOGIN OVERLAY -->
   <div id="site-login-overlay">
     <div class="login-box">
       <h2 style="color: var(--lcars-orange); font-size: 1.8rem; margin-bottom: 0.5rem;">LCARS TACTICAL MAINFRAME</h2>
@@ -159,6 +161,7 @@
       </div>
     </header>
     <div id="theater-layout">
+      <!-- Left LCARS Side Rail -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
         <button class="rail-btn rail-btn-captains" onclick="openCaptainsMenu()" title="Open Captain XP Roster">
@@ -551,6 +554,9 @@
 
       if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
 
+      const btn = document.getElementById('btn-auth-captains');
+      btn.textContent = "AUTHENTICATING..."; btn.disabled = true;
+
       const pinHash = await hashPin(rawPin);
       try {
         const res = await fetch(API_URL, {
@@ -559,11 +565,18 @@
           body: JSON.stringify({ action: 'get_captains', playerName: playerName, pinHash: pinHash })
         });
         const respData = await res.json();
-        if (respData.status === 'auth_failed') { alert("SECURITY BREACH: Invalid PIN for " + playerName); return; }
+        if (respData.status === 'auth_failed') { 
+          alert("SECURITY BREACH: Invalid PIN for " + playerName); 
+          btn.textContent = "DECRYPT CAPTAIN XP ROSTER"; btn.disabled = false;
+          return; 
+        }
         authCaptainPlayer = playerName; authCaptainPinHash = pinHash;
         authenticatedCaptains = respData.captains || [];
         renderAuthenticatedCaptainsView();
-      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
+      } catch (err) { 
+        alert("COMMUNICATION ERROR: " + err); 
+        btn.textContent = "DECRYPT CAPTAIN XP ROSTER"; btn.disabled = false;
+      }
     }
 
     function renderAuthenticatedCaptainsView() {
@@ -938,8 +951,7 @@
     function updateSettingsPinFields() {
       const select = document.getElementById('settings-player-select');
       if (!select) return;
-      const selectedPlayer = select.value;
-      const pRecord = getPlayerRecord(selectedPlayer);
+      const pRecord = getPlayerRecord(select.value);
       const oldPinContainer = document.getElementById('settings-old-pin-container');
       if (oldPinContainer) {
         oldPinContainer.style.display = (pRecord && pRecord.has_pin_set) ? 'block' : 'none';
@@ -951,10 +963,9 @@
       if (!select) return;
       const playerName = select.value;
       const pRecord = getPlayerRecord(playerName);
-      const isConfigured = pRecord && pRecord.has_pin_set;
 
       let oldPinHash = undefined;
-      if (isConfigured) {
+      if (pRecord && pRecord.has_pin_set) {
         const oldPinVal = document.getElementById('settings-old-pin').value;
         if (!oldPinVal || oldPinVal.trim() === '') {
           alert("AUTHENTICATION REQUIRED: Please enter your existing PIN.");
@@ -984,8 +995,7 @@
         
         if (respData.status === 'auth_failed') {
           alert("SECURITY ERROR: Existing PIN was incorrect.");
-          btn.textContent = "SAVE PLAYER PIN";
-          btn.disabled = false;
+          btn.textContent = "SAVE PLAYER PIN"; btn.disabled = false;
           return;
         }
         
@@ -994,8 +1004,7 @@
         fetchCampaignData();
       } catch (err) {
         alert("TRANSMISSION ERROR: " + err);
-        btn.textContent = "SAVE PLAYER PIN";
-        btn.disabled = false;
+        btn.textContent = "SAVE PLAYER PIN"; btn.disabled = false;
       }
     }
 
@@ -1045,22 +1054,6 @@
       showFleetSidebar(tf, sec);
     }
 
-    async function confirmRetreatExecution(taskForceId, rawPass) {
-      const select = document.getElementById(`retreat-dest-${taskForceId}`);
-      if (!select) return;
-      const gmHash = await hashPin(rawPass);
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: select.value, gmHash: gmHash, rawPass: rawPass })
-        });
-        alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${select.value}.`);
-        closeSidebar();
-        setTimeout(fetchCampaignData, 1200);
-      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
-    }
-
     function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
       if (pass === null || pass.trim() === '') return;
@@ -1091,6 +1084,22 @@
         <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}', '${pass.trim()}')">CONFIRM RETREAT VECTOR</button>
       `;
       container.appendChild(retreatBox);
+    }
+
+    async function confirmRetreatExecution(taskForceId, rawPass) {
+      const select = document.getElementById(`retreat-dest-${taskForceId}`);
+      if (!select) return;
+      const gmHash = await hashPin(rawPass);
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: select.value, gmHash: gmHash, rawPass: rawPass })
+        });
+        alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${select.value}.`);
+        closeSidebar();
+        setTimeout(fetchCampaignData, 1200);
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
     }
 
     async function destroyFleet(taskForceId) {
@@ -1192,8 +1201,33 @@
       const isPhase2 = currentPhase.includes("phase ii") && !currentPhase.includes("phase iii");
       const isPhase3 = currentPhase.includes("phase iii");
 
-      const assignedCap = (campaignData.captains || []).find(c => norm(c.player_name) === norm(fleet.player) && norm(c.task_force_id) === norm(fleet.task_force_id) && norm(c.status) !== 'kia' && norm(c.status) !== 'mia');
-      let captainBanner = `<div class="sidebar-field" style="border-left-color: var(--lcars-teal);"><div class="field-label">COMMANDING OFFICER</div><div class="field-value" style="color: var(--lcars-teal); font-size: 1.15rem;">${assignedCap ? `${assignedCap.captain_name} (SKILL ${assignedCap.current_skill || assignedCap.base_skill})` : 'NO OFFICER ASSIGNED'}</div></div>`;
+      let captainBanner = '';
+
+      // Only decrypt the captain banner if the user has authenticated as the owner of this fleet
+      if (authCaptainPlayer && norm(authCaptainPlayer) === norm(fleet.player)) {
+        const assignedCap = authenticatedCaptains.find(c => 
+          norm(c.task_force_id) === norm(fleet.task_force_id) && 
+          norm(c.status) !== 'kia' && norm(c.status) !== 'mia'
+        );
+        captainBanner = `
+          <div class="sidebar-field" style="border-left-color: var(--lcars-teal);">
+            <div class="field-label">COMMANDING OFFICER</div>
+            <div class="field-value" style="color: var(--lcars-teal); font-size: 1.15rem;">
+              ${assignedCap ? `${assignedCap.captain_name} (SKILL ${assignedCap.current_skill || assignedCap.base_skill})` : 'NO OFFICER ASSIGNED'}
+            </div>
+          </div>
+        `;
+      } else {
+        // Obscured for opponents and unauthenticated users to preserve Fog of War
+        captainBanner = `
+          <div class="sidebar-field" style="border-left-color: var(--lcars-slate);">
+            <div class="field-label">COMMANDING OFFICER</div>
+            <div class="field-value" style="color: var(--lcars-slate); font-size: 1rem; margin-top: 4px;">
+              <span style="background: #000; padding: 2px 6px; border: 1px solid var(--lcars-slate);">CLASSIFIED (FOG OF WAR)</span>
+            </div>
+          </div>
+        `;
+      }
 
       let ordersHtml = '';
       if (isPhase2) {
