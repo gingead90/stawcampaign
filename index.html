@@ -153,7 +153,7 @@
       overflow: hidden;
     }
 
-    /* Left LCARS Side Rail with 3 Dedicated Feature Tabs */
+    /* Left LCARS Side Rail */
     .lcars-side-rail {
       width: 60px;
       min-width: 60px;
@@ -382,8 +382,8 @@
     }
 
     #sidebar-panel {
-      width: 360px;
-      min-width: 360px;
+      width: 340px;
+      min-width: 340px;
       height: 100%;
       background: rgba(3, 7, 18, 0.96);
       backdrop-filter: blur(8px);
@@ -705,17 +705,6 @@
       border-radius: 3px;
     }
 
-    .btn-edit-perk {
-      background: transparent;
-      border: 1px solid var(--lcars-slate);
-      color: var(--lcars-blue);
-      font-size: 0.65rem;
-      padding: 1px 4px;
-      cursor: pointer;
-      border-radius: 2px;
-      margin-left: 4px;
-    }
-
     /* Fixed Landscape Blocker Overlay */
     #landscape-prompt {
       display: none;
@@ -803,9 +792,9 @@
       <!-- Left LCARS Side Rail with Officers, RP Treasury & Config -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
-        <button class="rail-btn rail-btn-captains" onclick="openCaptainsMenu()" title="Open Captains & Personnel Roster">
-          <span>CREW</span>
-          <span style="font-size: 0.58rem; color: #1e293b;">ROSTER</span>
+        <button class="rail-btn rail-btn-captains" onclick="openCaptainsMenu()" title="Open Captain XP Roster">
+          <span>CAPTAIN</span>
+          <span style="font-size: 0.58rem; color: #1e293b;">XP</span>
         </button>
         <button class="rail-btn rail-btn-rp" onclick="openRpLedgerMenu()" title="Open Confidential RP Treasury">
           <span>RP</span>
@@ -1141,10 +1130,12 @@
       }
     }
 
-    // --- CONFIDENTIAL PERSONNEL & CAPTAINS ROSTER (PIN PROTECTED) ---
+    // --- CONFIDENTIAL CAPTAIN XP ROSTER (PIN PROTECTED) ---
     let authCaptainPlayer = '';
     let authCaptainPinHash = '';
     let authenticatedCaptains = [];
+
+    const OFFICIAL_PERKS = ['NONE', 'Combat Drift', 'Evasive Instinct', 'Rapid Lock', 'Lead by Example'];
 
     function openCaptainsMenu() {
       const sidebar = document.getElementById('sidebar-panel');
@@ -1154,7 +1145,7 @@
 
       sidebar.style.borderColor = 'var(--lcars-teal)';
       header.style.background = 'var(--lcars-teal)';
-      title.textContent = "PERSONNEL & OFFICERS LOG";
+      title.textContent = "CAPTAIN XP ROSTER";
 
       const playerOptions = (campaignData.players || []).map(p => {
         return `<option value="${p.player_name}">${p.player_name}</option>`;
@@ -1162,8 +1153,8 @@
 
       content.innerHTML = `
         <div class="sidebar-notes" style="border-left-color: var(--lcars-teal); margin-bottom: 0.5rem;">
-          <div class="field-label" style="color: var(--lcars-teal); margin-bottom: 2px;">CONFIDENTIAL DOSSIER</div>
-          OFFICER FILES ARE SEALED PER COMMAND LEVEL PROTOCOL. ENTER SECURITY PIN TO ACCESS YOUR PERSONNEL ROSTER.
+          <div class="field-label" style="color: var(--lcars-teal); margin-bottom: 2px;">CAPTAIN XP PROTOCOL</div>
+          TRACK CAPTAIN SKILL RATINGS (LEVEL 1-9), ACCUMULATED XP, VETERAN PERKS, AND COMBAT CASUALTY STATUS.
         </div>
 
         <div class="order-box" style="border-color: var(--lcars-teal);">
@@ -1178,7 +1169,7 @@
           </div>
 
           <button id="btn-auth-captains" class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 0.5rem;" onclick="authenticateCaptainsRoster()">
-            DECRYPT PERSONNEL ROSTER
+            DECRYPT CAPTAIN XP ROSTER
           </button>
         </div>
 
@@ -1221,7 +1212,7 @@
 
         if (respData.status === 'auth_failed') {
           alert("SECURITY BREACH: Invalid PIN for " + playerName);
-          btn.textContent = "DECRYPT PERSONNEL ROSTER";
+          btn.textContent = "DECRYPT CAPTAIN XP ROSTER";
           btn.disabled = false;
           return;
         }
@@ -1233,7 +1224,7 @@
         renderAuthenticatedCaptainsView();
       } catch (err) {
         alert("COMMUNICATION ERROR: " + err);
-        btn.textContent = "DECRYPT PERSONNEL ROSTER";
+        btn.textContent = "DECRYPT CAPTAIN XP ROSTER";
         btn.disabled = false;
       }
     }
@@ -1253,7 +1244,7 @@
       if (authenticatedCaptains.length === 0) {
         cardsHtml = `
           <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 1rem;">
-            NO COMMISSIONED OFFICERS IN ROSTER. ENLIST YOUR FIRST CAPTAIN BELOW.
+            NO CAPTAINS IN ROSTER. ENLIST YOUR FIRST CAPTAIN BELOW.
           </div>
         `;
       } else {
@@ -1264,7 +1255,6 @@
           const cSkill = Number(c.current_skill) || bSkill;
           const xp = Number(c.xp) || 0;
           const vet = c.tier || 'Tier I (Line Captain)';
-          const perks = String(c.perks || 'NONE').trim();
           const miaTimer = Number(c.mia_timer) || 0;
           const statusText = isMia ? `MIA (${miaTimer} TURN${miaTimer!==1?'S':''})` : (isKia ? 'KIA' : 'ACTIVE');
           const isAssigned = !isKia && !isMia;
@@ -1273,6 +1263,14 @@
             <option value="RESERVE" ${norm(c.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>
             ${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(c.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}
           `;
+
+          // Parse existing perks array for the dual dropdowns
+          const currentPerksArr = String(c.perks || 'NONE').split(',').map(s => s.trim());
+          const p1Val = currentPerksArr[0] || 'NONE';
+          const p2Val = currentPerksArr[1] || 'NONE';
+          
+          const p1OptionsHtml = OFFICIAL_PERKS.map(p => `<option value="${p}" ${p1Val === p ? 'selected' : ''}>${p}</option>`).join('');
+          const p2OptionsHtml = OFFICIAL_PERKS.map(p => `<option value="${p}" ${p2Val === p ? 'selected' : ''}>${p}</option>`).join('');
 
           return `
             <div class="captain-card ${isKia ? 'kia' : ''} ${isMia ? 'mia' : ''}">
@@ -1290,13 +1288,23 @@
                 <span style="color: ${isKia ? 'var(--lcars-red)' : (isMia ? 'var(--lcars-orange)' : '#4ade80')};">${statusText}</span>
               </div>
               
-              <div style="font-size: 0.72rem; color: #cbd5e1; margin-top: 2px;">
-                PERKS: <span style="color: var(--lcars-blue);">${perks}</span>
-                <button class="btn-edit-perk" onclick="editCaptainPerks('${c.captain_id}', '${perks.replace(/'/g, "\\'")}')">[EDIT]</button>
+              <div style="font-size: 0.72rem; color: #cbd5e1; margin-top: 4px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px;">
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 1:</span>
+                  <select id="perk1-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 2px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">
+                    ${p1OptionsHtml}
+                  </select>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                  <span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 2:</span>
+                  <select id="perk2-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 2px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">
+                    ${p2OptionsHtml}
+                  </select>
+                </div>
               </div>
 
               <!-- Fleet Assignment -->
-              <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
+              <div style="display: flex; gap: 4px; align-items: center; margin-top: 6px;">
                 <select id="assign-select-${c.captain_id}" class="order-select" style="font-size: 0.82rem; padding: 2px 4px; border-color: var(--lcars-teal); color: #fff;" ${!isAssigned ? 'disabled' : ''}>
                   ${currentTfOptions}
                 </select>
@@ -1354,30 +1362,31 @@
       `;
     }
 
-    async function editCaptainPerks(captainId, currentPerks) {
-      const val = prompt(`EDIT VETERAN PERKS:\n(e.g., Combat Drift, Rapid Lock)`, currentPerks === 'NONE' ? '' : currentPerks);
-      if (val === null) return;
+    async function updateCaptainPerks(captainId) {
+      const p1 = document.getElementById(`perk1-${captainId}`).value;
+      const p2 = document.getElementById(`perk2-${captainId}`).value;
+      
+      let combined = [p1, p2].filter(p => p !== 'NONE').join(', ');
+      if (combined === '') combined = 'NONE';
       
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             action: 'modify_captain_stats',
             playerName: authCaptainPlayer,
             pinHash: authCaptainPinHash,
             captainId: captainId,
-            perks: val.trim()
+            perks: combined
           })
         });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
-          if (cap) cap.perks = val.trim();
-          renderAuthenticatedCaptainsView();
-        }
+        
+        const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+        if (cap) cap.perks = combined;
       } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
+        console.error("Transmission error:", err);
       }
     }
 
@@ -1428,7 +1437,6 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          // Re-fetch to guarantee sync with tier/skill math from backend
           const refRes = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1450,8 +1458,6 @@
       }
       const conf = confirm(promptMsg);
       if (!conf) return;
-      
-      // If GM override is requested, we can supply gmHash, but since we are logged in, player auth works
       await adjustCaptainStats(captainId, 0, newStatus);
     }
 
@@ -1819,6 +1825,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'set_pin', playerName: playerName, newPinHash: newPinHash })
         });
@@ -1855,6 +1862,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'submit_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash, destinationSectorId: destSector })
         });
@@ -1887,6 +1895,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'clear_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash })
         });
@@ -1951,6 +1960,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: retreatSec, gmHash: gmHash, rawPass: rawPass })
         });
@@ -1975,6 +1985,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
+          mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: rawPass })
         });
