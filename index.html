@@ -21,274 +21,72 @@
       --lcars-teal: #00aaaa;
       --lcars-panel: rgba(10, 14, 23, 0.9);
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      height: 100dvh;
-      overflow: hidden;
-      background-color: #030712;
-      color: #ffffff;
-      font-family: 'Antonio', -apple-system, sans-serif;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    #space-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    /* INITIAL LOGIN OVERLAY */
-    #site-login-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(3, 7, 18, 0.95);
-      backdrop-filter: blur(15px);
-      z-index: 9999999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .login-box {
-      background: rgba(10, 14, 23, 0.95);
-      border: 2px solid var(--lcars-orange);
-      padding: 2.5rem;
-      border-radius: 8px;
-      box-shadow: 0 0 30px rgba(255, 153, 0, 0.2);
-    }
-
-    #app-container {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      width: 100vw;
-      height: 100%;
-      height: 100dvh;
-      padding: 0.4rem 0.6rem 0.5rem 0.6rem;
-      gap: 0.35rem;
-      z-index: 10;
-    }
-
-    header {
-      width: 100%;
-      height: 42px;
-      min-height: 42px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      z-index: 50;
-    }
-
-    .lcars-elbow-top {
-      width: 100px;
-      height: 42px;
-      background: var(--lcars-orange);
-      border-top-left-radius: 21px;
-      border-bottom-left-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-right: 12px;
-      font-weight: 700;
-      font-size: 0.95rem;
-      color: #000;
-      flex-shrink: 0;
-      box-shadow: 0 0 14px rgba(255, 153, 0, 0.45);
-    }
-
-    .lcars-pill-bar {
-      flex: 1;
-      height: 42px;
-      background: var(--lcars-purple);
-      display: flex;
-      align-items: center;
-      padding: 0 0.85rem;
-      color: #000;
-      font-weight: 700;
-      font-size: 1.05rem;
-      letter-spacing: 1.5px;
-      overflow: hidden;
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      box-shadow: 0 0 14px rgba(204, 153, 204, 0.35);
-    }
-
+    html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background-color: #030712; color: #ffffff; font-family: 'Antonio', -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 1px; }
+    #space-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+    #site-login-overlay { position: fixed; inset: 0; background: rgba(3, 7, 18, 0.95); backdrop-filter: blur(15px); z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+    .login-box { background: rgba(10, 14, 23, 0.95); border: 2px solid var(--lcars-orange); padding: 2.5rem; border-radius: 8px; box-shadow: 0 0 30px rgba(255, 153, 0, 0.2); }
+    #app-container { position: relative; display: flex; flex-direction: column; width: 100vw; height: 100%; height: 100dvh; padding: 0.4rem 0.6rem 0.5rem 0.6rem; gap: 0.35rem; z-index: 10; }
+    header { width: 100%; height: 42px; min-height: 42px; display: flex; align-items: center; gap: 8px; z-index: 50; }
+    .lcars-elbow-top { width: 100px; height: 42px; background: var(--lcars-orange); border-top-left-radius: 21px; border-bottom-left-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 700; font-size: 0.95rem; color: #000; flex-shrink: 0; box-shadow: 0 0 14px rgba(255, 153, 0, 0.45); }
+    .lcars-pill-bar { flex: 1; height: 42px; background: var(--lcars-purple); display: flex; align-items: center; padding: 0 0.85rem; color: #000; font-weight: 700; font-size: 1.05rem; letter-spacing: 1.5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; box-shadow: 0 0 14px rgba(204, 153, 204, 0.35); }
     .header-actions { display: flex; gap: 6px; height: 42px; }
-
-    .lcars-btn {
-      height: 42px;
-      padding: 0 1rem;
-      font-family: 'Antonio', sans-serif;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      color: #000;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      transition: filter 0.15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
+    .lcars-btn { height: 42px; padding: 0 1rem; font-family: 'Antonio', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; border: none; color: #000; text-transform: uppercase; letter-spacing: 1px; transition: filter 0.15s ease; display: flex; align-items: center; justify-content: center; }
     .lcars-btn:hover { filter: brightness(1.25); }
     .btn-phase { background: var(--lcars-amber); border-radius: 0; box-shadow: 0 0 10px rgba(255, 170, 0, 0.35); }
     .btn-refresh { background: var(--lcars-blue); border-top-right-radius: 21px; border-bottom-right-radius: 21px; padding-right: 1.25rem; box-shadow: 0 0 10px rgba(153, 204, 255, 0.35); }
-
-    #theater-layout {
-      display: flex;
-      flex: 1;
-      width: 100%;
-      height: calc(100dvh - 54px);
-      gap: 0.4rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .lcars-side-rail {
-      width: 60px;
-      min-width: 60px;
-      height: 100%;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
+    #theater-layout { display: flex; flex: 1; width: 100%; height: calc(100dvh - 54px); gap: 0.4rem; position: relative; overflow: hidden; }
+    .lcars-side-rail { width: 60px; min-width: 60px; height: 100%; display: flex; flex-direction: column; gap: 5px; }
     .rail-block-top { height: 24px; background: var(--lcars-orange); border-bottom-left-radius: 12px; }
-    .rail-btn {
-      height: 48px; border: none; cursor: pointer; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; font-family: 'Antonio', sans-serif;
-      font-weight: 700; font-size: 0.72rem; color: #000; letter-spacing: 0.5px; padding: 2px;
-      transition: filter 0.15s ease;
-    }
+    .rail-btn { height: 48px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Antonio', sans-serif; font-weight: 700; font-size: 0.72rem; color: #000; letter-spacing: 0.5px; padding: 2px; transition: filter 0.15s ease; }
     .rail-btn:hover { filter: brightness(1.3); }
     .rail-btn-captains { background: var(--lcars-teal); }
     .rail-btn-rp { background: var(--lcars-gold); }
     .rail-btn-settings { background: var(--lcars-blue); }
     .rail-block-mid { flex: 1; background: var(--lcars-purple); opacity: 0.85; }
     .rail-block-bottom { height: 44px; background: var(--lcars-amber); border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
-
-    #map-wrapper {
-      position: relative;
-      flex: 1;
-      height: 100%;
-      background: rgba(3, 7, 18, 0.6);
-      backdrop-filter: blur(4px);
-      border: 2px solid rgba(85, 102, 119, 0.65);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      user-select: none;
-      touch-action: none;
-      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.95), 0 0 24px rgba(15, 23, 42, 0.8);
-    }
-
-    #stage-container {
-      position: relative;
-      width: auto;
-      height: 100%;
-      max-width: 100%;
-      max-height: 100%;
-      aspect-ratio: 2 / 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transform-origin: center center;
-      will-change: transform;
-      cursor: grab;
-    }
+    #map-wrapper { position: relative; flex: 1; height: 100%; background: rgba(3, 7, 18, 0.6); backdrop-filter: blur(4px); border: 2px solid rgba(85, 102, 119, 0.65); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; user-select: none; touch-action: none; box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.95), 0 0 24px rgba(15, 23, 42, 0.8); }
+    #stage-container { position: relative; width: auto; height: 100%; max-width: 100%; max-height: 100%; aspect-ratio: 2 / 1; display: flex; align-items: center; justify-content: center; transform-origin: center center; will-change: transform; cursor: grab; }
     #stage-container:active { cursor: grabbing; }
-
-    #campaign-map {
-      display: block;
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.95));
-      pointer-events: none;
-    }
-
+    #campaign-map { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.95)); pointer-events: none; }
     #overlay-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
-
     .map-controls { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 6px; z-index: 35; pointer-events: auto; }
-    .map-ctrl-btn {
-      width: 34px; height: 34px; background: rgba(15, 23, 42, 0.88); border: 1.5px solid var(--lcars-amber);
-      color: var(--lcars-amber); font-family: 'Antonio', sans-serif; font-size: 1.1rem; font-weight: 700;
-      border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer;
-      backdrop-filter: blur(4px); box-shadow: 0 0 10px rgba(0, 0, 0, 0.7); transition: all 0.15s ease;
-    }
+    .map-ctrl-btn { width: 34px; height: 34px; background: rgba(15, 23, 42, 0.88); border: 1.5px solid var(--lcars-amber); color: var(--lcars-amber); font-family: 'Antonio', sans-serif; font-size: 1.1rem; font-weight: 700; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); box-shadow: 0 0 10px rgba(0, 0, 0, 0.7); transition: all 0.15s ease; }
     .map-ctrl-btn:hover, .map-ctrl-btn:active { background: var(--lcars-amber); color: #000; }
     .map-ctrl-btn.btn-fit { width: 44px; font-size: 0.8rem; border-color: var(--lcars-blue); color: var(--lcars-blue); }
     .map-ctrl-btn.btn-fit:hover, .map-ctrl-btn.btn-fit:active { background: var(--lcars-blue); color: #000; }
-
-    .sector-number-badge {
-      position: absolute; transform: translate(-50%, -50%); pointer-events: auto; font-size: 13px; font-weight: 700;
-      line-height: 1; padding: 3px 6px; border-radius: 7px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.9), 0 0 5px currentColor;
-      border: 1.5px solid transparent; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; z-index: 10; letter-spacing: 0.5px;
-    }
+    .sector-number-badge { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; font-size: 13px; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 7px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.9), 0 0 5px currentColor; border: 1.5px solid transparent; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; z-index: 10; letter-spacing: 0.5px; }
     .sector-number-badge:hover { transform: translate(-50%, -50%) scale(1.3); filter: brightness(1.3); z-index: 25; }
-
-    .fleet-token-pill {
-      position: absolute; transform: translate(-50%, -50%); pointer-events: auto; display: inline-flex; align-items: center;
-      gap: 6px; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap;
-      cursor: pointer; box-shadow: 0 0 10px rgba(0, 0, 0, 0.95); transition: transform 0.15s ease; z-index: 15; letter-spacing: 1px;
-    }
+    .fleet-token-pill { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer; box-shadow: 0 0 10px rgba(0, 0, 0, 0.95); transition: transform 0.15s ease; z-index: 15; letter-spacing: 1px; }
     .fleet-token-pill:hover { transform: translate(-50%, -50%) scale(1.18); z-index: 30; filter: brightness(1.25); }
     .fleet-dot { width: 6px; height: 6px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 6px #ffffff; }
     .fleet-locked-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; margin-left: 2px; }
-
-    #sidebar-panel {
-      width: 340px; min-width: 340px; height: 100%; background: rgba(3, 7, 18, 0.96); backdrop-filter: blur(8px);
-      border: 2px solid var(--lcars-orange); border-radius: 0 16px 16px 0; display: flex; flex-direction: column;
-      overflow-y: auto; padding: 0.85rem; gap: 0.5rem; box-shadow: 0 0 25px rgba(0, 0, 0, 0.95); transition: border-color 0.25s ease;
-    }
+    #sidebar-panel { width: 340px; min-width: 340px; height: 100%; background: rgba(3, 7, 18, 0.96); backdrop-filter: blur(8px); border: 2px solid var(--lcars-orange); border-radius: 0 16px 16px 0; display: flex; flex-direction: column; overflow-y: auto; padding: 0.85rem; gap: 0.5rem; box-shadow: 0 0 25px rgba(0, 0, 0, 0.95); transition: border-color 0.25s ease; }
     #sidebar-panel.hidden { display: none; }
-
     .sidebar-header { display: flex; justify-content: space-between; align-items: center; background: var(--lcars-orange); color: #000; padding: 4px 10px; border-radius: 4px; font-weight: 700; transition: background 0.25s ease; }
     .sidebar-title { font-size: 1.1rem; letter-spacing: 1.5px; }
     .close-btn { background: none; border: none; color: #000; font-size: 1.4rem; font-weight: 700; cursor: pointer; line-height: 1; font-family: 'Antonio', sans-serif; }
-
     .sidebar-field-grid { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
     .sidebar-field { background: var(--lcars-panel); padding: 0.45rem 0.65rem; border-left: 5px solid var(--lcars-purple); border-radius: 0 4px 4px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: border-left-color 0.25s ease; }
     .field-label { font-size: 0.72rem; color: var(--lcars-amber); font-weight: 700; letter-spacing: 1px; }
     .field-value { font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-top: 1px; }
-
     .sidebar-notes { background: var(--lcars-panel); padding: 0.65rem; border-left: 5px solid var(--lcars-gold); border-radius: 0 4px 4px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.9rem; color: #e2e8f0; line-height: 1.35; transition: border-left-color 0.25s ease; }
-    
     .order-box { margin-top: 0.5rem; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--lcars-amber); border-radius: 4px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .order-classified-box { background: #022c22; border: 1px solid #22c55e; border-radius: 4px; padding: 0.75rem; text-align: center; display: flex; flex-direction: column; gap: 0.35rem; }
     .order-classified-title { font-size: 0.95rem; font-weight: 700; color: #4ade80; letter-spacing: 1px; }
     .order-classified-text { font-size: 0.78rem; color: #86efac; letter-spacing: 0.5px; }
-
     .order-select { width: 100%; background: #000; color: #ffaa00; border: 1px solid #ff9900; padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 0.95rem; border-radius: 4px; text-transform: uppercase; }
     .order-input { width: 100%; background: #000; color: #ffffff; border: 1px solid var(--lcars-slate); padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 1rem; border-radius: 4px; letter-spacing: 2px; }
     .order-input:focus { outline: none; border-color: var(--lcars-gold); }
-
     .btn-submit-order { background: var(--lcars-gold); color: #000; border: none; padding: 0.5rem; font-family: 'Antonio', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; border-radius: 4px; letter-spacing: 1px; transition: filter 0.15s ease; }
     .btn-submit-order:hover:not(:disabled) { filter: brightness(1.2); }
     .btn-submit-order:disabled { opacity: 0.5; cursor: not-allowed; }
-
     .btn-modify-order { background: #334155; color: #cbd5e1; border: 1px solid #475569; padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; border-radius: 4px; letter-spacing: 1px; transition: background 0.15s ease; }
     .btn-modify-order:hover { background: #475569; color: #ffffff; }
-
     .combat-action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 0.5rem; }
     .btn-combat-retreat { background: var(--lcars-blue); color: #000; border: none; padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
     .btn-combat-destroy { background: var(--lcars-dark-red); color: #fff; border: 1px solid var(--lcars-red); padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
-
+    
     /* FULL-SCREEN MODAL FOR CAPTAINS */
     .full-screen-modal { position: fixed; inset: 0; background: rgba(3, 7, 18, 0.97); backdrop-filter: blur(12px); z-index: 80; display: flex; flex-direction: column; padding: 0.6rem; gap: 0.5rem; }
     .full-screen-modal.hidden { display: none !important; }
@@ -316,12 +114,10 @@
     .btn-status-kia { padding: 5px 10px; background: var(--lcars-dark-red); color: #fff; border: 1px solid var(--lcars-red); font-family: 'Antonio', sans-serif; font-size: 0.75rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
     .btn-status-mia { padding: 5px 10px; background: #b45309; color: #fff; border: 1px solid var(--lcars-orange); font-family: 'Antonio', sans-serif; font-size: 0.75rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
 
-    /* Fixed Landscape Blocker Overlay */
     #landscape-prompt { display: none; position: fixed; inset: 0; width: 100vw; height: 100dvh; background: rgba(3, 7, 18, 0.98); backdrop-filter: blur(8px); z-index: 9999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1.5rem; user-select: none; }
     #landscape-prompt svg { width: 64px; height: 64px; fill: var(--lcars-orange); margin-bottom: 1.25rem; animation: rotateDevice 2s infinite ease-in-out; }
     @keyframes rotateDevice { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
     @media (orientation: portrait), (max-aspect-ratio: 1/1) { #landscape-prompt { display: flex !important; } }
-
     @media screen and (max-width: 900px) {
       #sidebar-panel { position: absolute; right: 0; top: 0; bottom: 0; width: 320px; min-width: 320px; box-shadow: -8px 0 28px rgba(0,0,0,0.98); z-index: 45; }
       .lcars-side-rail { width: 50px; min-width: 50px; }
@@ -330,9 +126,7 @@
   </style>
 </head>
 <body>
-
   <canvas id="space-canvas"></canvas>
-
   <div id="landscape-prompt">
     <svg viewBox="0 0 24 24">
       <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
@@ -343,16 +137,13 @@
     </p>
   </div>
 
-  <!-- SITE ACCESS LOGIN OVERLAY -->
   <div id="site-login-overlay">
     <div class="login-box">
       <h2 style="color: var(--lcars-orange); font-size: 1.8rem; margin-bottom: 0.5rem;">LCARS TACTICAL MAINFRAME</h2>
       <p style="color: var(--lcars-blue); font-size: 1rem; letter-spacing: 2px;">AUTHORIZATION REQUIRED</p>
-      
       <div style="margin: 1.5rem 0;">
         <input type="password" id="site-pass-input" class="order-input" style="width: 250px; text-align: center; font-size: 1.5rem; letter-spacing: 5px;" placeholder="PASSCODE" onkeydown="if(event.key === 'Enter') submitSiteLogin()">
       </div>
-      
       <button id="btn-site-login" class="btn-submit-order" style="width: 250px; margin: 0 auto;" onclick="submitSiteLogin()">VERIFY ACCESS</button>
       <p id="site-login-error" style="color: var(--lcars-red); margin-top: 1rem; font-weight: 700; display: none;">ACCESS DENIED</p>
     </div>
@@ -367,9 +158,7 @@
         <button class="lcars-btn btn-refresh" onclick="fetchCampaignData()">SYNC</button>
       </div>
     </header>
-
     <div id="theater-layout">
-      <!-- Left LCARS Side Rail -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
         <button class="rail-btn rail-btn-captains" onclick="openCaptainsMenu()" title="Open Captain XP Roster">
@@ -387,20 +176,17 @@
         <div class="rail-block-mid"></div>
         <div class="rail-block-bottom"></div>
       </div>
-
       <div id="map-wrapper">
         <div id="stage-container">
           <img id="campaign-map" src="map.png" alt="LCARS Campaign Map">
           <div id="overlay-layer"></div>
         </div>
-
         <div class="map-controls">
           <button class="map-ctrl-btn" onclick="zoomIn()" title="Zoom In">+</button>
           <button class="map-ctrl-btn" onclick="zoomOut()" title="Zoom Out">&minus;</button>
           <button class="map-ctrl-btn btn-fit" onclick="resetMap()" title="Fit Map to Screen">FIT</button>
         </div>
       </div>
-
       <aside id="sidebar-panel" class="hidden">
         <div id="sidebar-header" class="sidebar-header">
           <span id="sidebar-title" class="sidebar-title">TACTICAL DOSSIER</span>
@@ -411,7 +197,6 @@
     </div>
   </div>
 
-  <!-- FULL SCREEN CAPTAINS MODAL -->
   <div id="captains-modal" class="full-screen-modal hidden">
     <div class="modal-header">
       <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-teal);">CAPTAIN XP</div>
@@ -427,28 +212,17 @@
       const ctx = canvas.getContext('2d');
       function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; draw(); }
       function draw() {
-        ctx.fillStyle = '#020617';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#020617'; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const g1 = ctx.createRadialGradient(canvas.width * 0.2, canvas.height * 0.3, 10, canvas.width * 0.2, canvas.height * 0.3, canvas.width * 0.45);
-        g1.addColorStop(0, 'rgba(30, 58, 138, 0.4)');
-        g1.addColorStop(1, 'transparent');
-        ctx.fillStyle = g1;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        g1.addColorStop(0, 'rgba(30, 58, 138, 0.4)'); g1.addColorStop(1, 'transparent'); ctx.fillStyle = g1; ctx.fillRect(0, 0, canvas.width, canvas.height);
         const g2 = ctx.createRadialGradient(canvas.width * 0.8, canvas.height * 0.7, 10, canvas.width * 0.8, canvas.height * 0.7, canvas.width * 0.45);
-        g2.addColorStop(0, 'rgba(88, 28, 135, 0.35)');
-        g2.addColorStop(1, 'transparent');
-        ctx.fillStyle = g2;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        let seed = 42;
-        function random() { const x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
+        g2.addColorStop(0, 'rgba(88, 28, 135, 0.35)'); g2.addColorStop(1, 'transparent'); ctx.fillStyle = g2; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        let seed = 42; function random() { const x = Math.sin(seed++) * 10000; return x - Math.floor(x); }
         const numStars = Math.floor((canvas.width * canvas.height) / 2400);
         for (let i = 0; i < numStars; i++) {
-          const x = random() * canvas.width;
-          const y = random() * canvas.height;
-          const radius = random() * 1.5;
-          const alpha = 0.3 + random() * 0.7;
-          ctx.beginPath();
-          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          const x = random() * canvas.width; const y = random() * canvas.height;
+          const radius = random() * 1.5; const alpha = 0.3 + random() * 0.7;
+          ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2);
           ctx.fillStyle = (i % 7 === 0) ? `rgba(153, 204, 255, ${alpha})` : `rgba(255, 255, 255, ${alpha})`;
           ctx.fill();
         }
@@ -458,27 +232,19 @@
     })();
 
     const API_URL = "https://script.google.com/macros/s/AKfycby908UFG7N8UXnPCoswOY1HHMTv5n-D4Q10LSJO8zJYXJFH1f1XNR0w1tTteMRrB39QOA/exec";
-
-    const PHASES = [
-      "Phase I: Resource Gathering",
-      "Phase II: The Operations Order",
-      "Phase III: Tactical Resolution",
-      "Phase IV: Attrition, Repairs & Expansion"
-    ];
-
+    const PHASES = ["Phase I: Resource Gathering", "Phase II: The Operations Order", "Phase III: Tactical Resolution", "Phase IV: Attrition, Repairs & Expansion"];
+    
     let campaignData = null;
     const unlockedForEdit = {};
-
     let sessionSiteHash = sessionStorage.getItem('lcars_site_hash') || '';
     let sessionSiteRaw = sessionStorage.getItem('lcars_site_raw') || '';
 
     function norm(str) { return String(str || '').trim().toLowerCase(); }
-
+    
     function enforceOrientation() {
       const promptEl = document.getElementById('landscape-prompt');
       if (!promptEl) return;
-      const isPortrait = window.innerHeight > window.innerWidth;
-      if (isPortrait) promptEl.style.setProperty('display', 'flex', 'important');
+      if (window.innerHeight > window.innerWidth) promptEl.style.setProperty('display', 'flex', 'important');
       else promptEl.style.display = 'none';
     }
     window.addEventListener('resize', enforceOrientation);
@@ -492,35 +258,23 @@
       return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Site Authentication Engine
     window.addEventListener('DOMContentLoaded', () => {
-      if (sessionSiteHash || sessionSiteRaw) {
-        fetchCampaignData();
-      }
+      if (sessionSiteHash || sessionSiteRaw) fetchCampaignData();
     });
 
     async function submitSiteLogin() {
-      const inputEl = document.getElementById('site-pass-input');
-      const errEl = document.getElementById('site-login-error');
-      const btn = document.getElementById('btn-site-login');
-      const raw = inputEl.value;
-
+      const raw = document.getElementById('site-pass-input').value;
       if (!raw) return;
-      
-      btn.textContent = "VERIFYING...";
-      btn.disabled = true;
-      errEl.style.display = 'none';
-
+      const btn = document.getElementById('btn-site-login');
+      btn.textContent = "VERIFYING..."; btn.disabled = true;
+      document.getElementById('site-login-error').style.display = 'none';
       const hash = await hashPin(raw);
-      sessionSiteRaw = raw;
-      sessionSiteHash = hash;
-      
+      sessionSiteRaw = raw; sessionSiteHash = hash;
       await fetchCampaignData();
     }
 
     async function fetchCampaignData() {
       if (!sessionSiteHash && !sessionSiteRaw) return;
-
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -534,10 +288,8 @@
           document.getElementById('site-login-overlay').style.display = 'flex';
           const btn = document.getElementById('btn-site-login');
           if (btn) { btn.textContent = "VERIFY ACCESS"; btn.disabled = false; }
-          sessionStorage.removeItem('lcars_site_hash');
-          sessionStorage.removeItem('lcars_site_raw');
-          sessionSiteHash = '';
-          sessionSiteRaw = '';
+          sessionStorage.removeItem('lcars_site_hash'); sessionStorage.removeItem('lcars_site_raw');
+          sessionSiteHash = ''; sessionSiteRaw = '';
           return;
         }
 
@@ -545,7 +297,6 @@
           sessionStorage.setItem('lcars_site_hash', sessionSiteHash);
           sessionStorage.setItem('lcars_site_raw', sessionSiteRaw);
           document.getElementById('site-login-overlay').style.display = 'none';
-          
           campaignData = data;
           renderHeader();
           renderMap();
@@ -577,8 +328,7 @@
       if (!val) return 'NONE';
       const str = String(val).trim();
       if (str.includes('T') && str.includes('-') && !isNaN(Date.parse(str))) {
-        const d = new Date(str);
-        return `SEC ${String(d.getDate()).padStart(2, '0')}, SEC ${String(d.getMonth() + 1).padStart(2, '0')}`;
+        const d = new Date(str); return `SEC ${String(d.getDate()).padStart(2, '0')}, SEC ${String(d.getMonth() + 1).padStart(2, '0')}`;
       }
       return str.replace(/-/g, ', ').replace(/SEC\s*/gi, 'SEC ');
     }
@@ -588,11 +338,9 @@
       if (!targetSec) return [];
       let rawLanes = String(targetSec.connected_lanes || '').trim();
       if (rawLanes.includes('T') && rawLanes.includes('-') && !isNaN(Date.parse(rawLanes))) {
-        const d = new Date(rawLanes);
-        return [String(d.getDate()).padStart(2, '0'), String(d.getMonth() + 1).padStart(2, '0')];
+        const d = new Date(rawLanes); return [String(d.getDate()).padStart(2, '0'), String(d.getMonth() + 1).padStart(2, '0')];
       }
-      const matches = rawLanes.match(/\b\d{1,2}\b/g) || [];
-      return matches.map(m => String(m).padStart(2, '0')).filter(id => id !== secId);
+      return (rawLanes.match(/\b\d{1,2}\b/g) || []).map(m => String(m).padStart(2, '0')).filter(id => id !== secId);
     }
 
     function calculateLegalDestinations(currentSec, controllingPlayer, sectors) {
@@ -603,17 +351,14 @@
 
       directNeighbors.forEach(nbrId => {
         const nbrObj = sectors.find(s => String(s.sector_id).padStart(2, '0') === nbrId);
-        const name = nbrObj ? (nbrObj.sector_name || `Sector ${nbrId}`) : `Sector ${nbrId}`;
-        destinations.push({ id: nbrId, dist: 1, label: `STANDARD TRANSIT: ${name} (${nbrId})` });
+        destinations.push({ id: nbrId, dist: 1, label: `STANDARD TRANSIT: ${nbrObj ? nbrObj.sector_name || `Sector ${nbrId}` : `Sector ${nbrId}`} (${nbrId})` });
       });
 
-      const startIsFriendly = (norm(currentSec.controller) === pNorm);
-      if (startIsFriendly) {
+      if (norm(currentSec.controller) === pNorm) {
         directNeighbors.forEach(step1Id => {
           const step1Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step1Id);
           if (step1Sec && norm(step1Sec.controller) === pNorm) {
-            const step2Neighbors = getSectorNeighbors(step1Id, sectors);
-            step2Neighbors.forEach(step2Id => {
+            getSectorNeighbors(step1Id, sectors).forEach(step2Id => {
               if (step2Id !== currentId && !directNeighbors.includes(step2Id) && !destinations.some(d => d.id === step2Id)) {
                 const step2Sec = sectors.find(s => String(s.sector_id).padStart(2, '0') === step2Id);
                 if (step2Sec && norm(step2Sec.controller) === pNorm) {
@@ -627,7 +372,6 @@
       return destinations;
     }
 
-    // Interactive Mobile Pan & Zoom Engine
     let scale = 1.0, panX = 0, panY = 0;
     const stageEl = document.getElementById('stage-container');
     const mapWrapperEl = document.getElementById('map-wrapper');
@@ -663,10 +407,7 @@
       } else if (isPinching && e.touches.length === 2) {
         e.preventDefault();
         const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-        if (pinchStartDist > 0) {
-          scale = Math.min(3.5, Math.max(0.65, pinchStartScale * (dist / pinchStartDist)));
-          applyMapTransform();
-        }
+        if (pinchStartDist > 0) { scale = Math.min(3.5, Math.max(0.65, pinchStartScale * (dist / pinchStartDist))); applyMapTransform(); }
       }
     }, { passive: false });
 
@@ -687,32 +428,25 @@
     });
     window.addEventListener('mousemove', (e) => {
       if (!isMouseDown) return;
-      panX = mouseStartPanX + (e.clientX - mouseStartX);
-      panY = mouseStartPanY + (e.clientY - mouseStartY);
+      panX = mouseStartPanX + (e.clientX - mouseStartX); panY = mouseStartPanY + (e.clientY - mouseStartY);
       applyMapTransform();
     });
     window.addEventListener('mouseup', () => { isMouseDown = false; });
     mapWrapperEl.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      scale = Math.min(3.5, Math.max(0.65, scale + (e.deltaY < 0 ? 0.15 : -0.15)));
-      applyMapTransform();
+      e.preventDefault(); scale = Math.min(3.5, Math.max(0.65, scale + (e.deltaY < 0 ? 0.15 : -0.15))); applyMapTransform();
     }, { passive: false });
 
     function renderHeader() {
-      const state = campaignData.campaignState || {};
-      const currentPhase = state['Current Phase'] || PHASES[0];
-      document.getElementById('phase-display').textContent = currentPhase;
+      document.getElementById('phase-display').textContent = (campaignData.campaignState || {})['Current Phase'] || PHASES[0];
     }
 
     async function advancePhase() {
       const state = campaignData.campaignState || {};
       const currentPhase = state['Current Phase'] || PHASES[0];
-      const isPhase3 = currentPhase.toLowerCase().includes("phase iii");
 
-      if (isPhase3) {
-        const fleets = campaignData.taskForces || [];
+      if (currentPhase.toLowerCase().includes("phase iii")) {
         const fleetsBySector = {};
-        fleets.forEach(f => {
+        (campaignData.taskForces || []).forEach(f => {
           const sId = String(f.sector_id).padStart(2, '0');
           if (!fleetsBySector[sId]) fleetsBySector[sId] = [];
           fleetsBySector[sId].push(f);
@@ -720,12 +454,10 @@
 
         const contestedSectors = [];
         for (const [sId, fleetList] of Object.entries(fleetsBySector)) {
-          const players = new Set(fleetList.map(f => norm(f.player)));
-          if (players.size > 1) {
+          if (new Set(fleetList.map(f => norm(f.player))).size > 1) {
             contestedSectors.push(`Sector ${sId}: ${fleetList.map(f => `${f.task_force_id} (${f.player})`).join(', ')}`);
           }
         }
-
         if (contestedSectors.length > 0) {
           alert("TACTICAL ALERT: COMBAT UNRESOLVED!\n\nRetreat or destroy defeated fleets before concluding Phase III:\n\n" + contestedSectors.join('\n'));
           return;
@@ -733,13 +465,12 @@
       }
 
       const entry = prompt("SECURITY OVERRIDE: Enter Command Passcode to cycle phase:");
-      if (entry === null || entry.trim() === '') return;
+      if (!entry || entry.trim() === '') return;
 
       const rawPass = entry.trim();
       const gmHash = await hashPin(rawPass);
       let nextIndex = PHASES.indexOf(currentPhase) + 1;
-      if (nextIndex >= PHASES.length || nextIndex === -1) nextIndex = 0;
-      const newPhase = PHASES[nextIndex];
+      const newPhase = PHASES[nextIndex >= PHASES.length || nextIndex === -1 ? 0 : nextIndex];
 
       const phaseBar = document.getElementById('phase-display');
       const originalText = phaseBar.textContent;
@@ -758,7 +489,6 @@
           phaseBar.textContent = originalText;
           return;
         }
-
         if (respData.status === 'success') {
           for (const k in unlockedForEdit) delete unlockedForEdit[k];
           state['Current Phase'] = newPhase;
@@ -774,21 +504,17 @@
       }
     }
 
-    // --- FULL SCREEN CAPTAIN XP ROSTER (PIN PROTECTED) ---
+    // --- FULL SCREEN CAPTAIN XP ROSTER ---
     let authCaptainPlayer = '';
     let authCaptainPinHash = '';
     let authenticatedCaptains = [];
-
     const OFFICIAL_PERKS = ['NONE', 'Combat Drift', 'Evasive Instinct', 'Rapid Lock', 'Lead by Example'];
 
     function openCaptainsMenu() {
-      closeSidebar(); // Ensure right sidebar is closed
+      closeSidebar();
       const modal = document.getElementById('captains-modal');
       const content = document.getElementById('captains-modal-content');
-
-      const playerOptions = (campaignData.players || []).map(p => {
-        return `<option value="${p.player_name}">${p.player_name}</option>`;
-      }).join('');
+      const playerOptions = (campaignData.players || []).map(p => `<option value="${p.player_name}">${p.player_name}</option>`).join('');
 
       content.innerHTML = `
         <div style="max-width: 450px; margin: 3rem auto;">
@@ -796,99 +522,59 @@
             <div class="field-label" style="color: var(--lcars-teal); margin-bottom: 2px;">CONFIDENTIAL DOSSIER</div>
             OFFICER FILES ARE SEALED PER COMMAND LEVEL PROTOCOL. ENTER SECURITY PIN TO ACCESS YOUR PERSONNEL ROSTER.
           </div>
-
           <div class="order-box" style="border-color: var(--lcars-teal); padding: 1.5rem;">
             <div class="field-label" style="color: var(--lcars-teal);">SELECT ALLEGIANCE</div>
             <select id="captain-auth-player" class="order-select" style="border-color: var(--lcars-teal); color: var(--lcars-teal); font-size: 1.1rem; padding: 0.75rem;">
               ${playerOptions}
             </select>
-
             <div style="margin-top: 1rem;">
               <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
               <input id="captain-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" style="font-size: 1.1rem; padding: 0.75rem;">
             </div>
-
-            <button id="btn-auth-captains" class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
+            <button class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
               DECRYPT CAPTAIN XP ROSTER
             </button>
           </div>
         </div>
       `;
-
       modal.classList.remove('hidden');
     }
 
-    function closeCaptainsMenu() {
-      document.getElementById('captains-modal').classList.add('hidden');
-    }
+    function closeCaptainsMenu() { document.getElementById('captains-modal').classList.add('hidden'); }
 
     async function authenticateCaptainsRoster() {
       const pSelect = document.getElementById('captain-auth-player');
       const pinInput = document.getElementById('captain-auth-pin');
-      const btn = document.getElementById('btn-auth-captains');
-
       if (!pSelect || !pinInput) return;
       const playerName = pSelect.value;
       const rawPin = pinInput.value;
 
-      if (!rawPin || rawPin.trim() === '') {
-        alert("INPUT REQUIRED: Enter your PIN.");
-        return;
-      }
-
-      btn.textContent = "AUTHENTICATING...";
-      btn.disabled = true;
+      if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
 
       const pinHash = await hashPin(rawPin);
-
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'get_captains',
-            playerName: playerName,
-            pinHash: pinHash
-          })
+          body: JSON.stringify({ action: 'get_captains', playerName: playerName, pinHash: pinHash })
         });
         const respData = await res.json();
-
-        if (respData.status === 'auth_failed') {
-          alert("SECURITY BREACH: Invalid PIN for " + playerName);
-          btn.textContent = "DECRYPT CAPTAIN XP ROSTER";
-          btn.disabled = false;
-          return;
-        }
-
-        authCaptainPlayer = playerName;
-        authCaptainPinHash = pinHash;
+        if (respData.status === 'auth_failed') { alert("SECURITY BREACH: Invalid PIN for " + playerName); return; }
+        authCaptainPlayer = playerName; authCaptainPinHash = pinHash;
         authenticatedCaptains = respData.captains || [];
-
         renderAuthenticatedCaptainsView();
-      } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
-        btn.textContent = "DECRYPT CAPTAIN XP ROSTER";
-        btn.disabled = false;
-      }
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
     }
 
     function renderAuthenticatedCaptainsView() {
       const content = document.getElementById('captains-modal-content');
       if (!content) return;
-
       const myFleets = (campaignData.taskForces || []).filter(f => norm(f.player) === norm(authCaptainPlayer));
-      const fleetOptions = `
-        <option value="RESERVE">RESERVE / UNASSIGNED</option>
-        ${myFleets.map(f => `<option value="${f.task_force_id}">${f.task_force_id}</option>`).join('')}
-      `;
+      const fleetOptions = `<option value="RESERVE">RESERVE / UNASSIGNED</option>${myFleets.map(f => `<option value="${f.task_force_id}">${f.task_force_id}</option>`).join('')}`;
 
       let cardsHtml = '';
       if (authenticatedCaptains.length === 0) {
-        cardsHtml = `
-          <div style="text-align: center; color: #94a3b8; font-size: 1rem; padding: 2rem; border: 1px dashed var(--lcars-slate); grid-column: 1 / -1; border-radius: 8px;">
-            NO COMMISSIONED OFFICERS IN ROSTER. ENLIST YOUR FIRST CAPTAIN BELOW.
-          </div>
-        `;
+        cardsHtml = `<div style="text-align: center; color: #94a3b8; font-size: 1rem; padding: 2rem; border: 1px dashed var(--lcars-slate); grid-column: 1 / -1; border-radius: 8px;">NO COMMISSIONED OFFICERS IN ROSTER. ENLIST YOUR FIRST CAPTAIN BELOW.</div>`;
       } else {
         cardsHtml = authenticatedCaptains.map(c => {
           const isKia = norm(c.status) === 'kia' || norm(c.status) === 'destroyed';
@@ -901,14 +587,9 @@
           const statusText = isMia ? `MIA (${miaTimer} TURN${miaTimer!==1?'S':''})` : (isKia ? 'KIA' : 'ACTIVE');
           const isAssigned = !isKia && !isMia;
 
-          const currentTfOptions = `
-            <option value="RESERVE" ${norm(c.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>
-            ${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(c.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}
-          `;
-
+          const currentTfOptions = `<option value="RESERVE" ${norm(c.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(c.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}`;
           const currentPerksArr = String(c.perks || 'NONE').split(',').map(s => s.trim());
-          const p1Val = currentPerksArr[0] || 'NONE';
-          const p2Val = currentPerksArr[1] || 'NONE';
+          const p1Val = currentPerksArr[0] || 'NONE', p2Val = currentPerksArr[1] || 'NONE';
           const p1OptionsHtml = OFFICIAL_PERKS.map(p => `<option value="${p}" ${p1Val === p ? 'selected' : ''}>${p}</option>`).join('');
           const p2OptionsHtml = OFFICIAL_PERKS.map(p => `<option value="${p}" ${p2Val === p ? 'selected' : ''}>${p}</option>`).join('');
 
@@ -919,30 +600,11 @@
           if (!isTier2 && !isTier3) {
             perkHtml = `<div style="grid-column: span 2; color: var(--lcars-slate); font-size: 0.75rem; text-align: center; padding: 4px; border: 1px dashed var(--lcars-slate); border-radius: 4px; margin-top: 4px;">PERKS LOCKED (REQUIRES TIER II)</div>`;
           } else {
-            perkHtml += `
-              <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 1:</span>
-                <select id="perk1-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 3px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">
-                  ${p1OptionsHtml}
-                </select>
-              </div>
-            `;
+            perkHtml += `<div style="display: flex; flex-direction: column;"><span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 1:</span><select id="perk1-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 3px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">${p1OptionsHtml}</select></div>`;
             if (isTier3) {
-              perkHtml += `
-                <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 2:</span>
-                  <select id="perk2-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 3px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">
-                    ${p2OptionsHtml}
-                  </select>
-                </div>
-              `;
+              perkHtml += `<div style="display: flex; flex-direction: column;"><span style="font-size: 0.65rem; color: var(--lcars-teal);">PERK 2:</span><select id="perk2-${c.captain_id}" class="order-select" style="font-size: 0.75rem; padding: 3px; border-color: var(--lcars-teal); color: #fff;" onchange="updateCaptainPerks('${c.captain_id}')">${p2OptionsHtml}</select></div>`;
             } else {
-              perkHtml += `
-                <div style="display: flex; flex-direction: column;">
-                  <span style="font-size: 0.65rem; color: var(--lcars-slate);">PERK 2:</span>
-                  <div style="font-size: 0.75rem; padding: 4px; color: var(--lcars-slate); border: 1px solid var(--lcars-slate); border-radius: 4px; text-align: center; background: rgba(0,0,0,0.5);">LOCKED (TIER III)</div>
-                </div>
-              `;
+              perkHtml += `<div style="display: flex; flex-direction: column;"><span style="font-size: 0.65rem; color: var(--lcars-slate);">PERK 2:</span><div style="font-size: 0.75rem; padding: 4px; color: var(--lcars-slate); border: 1px solid var(--lcars-slate); border-radius: 4px; text-align: center; background: rgba(0,0,0,0.5);">LOCKED (TIER III)</div></div>`;
             }
           }
 
@@ -956,34 +618,20 @@
                   <span class="badge-vet">${vet}</span>
                 </div>
               </div>
-
               <div class="captain-stats-row">
                 <span>XP: <strong style="color: var(--lcars-gold); font-size: 1.1rem;">${xp}</strong></span>
                 <span style="color: ${isKia ? 'var(--lcars-red)' : (isMia ? 'var(--lcars-orange)' : '#4ade80')}; font-weight: 700;">${statusText}</span>
               </div>
-              
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">
-                ${perkHtml}
-              </div>
-
-              <!-- Fleet Assignment -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px;">${perkHtml}</div>
               <div style="display: flex; gap: 6px; align-items: center; margin-top: 8px;">
-                <select id="assign-select-${c.captain_id}" class="order-select" style="font-size: 0.85rem; padding: 4px; border-color: var(--lcars-teal); color: #fff;" ${!isAssigned ? 'disabled' : ''}>
-                  ${currentTfOptions}
-                </select>
-                <button class="btn-xp-mod" style="flex: none; padding: 4px 12px; background: var(--lcars-teal); color: #000;" onclick="assignCaptainToFleet('${c.captain_id}')" ${!isAssigned ? 'disabled' : ''}>
-                  ASSIGN
-                </button>
+                <select id="assign-select-${c.captain_id}" class="order-select" style="font-size: 0.85rem; padding: 4px; border-color: var(--lcars-teal); color: #fff;" ${!isAssigned ? 'disabled' : ''}>${currentTfOptions}</select>
+                <button class="btn-xp-mod" style="flex: none; padding: 4px 12px; background: var(--lcars-teal); color: #000;" onclick="assignCaptainToFleet('${c.captain_id}')" ${!isAssigned ? 'disabled' : ''}>ASSIGN</button>
               </div>
-
-              <!-- XP & Status Actions -->
               <div class="captain-btn-row" style="margin-top: 8px;">
                 <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 1, null)">+1 XP</button>
                 <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 2, null)">+2 XP</button>
                 <button class="btn-status-mia" onclick="toggleCaptainStatus('${c.captain_id}', 'MIA')">MIA</button>
-                <button class="btn-status-kia" onclick="toggleCaptainStatus('${c.captain_id}', '${isKia ? 'ACTIVE' : 'KIA'}')">
-                  ${isKia ? 'REVIVE' : 'KIA'}
-                </button>
+                <button class="btn-status-kia" onclick="toggleCaptainStatus('${c.captain_id}', '${isKia ? 'ACTIVE' : 'KIA'}')">${isKia ? 'REVIVE' : 'KIA'}</button>
               </div>
             </div>
           `;
@@ -992,40 +640,21 @@
 
       content.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <div style="font-size: 1.25rem; color: var(--lcars-teal); font-weight: 700;">
-            COMMANDING OFFICERS: ${authCaptainPlayer.toUpperCase()}
-          </div>
+          <div style="font-size: 1.25rem; color: var(--lcars-teal); font-weight: 700;">COMMANDING OFFICERS: ${authCaptainPlayer.toUpperCase()}</div>
         </div>
-        
-        <div class="captains-grid">
-          ${cardsHtml}
-        </div>
-
+        <div class="captains-grid">${cardsHtml}</div>
         <div class="enlist-panel">
           <div class="field-label" style="color: var(--lcars-amber); font-size: 0.95rem; margin-bottom: 0.5rem;">ENLIST NEW OFFICER</div>
           <input id="enlist-cap-name" type="text" class="order-input" placeholder="CAPTAIN NAME (E.G. JEAN-LUC PICARD)">
-          
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
-            <div>
-              <div class="field-label">BASE SKILL (1-9)</div>
-              <input id="enlist-cap-skill" type="number" min="1" max="9" value="6" class="order-input">
-            </div>
-            <div>
-              <div class="field-label">STARTING XP</div>
-              <input id="enlist-cap-xp" type="number" min="0" value="0" class="order-input">
-            </div>
+            <div><div class="field-label">BASE SKILL (1-9)</div><input id="enlist-cap-skill" type="number" min="1" max="9" value="6" class="order-input"></div>
+            <div><div class="field-label">STARTING XP</div><input id="enlist-cap-xp" type="number" min="0" value="0" class="order-input"></div>
           </div>
-
           <div style="margin-top: 0.75rem;">
             <div class="field-label">INITIAL ASSIGNMENT</div>
-            <select id="enlist-cap-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">
-              ${fleetOptions}
-            </select>
+            <select id="enlist-cap-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">${fleetOptions}</select>
           </div>
-
-          <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 1rem; width: 100%;" onclick="executeEnlistCaptain()">
-            COMMISSION NEW OFFICER
-          </button>
+          <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 1rem; width: 100%;" onclick="executeEnlistCaptain()">COMMISSION NEW OFFICER</button>
         </div>
       `;
     }
@@ -1033,71 +662,38 @@
     async function updateCaptainPerks(captainId) {
       const p1El = document.getElementById(`perk1-${captainId}`);
       const p2El = document.getElementById(`perk2-${captainId}`);
-      
-      const p1 = p1El ? p1El.value : 'NONE';
-      const p2 = p2El ? p2El.value : 'NONE';
-      
-      let combined = [p1, p2].filter(p => p !== 'NONE').join(', ');
+      let combined = [p1El ? p1El.value : 'NONE', p2El ? p2El.value : 'NONE'].filter(p => p !== 'NONE').join(', ');
       if (combined === '') combined = 'NONE';
-      
       try {
         await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'modify_captain_stats',
-            playerName: authCaptainPlayer,
-            pinHash: authCaptainPinHash,
-            captainId: captainId,
-            perks: combined
-          })
+          body: JSON.stringify({ action: 'modify_captain_stats', playerName: authCaptainPlayer, pinHash: authCaptainPinHash, captainId: captainId, perks: combined })
         });
-        
-        const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
-        if (cap) cap.perks = combined;
-      } catch (err) {
-        console.error("Transmission error:", err);
-      }
+      } catch (err) { console.error("Transmission error:", err); }
     }
 
     async function assignCaptainToFleet(captainId) {
       const select = document.getElementById(`assign-select-${captainId}`);
       if (!select) return;
-      const targetFleet = select.value;
-
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'assign_captain_fleet',
-            playerName: authCaptainPlayer,
-            pinHash: authCaptainPinHash,
-            captainId: captainId,
-            taskForceId: targetFleet
-          })
+          body: JSON.stringify({ action: 'assign_captain_fleet', playerName: authCaptainPlayer, pinHash: authCaptainPinHash, captainId: captainId, taskForceId: select.value })
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
-          if (cap) cap.task_force_id = targetFleet;
           renderAuthenticatedCaptainsView();
           fetchCampaignData();
         }
-      } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
-      }
+      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
     }
 
     async function adjustCaptainStats(captainId, addedXp, newStatus) {
-      const payload = {
-        action: 'modify_captain_stats',
-        playerName: authCaptainPlayer,
-        pinHash: authCaptainPinHash,
-        captainId: captainId
-      };
-      if (addedXp !== null && addedXp !== 0) payload.addedXp = addedXp;
-      if (newStatus !== null) payload.status = newStatus;
+      const payload = { action: 'modify_captain_stats', playerName: authCaptainPlayer, pinHash: authCaptainPinHash, captainId: captainId };
+      if (addedXp) payload.addedXp = addedXp;
+      if (newStatus) payload.status = newStatus;
 
       try {
         const res = await fetch(API_URL, {
@@ -1107,25 +703,6 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
-          if (cap && addedXp !== 0) {
-            cap.xp = Math.max(0, (Number(cap.xp) || 0) + addedXp);
-            const xpVal = Number(cap.xp);
-            let bSkill = Number(cap.base_skill) || 1;
-            if (xpVal >= 25) { 
-              cap.tier = 'Tier III (Fleet Legend)'; 
-              cap.current_skill = bSkill + 2; 
-            } else if (xpVal >= 10) { 
-              cap.tier = 'Tier II (Veteran)'; 
-              cap.current_skill = bSkill + 1; 
-            } else { 
-              cap.tier = 'Tier I (Line Captain)'; 
-              cap.current_skill = bSkill; 
-            }
-          }
-          
-          renderAuthenticatedCaptainsView();
-          
           const refRes = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1135,56 +712,34 @@
           authenticatedCaptains = refData.captains || [];
           renderAuthenticatedCaptainsView();
         }
-      } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
-      }
+      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
     }
 
     async function toggleCaptainStatus(captainId, newStatus) {
       let promptMsg = `CONFIRMATION: Mark captain as ${newStatus}?`;
-      if (newStatus === 'MIA') {
-        promptMsg = `WARNING: Marking a captain MIA drops their unspent XP by 50%, recalculates their Tier, and puts them out of action for 2 turns.\n\nProceed?`;
-      }
-      const conf = confirm(promptMsg);
-      if (!conf) return;
+      if (newStatus === 'MIA') promptMsg = `WARNING: Marking MIA halves XP and sets a 2-turn cooldown.\n\nProceed?`;
+      if (!confirm(promptMsg)) return;
       await adjustCaptainStats(captainId, 0, newStatus);
     }
 
     async function executeEnlistCaptain() {
-      const nameInput = document.getElementById('enlist-cap-name');
-      const skillInput = document.getElementById('enlist-cap-skill');
-      const xpInput = document.getElementById('enlist-cap-xp');
-      const fleetSelect = document.getElementById('enlist-cap-fleet');
+      const name = document.getElementById('enlist-cap-name').value.trim();
+      const skill = Number(document.getElementById('enlist-cap-skill').value) || 1;
+      const xp = Number(document.getElementById('enlist-cap-xp').value) || 0;
+      const tf = document.getElementById('enlist-cap-fleet').value;
 
-      const name = nameInput.value.trim();
-      const skill = Number(skillInput.value) || 1;
-      const xp = Number(xpInput.value) || 0;
-      const tf = fleetSelect.value;
-
-      if (!name) {
-        alert("INPUT ERROR: Please provide a Captain name.");
-        return;
-      }
+      if (!name) { alert("INPUT ERROR: Please provide a Captain name."); return; }
 
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'add_captain',
-            playerName: authCaptainPlayer,
-            pinHash: authCaptainPinHash,
-            captainName: name,
-            baseSkill: skill,
-            initialXp: xp,
-            taskForceId: tf
-          })
+          body: JSON.stringify({ action: 'add_captain', playerName: authCaptainPlayer, pinHash: authCaptainPinHash, captainName: name, baseSkill: skill, initialXp: xp, taskForceId: tf })
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          nameInput.value = '';
-          alert(`COMMISSION REPORT: ${name} added to ${authCaptainPlayer}'s roster.`);
-          
+          document.getElementById('enlist-cap-name').value = '';
+          alert(`COMMISSION REPORT: ${name} added.`);
           const refRes = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1194,9 +749,7 @@
           authenticatedCaptains = refData.captains || [];
           renderAuthenticatedCaptainsView();
         }
-      } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
-      }
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
     }
 
     // --- RP LEDGER SYSTEM ---
@@ -1211,58 +764,33 @@
       header.style.background = 'var(--lcars-gold)';
       title.textContent = "RESOURCE POINT LEDGER";
 
-      const playerOptions = (campaignData.players || []).map(p => {
-        return `<option value="${p.player_name}">${p.player_name}</option>`;
-      }).join('');
+      const playerOptions = (campaignData.players || []).map(p => `<option value="${p.player_name}">${p.player_name}</option>`).join('');
 
       content.innerHTML = `
         <div class="sidebar-notes" style="border-left-color: var(--lcars-gold); margin-bottom: 0.5rem;">
           <div class="field-label" style="color: var(--lcars-gold); margin-bottom: 2px;">TREASURY PROTOCOL</div>
           RESOURCE POINTS ARE HARVESTED IN PHASE I ACCORDING TO CONTROLLED SECTORS. SPEND RP IN PHASE IV ON UPKEEP OR COMMISSIONING.
         </div>
-
         <div class="order-box" style="border-color: var(--lcars-gold);">
           <div class="field-label" style="color: var(--lcars-gold);">SELECT ALLEGIANCE</div>
-          <select id="rp-player-select" class="order-select" style="border-color: var(--lcars-gold); color: var(--lcars-gold);">
-            ${playerOptions}
-          </select>
-
+          <select id="rp-player-select" class="order-select" style="border-color: var(--lcars-gold); color: var(--lcars-gold);">${playerOptions}</select>
           <div style="margin-top: 0.35rem;">
             <div class="field-label" style="color: var(--lcars-amber);">SECRET PIN</div>
             <input id="rp-pin-input" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN">
           </div>
-
-          <button id="btn-auth-rp" class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">
-            AUTHENTICATE & VIEW LEDGER
-          </button>
+          <button class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">AUTHENTICATE & VIEW LEDGER</button>
         </div>
-
         <div id="rp-account-display" style="display: none; margin-top: 0.75rem;"></div>
       `;
-
       sidebar.classList.remove('hidden');
     }
 
     async function authenticateRpLedger() {
-      const select = document.getElementById('rp-player-select');
-      const pinInput = document.getElementById('rp-pin-input');
-      const btn = document.getElementById('btn-auth-rp');
-
-      if (!select || !pinInput) return;
-
-      const playerName = select.value;
-      const rawPin = pinInput.value;
-
-      if (!rawPin || rawPin.trim() === '') {
-        alert("INPUT REQUIRED: Enter your PIN.");
-        return;
-      }
-
-      btn.textContent = "DECRYPTING TREASURY...";
-      btn.disabled = true;
+      const playerName = document.getElementById('rp-player-select').value;
+      const rawPin = document.getElementById('rp-pin-input').value;
+      if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
 
       const pinHash = await hashPin(rawPin);
-
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -1270,20 +798,9 @@
           body: JSON.stringify({ action: 'get_rp', playerName: playerName, pinHash: pinHash })
         });
         const respData = await res.json();
-
-        if (respData.status === 'auth_failed') {
-          alert("SECURITY BREACH: Invalid PIN for " + playerName);
-          btn.textContent = "AUTHENTICATE & VIEW LEDGER";
-          btn.disabled = false;
-          return;
-        }
-
+        if (respData.status === 'auth_failed') { alert("SECURITY BREACH: Invalid PIN."); return; }
         renderRpAccountView(respData, pinHash);
-      } catch (err) {
-        alert("NETWORK ERROR: " + err);
-        btn.textContent = "AUTHENTICATE & VIEW LEDGER";
-        btn.disabled = false;
-      }
+      } catch (err) { alert("NETWORK ERROR: " + err); }
     }
 
     function renderRpAccountView(accData, pinHash) {
@@ -1292,57 +809,28 @@
 
       const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
       const isPhase4 = /\bphase iv\b/i.test(currentPhase);
-
       const ownedSectors = (campaignData.sectors || []).filter(s => norm(s.controller) === norm(accData.playerName));
-      const ownedSectorOptions = ownedSectors.map(s => {
-        const sId = String(s.sector_id).padStart(2, '0');
-        return `<option value="${sId}">SEC ${sId}: ${s.sector_name}</option>`;
-      }).join('');
+      const ownedSectorOptions = ownedSectors.map(s => `<option value="${String(s.sector_id).padStart(2, '0')}">SEC ${String(s.sector_id).padStart(2, '0')}: ${s.sector_name}</option>`).join('');
 
       let commissioningHtml = '';
       if (isPhase4) {
         commissioningHtml = `
           <div class="order-box" style="border-color: var(--lcars-blue); margin-top: 0.75rem;">
             <div class="field-label" style="color: var(--lcars-blue);">PHASE IV: COMMISSION NEW TASK FORCE</div>
-            
-            <div style="margin-top: 0.25rem;">
-              <div class="field-label" style="color: var(--lcars-amber);">TASK FORCE DESIGNATION</div>
-              <input id="new-tf-id" type="text" class="order-input" placeholder="E.G. TF-12 OR 3RD FLEET">
-            </div>
-
-            <div style="margin-top: 0.25rem;">
-              <div class="field-label" style="color: var(--lcars-amber);">DEPLOYMENT SHIPYARD (CONTROLLED SECTOR)</div>
-              <select id="new-tf-sector" class="order-select" style="border-color: var(--lcars-blue); color: #fff;">
-                ${ownedSectorOptions || '<option value="">NO CONTROLLED SECTORS AVAILABLE</option>'}
-              </select>
-            </div>
-
-            <div style="margin-top: 0.25rem;">
-              <div class="field-label" style="color: var(--lcars-amber);">CONSTRUCTION COST (RP)</div>
-              <input id="new-tf-cost" type="number" min="1" max="${accData.currentRp}" value="5" class="order-input">
-            </div>
-
-            <button id="btn-commission-tf" class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executeFleetCommission('${accData.playerName}', '${pinHash}')">
-              AUTHORIZE SHIPYARD CONSTRUCTION
-            </button>
+            <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">TASK FORCE DESIGNATION</div><input id="new-tf-id" type="text" class="order-input" placeholder="E.G. TF-12 OR 3RD FLEET"></div>
+            <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">DEPLOYMENT SHIPYARD (CONTROLLED SECTOR)</div><select id="new-tf-sector" class="order-select" style="border-color: var(--lcars-blue); color: #fff;">${ownedSectorOptions || '<option value="">NO CONTROLLED SECTORS AVAILABLE</option>'}</select></div>
+            <div style="margin-top: 0.25rem;"><div class="field-label" style="color: var(--lcars-amber);">CONSTRUCTION COST (RP)</div><input id="new-tf-cost" type="number" min="1" max="${accData.currentRp}" value="5" class="order-input"></div>
+            <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executeFleetCommission('${accData.playerName}', '${pinHash}')">AUTHORIZE SHIPYARD CONSTRUCTION</button>
           </div>
         `;
       }
 
       display.innerHTML = `
         <div class="sidebar-field-grid">
-          <div class="sidebar-field" style="border-left-color: var(--lcars-gold);">
-            <div class="field-label">CURRENT BALANCE</div>
-            <div class="field-value" style="color: #4ade80; font-size: 1.4rem;">${accData.currentRp} RP</div>
-          </div>
-          <div class="sidebar-field" style="border-left-color: var(--lcars-blue);">
-            <div class="field-label">ROUND HARVEST YIELD</div>
-            <div class="field-value">+${accData.roundYield} RP / ROUND</div>
-          </div>
+          <div class="sidebar-field" style="border-left-color: var(--lcars-gold);"><div class="field-label">CURRENT BALANCE</div><div class="field-value" style="color: #4ade80; font-size: 1.4rem;">${accData.currentRp} RP</div></div>
+          <div class="sidebar-field" style="border-left-color: var(--lcars-blue);"><div class="field-label">ROUND HARVEST YIELD</div><div class="field-value">+${accData.roundYield} RP / ROUND</div></div>
         </div>
-
         ${commissioningHtml}
-
         <div class="order-box" style="border-color: var(--lcars-amber); margin-top: 0.75rem;">
           <div class="field-label" style="color: var(--lcars-amber);">GENERAL EXPENDITURE (REPAIRS / UPKEEP)</div>
           <select id="spend-type-select" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">
@@ -1351,15 +839,8 @@
             <option value="Sector Fortification">SECTOR FORTIFICATION / EXPANSION</option>
             <option value="Custom">OTHER EXPENDITURE</option>
           </select>
-
-          <div style="margin-top: 0.35rem;">
-            <div class="field-label" style="color: var(--lcars-amber);">RP AMOUNT TO DEDUCT</div>
-            <input id="spend-amount-input" type="number" min="1" max="${accData.currentRp}" class="order-input" placeholder="ENTER RP AMOUNT">
-          </div>
-
-          <button id="btn-spend-rp" class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.5rem;" onclick="executeRpSpend('${accData.playerName}', '${pinHash}')">
-            TRANSMIT EXPENDITURE
-          </button>
+          <div style="margin-top: 0.35rem;"><div class="field-label" style="color: var(--lcars-amber);">RP AMOUNT TO DEDUCT</div><input id="spend-amount-input" type="number" min="1" max="${accData.currentRp}" class="order-input" placeholder="ENTER RP AMOUNT"></div>
+          <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.5rem;" onclick="executeRpSpend('${accData.playerName}', '${pinHash}')">TRANSMIT EXPENDITURE</button>
         </div>
       `;
     }
@@ -1369,17 +850,8 @@
       const sectorId = document.getElementById('new-tf-sector').value;
       const cost = Number(document.getElementById('new-tf-cost').value);
 
-      if (!tfId || !sectorId || !cost) {
-        alert("INPUT ERROR: Please check all required commissioning fields.");
-        return;
-      }
-
-      const conf = confirm(`CONFIRM COMMISSIONING: Deploy ${tfId} to Sector ${sectorId} for ${cost} RP?`);
-      if (!conf) return;
-
-      const btn = document.getElementById('btn-commission-tf');
-      btn.textContent = "COMMISSIONING VESSEL...";
-      btn.disabled = true;
+      if (!tfId || !sectorId || !cost) { alert("INPUT ERROR: Please check all required commissioning fields."); return; }
+      if (!confirm(`CONFIRM COMMISSIONING: Deploy ${tfId} to Sector ${sectorId} for ${cost} RP?`)) return;
 
       try {
         const res = await fetch(API_URL, {
@@ -1388,37 +860,19 @@
           body: JSON.stringify({ action: 'commission_fleet', playerName: playerName, pinHash: pinHash, taskForceId: tfId, sectorId: sectorId, cost: cost })
         });
         const respData = await res.json();
-        if (respData.status === 'insufficient_funds') {
-          alert("SHIPYARD HALT: Insufficient RP balance.");
-          btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION";
-          btn.disabled = false;
-          return;
-        }
+        if (respData.status === 'insufficient_funds') { alert("SHIPYARD HALT: Insufficient RP balance."); return; }
         alert(`SHIPYARD REPORT: ${tfId} successfully deployed.`);
         openRpLedgerMenu();
         fetchCampaignData();
-      } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
-        btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION";
-        btn.disabled = false;
-      }
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
     }
 
     async function executeRpSpend(playerName, pinHash) {
       const spendType = document.getElementById('spend-type-select').value;
       const amt = Number(document.getElementById('spend-amount-input').value);
 
-      if (!amt || amt <= 0) {
-        alert("INPUT ERROR: Please provide a valid expenditure amount.");
-        return;
-      }
-
-      const conf = confirm(`CONFIRMATION: Authorize payment of ${amt} RP for ${spendType}?`);
-      if (!conf) return;
-
-      const btn = document.getElementById('btn-spend-rp');
-      btn.textContent = "PROCESSING PAYMENT...";
-      btn.disabled = true;
+      if (!amt || amt <= 0) { alert("INPUT ERROR: Please provide a valid expenditure amount."); return; }
+      if (!confirm(`CONFIRMATION: Authorize payment of ${amt} RP for ${spendType}?`)) return;
 
       try {
         const res = await fetch(API_URL, {
@@ -1427,19 +881,10 @@
           body: JSON.stringify({ action: 'spend_rp', playerName: playerName, pinHash: pinHash, amount: amt, description: spendType })
         });
         const respData = await res.json();
-        if (respData.status === 'insufficient_funds') {
-          alert("TRANSACTION DECLINED: Insufficient RP balance.");
-          btn.textContent = "TRANSMIT EXPENDITURE";
-          btn.disabled = false;
-          return;
-        }
+        if (respData.status === 'insufficient_funds') { alert("TRANSACTION DECLINED: Insufficient RP balance."); return; }
         alert(`TRANSACTION APPROVED: Deducted ${amt} RP. Remaining: ${respData.newBalance} RP.`);
         openRpLedgerMenu();
-      } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
-        btn.textContent = "TRANSMIT EXPENDITURE";
-        btn.disabled = false;
-      }
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
     }
 
     // --- CONFIGURATION & SECURITY SUBMENU ---
@@ -1464,65 +909,89 @@
           <div class="field-label" style="color: var(--lcars-blue); margin-bottom: 2px;">SECURITY PROTOCOL</div>
           PASSCODES ARE ENCRYPTED BEFORE TRANSMISSION. ENTER NEW CODES BELOW TO UPDATE CREDENTIALS.
         </div>
-
         <div class="order-box" style="border-color: var(--lcars-blue);">
           <div class="field-label" style="color: var(--lcars-blue);">PLAYER PIN CONFIGURATION</div>
-          <select id="settings-player-select" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);">
+          <select id="settings-player-select" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);" onchange="updateSettingsPinFields()">
             ${playerOptions}
           </select>
-
+          <div id="settings-old-pin-container" style="display: none; margin-top: 0.35rem;">
+            <div class="field-label" style="color: var(--lcars-amber);">CURRENT PIN</div>
+            <input id="settings-old-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER CURRENT PIN">
+          </div>
           <div style="margin-top: 0.35rem;">
             <div class="field-label" style="color: var(--lcars-gold);">NEW SECRET PIN</div>
             <input id="settings-new-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER NEW PIN">
           </div>
-
           <div style="margin-top: 0.35rem;">
             <div class="field-label" style="color: var(--lcars-gold);">CONFIRM NEW PIN</div>
             <input id="settings-confirm-pin" type="password" maxlength="8" class="order-input" placeholder="RE-ENTER NEW PIN">
           </div>
-
           <button id="btn-save-pin" class="btn-submit-order" style="background: var(--lcars-blue); color: #000; margin-top: 0.5rem;" onclick="executePinUpdate()">
             SAVE PLAYER PIN
           </button>
         </div>
       `;
-
       sidebar.classList.remove('hidden');
+      updateSettingsPinFields();
+    }
+
+    function updateSettingsPinFields() {
+      const select = document.getElementById('settings-player-select');
+      if (!select) return;
+      const selectedPlayer = select.value;
+      const pRecord = getPlayerRecord(selectedPlayer);
+      const oldPinContainer = document.getElementById('settings-old-pin-container');
+      if (oldPinContainer) {
+        oldPinContainer.style.display = (pRecord && pRecord.has_pin_set) ? 'block' : 'none';
+      }
     }
 
     async function executePinUpdate() {
       const select = document.getElementById('settings-player-select');
       if (!select) return;
-
       const playerName = select.value;
+      const pRecord = getPlayerRecord(playerName);
+      const isConfigured = pRecord && pRecord.has_pin_set;
+
+      let oldPinHash = undefined;
+      if (isConfigured) {
+        const oldPinVal = document.getElementById('settings-old-pin').value;
+        if (!oldPinVal || oldPinVal.trim() === '') {
+          alert("AUTHENTICATION REQUIRED: Please enter your existing PIN.");
+          return;
+        }
+        oldPinHash = await hashPin(oldPinVal);
+      }
+
       const newPinVal = document.getElementById('settings-new-pin').value;
       const confirmPinVal = document.getElementById('settings-confirm-pin').value;
 
-      if (!newPinVal || newPinVal.trim() === '') {
-        alert("INPUT ERROR: Please provide a new PIN.");
-        return;
-      }
-      if (newPinVal !== confirmPinVal) {
-        alert("SECURITY MISMATCH: The new PIN confirmation does not match.");
-        return;
-      }
+      if (!newPinVal || newPinVal.trim() === '') { alert("INPUT ERROR: Please provide a new PIN."); return; }
+      if (newPinVal !== confirmPinVal) { alert("SECURITY MISMATCH: The new PIN confirmation does not match."); return; }
 
       const btn = document.getElementById('btn-save-pin');
-      btn.textContent = "ENCRYPTING & TRANSMITTING...";
-      btn.disabled = true;
+      btn.textContent = "ENCRYPTING & TRANSMITTING..."; btn.disabled = true;
 
       const newPinHash = await hashPin(newPinVal);
 
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'set_pin', playerName: playerName, newPinHash: newPinHash })
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'set_pin', playerName: playerName, oldPinHash: oldPinHash, newPinHash: newPinHash })
         });
-
+        const respData = await res.json();
+        
+        if (respData.status === 'auth_failed') {
+          alert("SECURITY ERROR: Existing PIN was incorrect.");
+          btn.textContent = "SAVE PLAYER PIN";
+          btn.disabled = false;
+          return;
+        }
+        
         alert(`SECURITY ENCRYPTED: PIN configured for ${playerName}.`);
         closeSidebar();
-        setTimeout(fetchCampaignData, 1200);
+        fetchCampaignData();
       } catch (err) {
         alert("TRANSMISSION ERROR: " + err);
         btn.textContent = "SAVE PLAYER PIN";
@@ -1532,42 +1001,26 @@
 
     async function submitSecretOrder(taskForceId, assignedPlayer) {
       const pRecord = getPlayerRecord(assignedPlayer);
-      if (!pRecord) {
-        alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined in the Players tab.`);
-        return;
-      }
+      if (!pRecord) { alert(`CONFIGURATION ERROR: Player "${assignedPlayer}" is not defined.`); return; }
 
       const enteredPin = prompt(`TACTICAL AUTHENTICATION: Enter secret PIN for ${assignedPlayer}:`);
       if (enteredPin === null || enteredPin.trim() === '') return;
       const pinHash = await hashPin(enteredPin);
-
-      const select = document.getElementById(`order-dest-${taskForceId}`);
-      if (!select) return;
-
-      const destSector = select.value;
-      const btn = document.getElementById(`btn-order-${taskForceId}`);
-      btn.textContent = "TRANSMITTING ENCRYPTED ORDER...";
-      btn.disabled = true;
+      const destSector = document.getElementById(`order-dest-${taskForceId}`).value;
 
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'submit_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash, destinationSectorId: destSector })
         });
-
         delete unlockedForEdit[taskForceId];
         const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
         if (tf) tf.has_pending_order = true;
-
         const sec = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === String(tf.sector_id).padStart(2, '0'));
         showFleetSidebar(tf, sec);
         renderMap();
-      } catch (err) {
-        alert("TRANSMISSION FAILURE: " + err);
-        btn.textContent = "TRANSMIT ENCRYPTED ORDERS";
-        btn.disabled = false;
-      }
+      } catch (err) { alert("TRANSMISSION FAILURE: " + err); }
     }
 
     async function unlockOrderModification(taskForceId, assignedPlayer) {
@@ -1578,47 +1031,53 @@
       unlockedForEdit[taskForceId] = true;
       const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
       if (tf) tf.has_pending_order = false;
-
       renderMap();
 
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'clear_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash })
         });
-      } catch (e) {
-        console.error("Failed to clear backend order", e);
-      }
+      } catch (e) { console.error("Failed to clear backend order", e); }
 
       const sec = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === String(tf.sector_id).padStart(2, '0'));
       showFleetSidebar(tf, sec);
     }
 
+    async function confirmRetreatExecution(taskForceId, rawPass) {
+      const select = document.getElementById(`retreat-dest-${taskForceId}`);
+      if (!select) return;
+      const gmHash = await hashPin(rawPass);
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: select.value, gmHash: gmHash, rawPass: rawPass })
+        });
+        alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${select.value}.`);
+        closeSidebar();
+        setTimeout(fetchCampaignData, 1200);
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
+    }
+
     function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize tactical retreat:");
       if (pass === null || pass.trim() === '') return;
-
       const pNorm = norm(assignedPlayer);
       const curId = String(rawSectorId).padStart(2, '0');
       const neighbors = getSectorNeighbors(curId, campaignData.sectors || []);
 
-      if (neighbors.length === 0) {
-        alert("TACTICAL ALERT: No connected hyperlanes found for Sector " + curId);
-        return;
-      }
+      if (neighbors.length === 0) { alert("TACTICAL ALERT: No connected hyperlanes found."); return; }
 
       const optionsHtml = neighbors.map(nId => {
         const sObj = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === nId);
-        const name = sObj ? (sObj.sector_name || `Sector ${nId}`) : `Sector ${nId}`;
-        const ctrl = sObj ? (sObj.controller || 'Neutral') : 'Unknown';
-        const isFriendly = (norm(ctrl) === pNorm);
-        return `<option value="${nId}">SEC ${nId}: ${name} [${ctrl.toUpperCase()}${isFriendly ? ' - FRIENDLY' : ''}]</option>`;
+        const isFriendly = (norm(sObj ? sObj.controller : '') === pNorm);
+        return `<option value="${nId}">SEC ${nId}: ${sObj ? sObj.sector_name : `Sector ${nId}`} [${isFriendly ? 'FRIENDLY' : 'UNKNOWN'}]</option>`;
       }).join('');
 
       const existingBox = document.getElementById(`retreat-box-${taskForceId}`);
       if (existingBox) existingBox.remove();
-
       const container = document.getElementById('sidebar-content');
       const retreatBox = document.createElement('div');
       retreatBox.id = `retreat-box-${taskForceId}`;
@@ -1628,70 +1087,36 @@
 
       retreatBox.innerHTML = `
         <div class="field-label" style="color: var(--lcars-blue);">AUTHORIZATION GRANTED // SELECT RETREAT VECTOR</div>
-        <select id="retreat-dest-${taskForceId}" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);">
-          ${optionsHtml}
-        </select>
-        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}', '${pass.trim()}')">
-          CONFIRM RETREAT VECTOR
-        </button>
+        <select id="retreat-dest-${taskForceId}" class="order-select" style="border-color: var(--lcars-blue); color: var(--lcars-blue);">${optionsHtml}</select>
+        <button class="btn-submit-order" style="background: var(--lcars-blue); color: #000;" onclick="confirmRetreatExecution('${taskForceId}', '${pass.trim()}')">CONFIRM RETREAT VECTOR</button>
       `;
-
       container.appendChild(retreatBox);
-    }
-
-    async function confirmRetreatExecution(taskForceId, rawPass) {
-      const select = document.getElementById(`retreat-dest-${taskForceId}`);
-      if (!select) return;
-      const retreatSec = select.value;
-      const gmHash = await hashPin(rawPass);
-
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: retreatSec, gmHash: gmHash, rawPass: rawPass })
-        });
-
-        alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${retreatSec}.`);
-        closeSidebar();
-        setTimeout(fetchCampaignData, 1200);
-      } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
-      }
     }
 
     async function destroyFleet(taskForceId) {
       const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to decommission/destroy fleet:");
       if (pass === null || pass.trim() === '') return;
-      const rawPass = pass.trim();
-      const gmHash = await hashPin(rawPass);
-
-      const conf = confirm(`RED ALERT: Confirm destruction and removal of ${taskForceId} from the campaign roster?`);
-      if (!conf) return;
-
+      if (!confirm(`RED ALERT: Confirm destruction of ${taskForceId}?`)) return;
+      const gmHash = await hashPin(pass.trim());
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: rawPass })
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: pass.trim() })
         });
-
         alert(`COMMAND LOG: ${taskForceId} decommissioned.`);
         closeSidebar();
         setTimeout(fetchCampaignData, 1200);
-      } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
-      }
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
     }
 
     function renderMap() {
       const layer = document.getElementById('overlay-layer');
       layer.innerHTML = '';
-
       const sectors = campaignData.sectors || [];
       const fleets = campaignData.taskForces || [];
-
       const fleetsBySector = {};
+
       fleets.forEach(fleet => {
         const secId = String(fleet.sector_id).padStart(2, '0');
         if (!fleetsBySector[secId]) fleetsBySector[secId] = [];
@@ -1700,70 +1125,36 @@
 
       sectors.forEach(sec => {
         const secId = String(sec.sector_id).padStart(2, '0');
-        let xPct = parseFloat(sec.x_pct);
-        let yPct = parseFloat(sec.y_pct);
-        
+        let xPct = parseFloat(sec.x_pct), yPct = parseFloat(sec.y_pct);
         if (secId === '01') xPct = 10.0;
         if (secId === '03') { xPct = 23.5; yPct = 60.0; }
 
         const theme = getPlayerColorTheme(sec.controller);
         const btn = document.createElement('div');
         btn.className = 'sector-number-badge';
-        btn.style.left = `${xPct}%`;
-        btn.style.top = `calc(${yPct}% - 12px)`;
-        btn.style.background = theme.bg;
-        btn.style.borderColor = theme.border;
-        btn.style.color = theme.text;
+        btn.style.left = `${xPct}%`; btn.style.top = `calc(${yPct}% - 12px)`;
+        btn.style.background = theme.bg; btn.style.borderColor = theme.border; btn.style.color = theme.text;
         btn.textContent = secId;
 
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          showSectorSidebar(sec);
-        });
-
+        btn.addEventListener('click', (e) => { e.stopPropagation(); showSectorSidebar(sec); });
         layer.appendChild(btn);
-      });
 
-      sectors.forEach(sec => {
-        const secId = String(sec.sector_id).padStart(2, '0');
         const stationFleets = fleetsBySector[secId] || [];
-
-        let xPct = parseFloat(sec.x_pct);
-        let yPct = parseFloat(sec.y_pct);
-        if (secId === '01') xPct = 10.0;
-        if (secId === '03') { xPct = 23.5; yPct = 60.0; }
-
-        const verticalStepPx = 22;
-
         stationFleets.forEach((fleet, idx) => {
           const el = document.createElement('div');
-          const verticalOffset = idx * verticalStepPx;
-
           el.className = 'fleet-token-pill';
           el.style.left = `${xPct}%`;
-          el.style.top = `calc(${yPct}% + 14px + ${verticalOffset}px)`;
+          el.style.top = `calc(${yPct}% + 14px + ${idx * 22}px)`;
 
           const fleetTheme = getPlayerColorTheme(fleet.player);
-          el.style.background = fleetTheme.bg;
-          el.style.borderColor = fleetTheme.border;
-          el.style.color = fleetTheme.text;
-          el.style.borderWidth = '1.5px';
-          el.style.borderStyle = 'solid';
+          el.style.background = fleetTheme.bg; el.style.borderColor = fleetTheme.border; el.style.color = fleetTheme.text;
+          el.style.borderWidth = '1.5px'; el.style.borderStyle = 'solid';
 
           const hasLockedOrders = Boolean(fleet.has_pending_order) && !unlockedForEdit[fleet.task_force_id];
-          const lockIndicator = hasLockedOrders ? `<span class="fleet-locked-indicator" title="Encrypted Orders On File"></span>` : '';
+          const lockIndicator = hasLockedOrders ? `<span class="fleet-locked-indicator"></span>` : '';
 
-          el.innerHTML = `
-            <span class="fleet-dot" style="background: ${fleetTheme.border};"></span>
-            <span>${fleet.task_force_id}</span>
-            ${lockIndicator}
-          `;
-
-          el.addEventListener('click', (e) => {
-            e.stopPropagation();
-            showFleetSidebar(fleet, sec);
-          });
-
+          el.innerHTML = `<span class="fleet-dot" style="background: ${fleetTheme.border};"></span><span>${fleet.task_force_id}</span>${lockIndicator}`;
+          el.addEventListener('click', (e) => { e.stopPropagation(); showFleetSidebar(fleet, sec); });
           layer.appendChild(el);
         });
       });
@@ -1771,41 +1162,19 @@
 
     function showSectorSidebar(sec) {
       const sidebar = document.getElementById('sidebar-panel');
-      const header = document.getElementById('sidebar-header');
       const secId = String(sec.sector_id).padStart(2, '0');
       const theme = getPlayerColorTheme(sec.controller);
 
       sidebar.style.borderColor = theme.border;
-      header.style.background = theme.border;
-
+      document.getElementById('sidebar-header').style.background = theme.border;
       document.getElementById('sidebar-title').textContent = `SECTOR ${secId} DOSSIER`;
 
       document.getElementById('sidebar-content').innerHTML = `
         <div class="sidebar-field-grid">
-          <div class="sidebar-field" style="border-left-color: ${theme.border};">
-            <div class="field-label">DESIGNATION</div>
-            <div class="field-value">${sec.sector_name}</div>
-          </div>
-          <div class="sidebar-field" style="border-left-color: ${theme.border};">
-            <div class="field-label">TACTICAL CONTROL</div>
-            <div class="field-value">${sec.controller || 'NEUTRAL SPACE'}</div>
-          </div>
-          <div class="sidebar-field" style="border-left-color: ${theme.border};">
-            <div class="field-label">STELLAR CLASSIFICATION</div>
-            <div class="field-value">${sec.classification || 'STANDARD'}</div>
-          </div>
-          <div class="sidebar-field" style="border-left-color: ${theme.border};">
-            <div class="field-label">RESOURCE HARVEST</div>
-            <div class="field-value">+${sec.rp_yield || '0'} RP / CYCLE</div>
-          </div>
-          <div class="sidebar-field" style="border-left-color: ${theme.border};">
-            <div class="field-label">CONNECTED HYPERLANES</div>
-            <div class="field-value">${formatLanes(sec.connected_lanes)}</div>
-          </div>
-        </div>
-        <div class="sidebar-notes" style="margin-top: 0.5rem; border-left-color: ${theme.border};">
-          <div class="field-label" style="color: ${theme.border}; margin-bottom: 2px;">TACTICAL ASSESSMENT</div>
-          ${sec.notes || 'NO SPECIAL ANOMALIES RECORDED.'}
+          <div class="sidebar-field" style="border-left-color: ${theme.border};"><div class="field-label">DESIGNATION</div><div class="field-value">${sec.sector_name}</div></div>
+          <div class="sidebar-field" style="border-left-color: ${theme.border};"><div class="field-label">TACTICAL CONTROL</div><div class="field-value">${sec.controller || 'NEUTRAL SPACE'}</div></div>
+          <div class="sidebar-field" style="border-left-color: ${theme.border};"><div class="field-label">STELLAR CLASSIFICATION</div><div class="field-value">${sec.classification || 'STANDARD'}</div></div>
+          <div class="sidebar-field" style="border-left-color: ${theme.border};"><div class="field-label">RESOURCE HARVEST</div><div class="field-value">+${sec.rp_yield || '0'} RP / CYCLE</div></div>
         </div>
       `;
       sidebar.classList.remove('hidden');
@@ -1813,99 +1182,35 @@
 
     function showFleetSidebar(fleet, sec) {
       const sidebar = document.getElementById('sidebar-panel');
-      const header = document.getElementById('sidebar-header');
       const fleetTheme = getPlayerColorTheme(fleet.player);
 
       sidebar.style.borderColor = fleetTheme.border;
-      header.style.background = fleetTheme.border;
-
+      document.getElementById('sidebar-header').style.background = fleetTheme.border;
       document.getElementById('sidebar-title').textContent = `${fleet.task_force_id} LOG`;
 
-      const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '');
-      const isPhase2 = /\bphase ii\b/i.test(currentPhase);
-      const isPhase3 = /\bphase iii\b/i.test(currentPhase);
+      const currentPhase = String((campaignData.campaignState || {})['Current Phase'] || '').toLowerCase();
+      const isPhase2 = currentPhase.includes("phase ii") && !currentPhase.includes("phase iii");
+      const isPhase3 = currentPhase.includes("phase iii");
 
-      const assignedCap = (campaignData.captains || []).find(c => 
-        norm(c.player_name) === norm(fleet.player) && 
-        norm(c.task_force_id) === norm(fleet.task_force_id) && 
-        norm(c.status) !== 'kia' && norm(c.status) !== 'mia'
-      );
-
-      let captainBanner = `
-        <div class="sidebar-field" style="border-left-color: var(--lcars-teal);">
-          <div class="field-label">COMMANDING OFFICER</div>
-          <div class="field-value" style="color: var(--lcars-teal); font-size: 1.15rem;">
-            ${assignedCap ? `${assignedCap.captain_name} (SKILL ${assignedCap.current_skill || assignedCap.base_skill})` : 'NO OFFICER ASSIGNED'}
-          </div>
-        </div>
-      `;
+      const assignedCap = (campaignData.captains || []).find(c => norm(c.player_name) === norm(fleet.player) && norm(c.task_force_id) === norm(fleet.task_force_id) && norm(c.status) !== 'kia' && norm(c.status) !== 'mia');
+      let captainBanner = `<div class="sidebar-field" style="border-left-color: var(--lcars-teal);"><div class="field-label">COMMANDING OFFICER</div><div class="field-value" style="color: var(--lcars-teal); font-size: 1.15rem;">${assignedCap ? `${assignedCap.captain_name} (SKILL ${assignedCap.current_skill || assignedCap.base_skill})` : 'NO OFFICER ASSIGNED'}</div></div>`;
 
       let ordersHtml = '';
-
       if (isPhase2) {
-        const controllingPlayer = fleet.player || '';
-        const isServerLocked = Boolean(fleet.has_pending_order);
-        const isSessionUnlocked = Boolean(unlockedForEdit[fleet.task_force_id]);
-
-        if (isServerLocked && !isSessionUnlocked) {
-          ordersHtml = `
-            <div class="order-box">
-              <div class="order-classified-box">
-                <div class="order-classified-title">&#128274; ORDERS TRANSMITTED & ENCRYPTED</div>
-                <div class="order-classified-text">DESTINATION SEALED UNDER FOG OF WAR</div>
-              </div>
-              <button class="btn-modify-order" onclick="unlockOrderModification('${fleet.task_force_id}', '${controllingPlayer}')">
-                CHANGE ORDERS (REQUIRES PIN)
-              </button>
-            </div>
-          `;
+        if (Boolean(fleet.has_pending_order) && !Boolean(unlockedForEdit[fleet.task_force_id])) {
+          ordersHtml = `<div class="order-box"><div class="order-classified-box"><div class="order-classified-title">&#128274; ORDERS TRANSMITTED</div></div><button class="btn-modify-order" onclick="unlockOrderModification('${fleet.task_force_id}', '${fleet.player || ''}')">CHANGE ORDERS (REQUIRES PIN)</button></div>`;
         } else {
-          const legalDestinations = calculateLegalDestinations(sec, controllingPlayer, campaignData.sectors);
-          const optionsHtml = legalDestinations.map(d => `<option value="${d.id}">${d.label}</option>`).join('');
-
-          ordersHtml = `
-            <div class="order-box">
-              <div class="field-label" style="color: var(--lcars-gold);">CONFIDENTIAL MOVEMENT DIRECTIVE</div>
-              <select id="order-dest-${fleet.task_force_id}" class="order-select">
-                ${optionsHtml}
-              </select>
-              <button id="btn-order-${fleet.task_force_id}" 
-                      class="btn-submit-order" 
-                      onclick="submitSecretOrder('${fleet.task_force_id}', '${controllingPlayer}')">
-                TRANSMIT ENCRYPTED ORDERS
-              </button>
-            </div>
-          `;
+          const optionsHtml = calculateLegalDestinations(sec, fleet.player || '', campaignData.sectors).map(d => `<option value="${d.id}">${d.label}</option>`).join('');
+          ordersHtml = `<div class="order-box"><div class="field-label" style="color: var(--lcars-gold);">CONFIDENTIAL MOVEMENT DIRECTIVE</div><select id="order-dest-${fleet.task_force_id}" class="order-select">${optionsHtml}</select><button class="btn-submit-order" onclick="submitSecretOrder('${fleet.task_force_id}', '${fleet.player || ''}')">TRANSMIT ENCRYPTED ORDERS</button></div>`;
         }
       }
 
-      let combatHtml = '';
-      if (isPhase3) {
-        combatHtml = `
-          <div class="order-box" style="border-color: var(--lcars-red);">
-            <div class="field-label" style="color: var(--lcars-red);">TACTICAL ENGAGEMENT STATUS</div>
-            <div class="combat-action-grid">
-              <button class="btn-combat-retreat" onclick="retreatFleet('${fleet.task_force_id}', '${fleet.player}', '${fleet.sector_id}')">
-                RETREAT FLEET
-              </button>
-              <button class="btn-combat-destroy" onclick="destroyFleet('${fleet.task_force_id}')">
-                DESTROY FLEET
-              </button>
-            </div>
-          </div>
-        `;
-      }
+      let combatHtml = isPhase3 ? `<div class="order-box" style="border-color: var(--lcars-red);"><div class="field-label" style="color: var(--lcars-red);">TACTICAL ENGAGEMENT STATUS</div><div class="combat-action-grid"><button class="btn-combat-retreat" onclick="retreatFleet('${fleet.task_force_id}', '${fleet.player}', '${fleet.sector_id}')">RETREAT FLEET</button><button class="btn-combat-destroy" onclick="destroyFleet('${fleet.task_force_id}')">DESTROY FLEET</button></div></div>` : '';
 
       document.getElementById('sidebar-content').innerHTML = `
         <div class="sidebar-field-grid">
-          <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
-            <div class="field-label">ALLEGIANCE</div>
-            <div class="field-value">${fleet.player || 'N/A'}</div>
-          </div>
-          <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};">
-            <div class="field-label">DEPLOYED SECTOR</div>
-            <div class="field-value">${sec.sector_name} (SEC ${String(sec.sector_id).padStart(2, '0')})</div>
-          </div>
+          <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};"><div class="field-label">ALLEGIANCE</div><div class="field-value">${fleet.player || 'N/A'}</div></div>
+          <div class="sidebar-field" style="border-left-color: ${fleetTheme.border};"><div class="field-label">DEPLOYED SECTOR</div><div class="field-value">${sec.sector_name} (SEC ${String(sec.sector_id).padStart(2, '0')})</div></div>
           ${captainBanner}
         </div>
         ${ordersHtml}
