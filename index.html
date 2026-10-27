@@ -533,7 +533,7 @@
       filter: brightness(1.2);
     }
 
-    /* Captain Cards & XP Meter */
+    /* Captain Cards & Stats */
     .captain-card {
       background: rgba(15, 23, 42, 0.9);
       border: 1px solid var(--lcars-slate);
@@ -563,8 +563,22 @@
       color: #ffffff;
     }
 
-    .captain-level-badge {
-      font-size: 0.85rem;
+    .captain-badges {
+      display: flex;
+      gap: 4px;
+    }
+
+    .badge-skill {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      background: var(--lcars-amber);
+      color: #000;
+      border-radius: 4px;
+    }
+
+    .badge-vet {
+      font-size: 0.8rem;
       font-weight: 700;
       padding: 2px 6px;
       background: var(--lcars-teal);
@@ -572,25 +586,21 @@
       border-radius: 4px;
     }
 
-    .xp-meter-track {
-      width: 100%;
-      height: 8px;
-      background: #1e293b;
-      border-radius: 4px;
-      overflow: hidden;
-      margin-top: 2px;
-    }
-
-    .xp-meter-fill {
-      height: 100%;
-      background: var(--lcars-gold);
-      transition: width 0.3s ease;
+    .captain-stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.75rem;
+      color: #94a3b8;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 4px 6px;
+      border-radius: 3px;
     }
 
     .captain-btn-row {
       display: flex;
       gap: 4px;
-      margin-top: 0.35rem;
+      margin-top: 0.25rem;
     }
 
     .btn-xp-mod {
@@ -600,7 +610,7 @@
       color: #ffffff;
       border: 1px solid #475569;
       font-family: 'Antonio', sans-serif;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
       border-radius: 3px;
@@ -808,8 +818,6 @@
       "Phase III: Tactical Resolution",
       "Phase IV: Attrition, Repairs & Expansion"
     ];
-
-    const XP_THRESHOLDS = [0, 5, 12, 20, 30, 42, 56, 72, 90];
 
     let campaignData = null;
     const unlockedForEdit = {};
@@ -1086,8 +1094,10 @@
       }
     }
 
-    // --- CAPTAINS & PERSONNEL ROSTER ENGINE ---
-    let selectedCaptainPlayer = '';
+    // --- CONFIDENTIAL PERSONNEL & CAPTAINS ROSTER (PIN PROTECTED) ---
+    let authCaptainPlayer = '';
+    let authCaptainPinHash = '';
+    let authenticatedCaptains = [];
 
     function openCaptainsMenu() {
       const sidebar = document.getElementById('sidebar-panel');
@@ -1097,130 +1107,308 @@
 
       sidebar.style.borderColor = 'var(--lcars-teal)';
       header.style.background = 'var(--lcars-teal)';
-      title.textContent = "PERSONNEL & CAPTAINS LOG";
+      title.textContent = "PERSONNEL & OFFICERS LOG";
 
-      const players = campaignData.players || [];
-      if (!selectedCaptainPlayer && players.length > 0) {
-        selectedCaptainPlayer = players[0].player_name;
-      }
-
-      const playerOptions = players.map(p => {
-        const isSel = norm(p.player_name) === norm(selectedCaptainPlayer) ? 'selected' : '';
-        return `<option value="${p.player_name}" ${isSel}>${p.player_name}</option>`;
+      const playerOptions = (campaignData.players || []).map(p => {
+        return `<option value="${p.player_name}">${p.player_name}</option>`;
       }).join('');
 
       content.innerHTML = `
         <div class="sidebar-notes" style="border-left-color: var(--lcars-teal); margin-bottom: 0.5rem;">
-          <div class="field-label" style="color: var(--lcars-teal); margin-bottom: 2px;">PERSONNEL PROTOCOL</div>
-          TRACK CAPTAIN SKILL RATINGS (LEVEL 1-9), ACCUMULATED XP, FLEET COMMISSIONS, AND COMBAT CASUALTY STATUS.
+          <div class="field-label" style="color: var(--lcars-teal); margin-bottom: 2px;">CONFIDENTIAL DOSSIER</div>
+          OFFICER FILES ARE SEALED PER COMMAND LEVEL PROTOCOL. ENTER SECURITY PIN TO ACCESS YOUR PERSONNEL ROSTER.
         </div>
 
         <div class="order-box" style="border-color: var(--lcars-teal);">
-          <div class="field-label" style="color: var(--lcars-teal);">FILTER FACTION ROSTER</div>
-          <select id="captain-player-filter" class="order-select" style="border-color: var(--lcars-teal); color: #fff;" onchange="changeCaptainFilter()">
+          <div class="field-label" style="color: var(--lcars-teal);">SELECT ALLEGIANCE</div>
+          <select id="captain-auth-player" class="order-select" style="border-color: var(--lcars-teal); color: var(--lcars-teal);">
             ${playerOptions}
           </select>
-        </div>
 
-        <div id="captains-list-container"></div>
-
-        <div class="order-box" style="border-color: var(--lcars-amber); margin-top: 0.75rem;">
-          <div class="field-label" style="color: var(--lcars-amber);">ENLIST NEW COMMANDING OFFICER</div>
-          <input id="new-captain-name" type="text" class="order-input" placeholder="CAPTAIN NAME (E.G. JEAN-LUC PICARD)">
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 0.25rem;">
-            <div>
-              <div class="field-label">INITIAL LEVEL (1-9)</div>
-              <input id="new-captain-level" type="number" min="1" max="9" value="1" class="order-input">
-            </div>
-            <div>
-              <div class="field-label">INITIAL XP</div>
-              <input id="new-captain-xp" type="number" min="0" value="0" class="order-input">
-            </div>
+          <div style="margin-top: 0.35rem;">
+            <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
+            <input id="captain-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN">
           </div>
 
-          <button class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 0.4rem;" onclick="enlistNewCaptain()">
-            COMMISSION OFFICER
+          <button id="btn-auth-captains" class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 0.5rem;" onclick="authenticateCaptainsRoster()">
+            DECRYPT PERSONNEL ROSTER
           </button>
         </div>
+
+        <div id="captains-authenticated-view" style="display: none; margin-top: 0.75rem;"></div>
       `;
 
       sidebar.classList.remove('hidden');
-      renderCaptainsList();
     }
 
-    function changeCaptainFilter() {
-      selectedCaptainPlayer = document.getElementById('captain-player-filter').value;
-      renderCaptainsList();
-    }
+    async function authenticateCaptainsRoster() {
+      const pSelect = document.getElementById('captain-auth-player');
+      const pinInput = document.getElementById('captain-auth-pin');
+      const btn = document.getElementById('btn-auth-captains');
 
-    function renderCaptainsList() {
-      const container = document.getElementById('captains-list-container');
-      if (!container) return;
+      if (!pSelect || !pinInput) return;
+      const playerName = pSelect.value;
+      const rawPin = pinInput.value;
 
-      const allCaptains = campaignData.captains || [];
-      const filtered = allCaptains.filter(c => norm(c.player_name) === norm(selectedCaptainPlayer));
-
-      if (filtered.length === 0) {
-        container.innerHTML = `
-          <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 1rem;">
-            NO ACTIVE OR REGISTERED OFFICERS FOUND FOR ${selectedCaptainPlayer.toUpperCase()}.
-          </div>
-        `;
+      if (!rawPin || rawPin.trim() === '') {
+        alert("INPUT REQUIRED: Enter your PIN.");
         return;
       }
 
-      container.innerHTML = filtered.map(c => {
-        const isKia = norm(c.status) === 'kia' || norm(c.status) === 'destroyed';
-        const xp = Number(c.xp) || 0;
-        const lvl = Number(c.level) || 1;
-        const curThreshold = XP_THRESHOLDS[lvl - 1] || 0;
-        const nextThreshold = XP_THRESHOLDS[lvl] || 90;
-        const progressPct = lvl >= 9 ? 100 : Math.min(100, Math.max(0, ((xp - curThreshold) / (nextThreshold - curThreshold)) * 100));
+      btn.textContent = "AUTHENTICATING...";
+      btn.disabled = true;
 
-        return `
-          <div class="captain-card ${isKia ? 'kia' : ''}">
-            <div class="captain-header">
-              <span class="captain-name">${c.captain_name}</span>
-              <span class="captain-level-badge">SKILL ${lvl}</span>
-            </div>
+      const pinHash = await hashPin(rawPin);
 
-            <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">
-              <span>ASSIGNMENT: ${c.task_force_id || 'RESERVE'}</span>
-              <span style="color: ${isKia ? 'var(--lcars-red)' : '#4ade80'};">${c.status || 'ACTIVE'}</span>
-            </div>
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'get_captains',
+            playerName: playerName,
+            pinHash: pinHash
+          })
+        });
+        const respData = await res.json();
 
-            <div style="margin-top: 4px;">
-              <div style="display: flex; justify-content: space-between; font-size: 0.68rem; color: var(--lcars-gold);">
-                <span>XP: ${xp}</span>
-                <span>${lvl >= 9 ? 'MAX SKILL' : `NEXT: ${nextThreshold} XP`}</span>
-              </div>
-              <div class="xp-meter-track">
-                <div class="xp-meter-fill" style="width: ${progressPct}%;"></div>
-              </div>
-            </div>
+        if (respData.status === 'auth_failed') {
+          alert("SECURITY BREACH: Invalid PIN for " + playerName);
+          btn.textContent = "DECRYPT PERSONNEL ROSTER";
+          btn.disabled = false;
+          return;
+        }
 
-            <div class="captain-btn-row">
-              <button class="btn-xp-mod" onclick="modifyCaptainXp('${c.captain_id}', 1)">+1 XP</button>
-              <button class="btn-xp-mod" onclick="modifyCaptainXp('${c.captain_id}', 2)">+2 XP</button>
-              <button class="btn-xp-mod" onclick="modifyCaptainXp('${c.captain_id}', 5)">+5 XP</button>
-              <button class="btn-status-kia" onclick="toggleCaptainStatus('${c.captain_id}', '${isKia ? 'ACTIVE' : 'KIA'}')">
-                ${isKia ? 'RESTORE' : 'KIA'}
-              </button>
-            </div>
-          </div>
-        `;
-      }).join('');
+        authCaptainPlayer = playerName;
+        authCaptainPinHash = pinHash;
+        authenticatedCaptains = respData.captains || [];
+
+        renderAuthenticatedCaptainsView();
+      } catch (err) {
+        alert("COMMUNICATION ERROR: " + err);
+        btn.textContent = "DECRYPT PERSONNEL ROSTER";
+        btn.disabled = false;
+      }
     }
 
-    async function enlistNewCaptain() {
-      const nameInput = document.getElementById('new-captain-name');
-      const levelInput = document.getElementById('new-captain-level');
-      const xpInput = document.getElementById('new-captain-xp');
+    function renderAuthenticatedCaptainsView() {
+      const container = document.getElementById('captains-authenticated-view');
+      if (!container) return;
+      container.style.display = 'block';
+
+      // Find player's active Task Forces for assignment dropdowns
+      const myFleets = (campaignData.taskForces || []).filter(f => norm(f.player) === norm(authCaptainPlayer));
+      const fleetOptions = `
+        <option value="RESERVE">RESERVE / UNASSIGNED</option>
+        ${myFleets.map(f => `<option value="${f.task_force_id}">${f.task_force_id}</option>`).join('')}
+      `;
+
+      let cardsHtml = '';
+      if (authenticatedCaptains.length === 0) {
+        cardsHtml = `
+          <div style="text-align: center; color: #94a3b8; font-size: 0.85rem; padding: 1rem;">
+            NO COMMISSIONED OFFICERS IN ROSTER. ENLIST YOUR FIRST CAPTAIN BELOW.
+          </div>
+        `;
+      } else {
+        cardsHtml = authenticatedCaptains.map(c => {
+          const isKia = norm(c.status) === 'kia' || norm(c.status) === 'destroyed';
+          const skill = Number(c.captain_skill) || 1;
+          const xp = Number(c.xp) || 0;
+          const vet = c.veteran_rank || 'Rookie';
+
+          const currentTfOptions = `
+            <option value="RESERVE" ${norm(c.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>
+            ${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(c.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}
+          `;
+
+          return `
+            <div class="captain-card ${isKia ? 'kia' : ''}">
+              <div class="captain-header">
+                <span class="captain-name">${c.captain_name}</span>
+                <div class="captain-badges">
+                  <span class="badge-skill">SKILL ${skill}</span>
+                  <span class="badge-vet">${vet}</span>
+                </div>
+              </div>
+
+              <div class="captain-stats-row">
+                <span>XP ACCUMULATED: <strong style="color: var(--lcars-gold);">${xp}</strong></span>
+                <span style="color: ${isKia ? 'var(--lcars-red)' : '#4ade80'};">${c.status || 'ACTIVE'}</span>
+              </div>
+
+              <!-- Fleet Assignment Selector -->
+              <div style="display: flex; gap: 4px; align-items: center; margin-top: 4px;">
+                <select id="assign-select-${c.captain_id}" class="order-select" style="font-size: 0.82rem; padding: 2px 4px; border-color: var(--lcars-teal); color: #fff;">
+                  ${currentTfOptions}
+                </select>
+                <button class="btn-xp-mod" style="flex: none; padding: 3px 8px; background: var(--lcars-teal); color: #000;" onclick="assignCaptainToFleet('${c.captain_id}')">
+                  ASSIGN
+                </button>
+              </div>
+
+              <!-- XP & Skill Modifiers -->
+              <div class="captain-btn-row">
+                <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 1, 0)">+1 XP</button>
+                <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 2, 0)">+2 XP</button>
+                <button class="btn-xp-mod" onclick="adjustCaptainStats('${c.captain_id}', 5, 0)">+5 XP</button>
+                <button class="btn-xp-mod" onclick="promptPromoteSkill('${c.captain_id}', ${skill})" title="Promote Captain Skill Rating">&uarr; SKILL</button>
+                <button class="btn-status-kia" onclick="toggleCaptainCasualty('${c.captain_id}', '${isKia ? 'ACTIVE' : 'KIA'}')">
+                  ${isKia ? 'REVIVE' : 'KIA'}
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      container.innerHTML = `
+        <div style="font-size: 0.85rem; color: var(--lcars-teal); font-weight: 700; margin-bottom: 4px;">
+          COMMANDING OFFICERS: ${authCaptainPlayer.toUpperCase()}
+        </div>
+        ${cardsHtml}
+
+        <!-- Enlistment Box -->
+        <div class="order-box" style="border-color: var(--lcars-amber); margin-top: 0.75rem;">
+          <div class="field-label" style="color: var(--lcars-amber);">ENLIST NEW OFFICER</div>
+          <input id="enlist-cap-name" type="text" class="order-input" placeholder="CAPTAIN NAME (E.G. JEAN-LUC PICARD)">
+          
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 0.25rem;">
+            <div>
+              <div class="field-label">BASE SKILL (1-9)</div>
+              <input id="enlist-cap-skill" type="number" min="1" max="9" value="6" class="order-input">
+            </div>
+            <div>
+              <div class="field-label">STARTING XP</div>
+              <input id="enlist-cap-xp" type="number" min="0" value="0" class="order-input">
+            </div>
+          </div>
+
+          <div style="margin-top: 0.25rem;">
+            <div class="field-label">INITIAL ASSIGNMENT</div>
+            <select id="enlist-cap-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">
+              ${fleetOptions}
+            </select>
+          </div>
+
+          <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 0.4rem;" onclick="executeEnlistCaptain()">
+            COMMISSION NEW OFFICER
+          </button>
+        </div>
+      `;
+    }
+
+    async function assignCaptainToFleet(captainId) {
+      const select = document.getElementById(`assign-select-${captainId}`);
+      if (!select) return;
+      const targetFleet = select.value;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'assign_captain_fleet',
+            playerName: authCaptainPlayer,
+            pinHash: authCaptainPinHash,
+            captainId: captainId,
+            taskForceId: targetFleet
+          })
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+          if (cap) cap.task_force_id = targetFleet;
+          renderAuthenticatedCaptainsView();
+          fetchCampaignData();
+        }
+      } catch (err) {
+        alert("TRANSMISSION ERROR: " + err);
+      }
+    }
+
+    async function adjustCaptainStats(captainId, addedXp, newSkill) {
+      const payload = {
+        action: 'modify_captain_stats',
+        playerName: authCaptainPlayer,
+        pinHash: authCaptainPinHash,
+        captainId: captainId
+      };
+      if (addedXp !== 0) payload.addedXp = addedXp;
+      if (newSkill > 0) payload.captainSkill = newSkill;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+          if (cap) {
+            if (addedXp !== 0) {
+              cap.xp = Math.max(0, (Number(cap.xp) || 0) + addedXp);
+              const xpVal = Number(cap.xp);
+              cap.veteran_rank = xpVal >= 45 ? 'Master' : xpVal >= 25 ? 'Elite' : xpVal >= 12 ? 'Veteran' : xpVal >= 5 ? 'Seasoned' : 'Rookie';
+            }
+            if (newSkill > 0) cap.captain_skill = newSkill;
+          }
+          renderAuthenticatedCaptainsView();
+        }
+      } catch (err) {
+        alert("TRANSMISSION ERROR: " + err);
+      }
+    }
+
+    function promptPromoteSkill(captainId, currentSkill) {
+      const valStr = prompt("PROMOTION: Enter updated Captain Skill rating (1-9):", currentSkill);
+      if (valStr === null) return;
+      const num = Number(valStr);
+      if (num >= 1 && num <= 9) {
+        adjustCaptainStats(captainId, 0, num);
+      } else {
+        alert("INVALID SKILL: Rating must be between 1 and 9.");
+      }
+    }
+
+    async function toggleCaptainCasualty(captainId, newStatus) {
+      const conf = confirm(`CONFIRMATION: Mark captain as ${newStatus}?`);
+      if (!conf) return;
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({
+            action: 'modify_captain_stats',
+            playerName: authCaptainPlayer,
+            pinHash: authCaptainPinHash,
+            captainId: captainId,
+            status: newStatus
+          })
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+          if (cap) cap.status = newStatus;
+          renderAuthenticatedCaptainsView();
+        }
+      } catch (err) {
+        alert("TRANSMISSION ERROR: " + err);
+      }
+    }
+
+    async function executeEnlistCaptain() {
+      const nameInput = document.getElementById('enlist-cap-name');
+      const skillInput = document.getElementById('enlist-cap-skill');
+      const xpInput = document.getElementById('enlist-cap-xp');
+      const fleetSelect = document.getElementById('enlist-cap-fleet');
 
       const name = nameInput.value.trim();
-      const level = Number(levelInput.value) || 1;
+      const skill = Number(skillInput.value) || 1;
       const xp = Number(xpInput.value) || 0;
+      const tf = fleetSelect.value;
 
       if (!name) {
         alert("INPUT ERROR: Please provide a Captain name.");
@@ -1233,63 +1421,30 @@
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({
             action: 'add_captain',
-            playerName: selectedCaptainPlayer,
+            playerName: authCaptainPlayer,
+            pinHash: authCaptainPinHash,
             captainName: name,
-            level: level,
-            xp: xp
+            captainSkill: skill,
+            initialXp: xp,
+            taskForceId: tf
           })
         });
         const respData = await res.json();
         if (respData.status === 'success') {
           nameInput.value = '';
-          alert(`COMMISSION LOG: ${name} registered under ${selectedCaptainPlayer}.`);
-          fetchCampaignData().then(renderCaptainsList);
+          alert(`COMMISSION REPORT: ${name} added to ${authCaptainPlayer}'s roster.`);
+          // Re-fetch updated captain roster
+          const refRes = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'get_captains', playerName: authCaptainPlayer, pinHash: authCaptainPinHash })
+          });
+          const refData = await refRes.json();
+          authenticatedCaptains = refData.captains || [];
+          renderAuthenticatedCaptainsView();
         }
       } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
-      }
-    }
-
-    async function modifyCaptainXp(captainId, delta) {
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'award_captain_xp',
-            captainId: captainId,
-            addedXp: delta
-          })
-        });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          fetchCampaignData().then(renderCaptainsList);
-        }
-      } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
-      }
-    }
-
-    async function toggleCaptainStatus(captainId, newStatus) {
-      const conf = confirm(`STATUS CHANGE: Set Captain ${captainId} to ${newStatus}?`);
-      if (!conf) return;
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'set_captain_status',
-            captainId: captainId,
-            status: newStatus
-          })
-        });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          fetchCampaignData().then(renderCaptainsList);
-        }
-      } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
+        alert("COMMUNICATION ERROR: " + err);
       }
     }
 
@@ -1535,35 +1690,6 @@
       }
     }
 
-    async function awardBonusRpPrompt(suggestedPlayer) {
-      const pass = prompt("GM COMMAND OVERRIDE: Enter passcode to authorize Combat Bonus RP:");
-      if (pass === null || pass.trim() === '') return;
-      const recipient = prompt("Enter recipient Player Name:", suggestedPlayer || "");
-      if (!recipient) return;
-      const amt = Number(prompt("Enter Bonus RP amount to award (e.g. 2, 5):", "2"));
-      if (!amt || amt <= 0) return;
-
-      const rawPass = pass.trim();
-      const gmHash = await hashPin(rawPass);
-
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'award_rp', recipientPlayer: recipient.trim(), amount: amt, rawPass: rawPass, gmHash: gmHash })
-        });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("ACCESS DENIED: GM Authorization failed.");
-          return;
-        }
-        alert(`TACTICAL COMMENDATION: Awarded ${amt} Bonus RP to ${recipient}.`);
-        fetchCampaignData();
-      } catch (err) {
-        alert("COMMUNICATION ERROR: " + err);
-      }
-    }
-
     // --- CONFIGURATION & SECURITY SUBMENU ---
     function toggleSettingsMenu() {
       const sidebar = document.getElementById('sidebar-panel');
@@ -1799,7 +1925,12 @@
           method: 'POST',
           mode: 'no-cors',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: rawPass })
+          body: JSON.stringify({ 
+            action: 'destroy_fleet', 
+            taskForceId: taskForceId, 
+            gmHash: gmHash, 
+            rawPass: rawPass 
+          })
         });
 
         alert(`COMMAND LOG: ${taskForceId} decommissioned.`);
@@ -1957,22 +2088,6 @@
       const isPhase2 = /\bphase ii\b/i.test(currentPhase);
       const isPhase3 = /\bphase iii\b/i.test(currentPhase);
 
-      // Find assigned captain for this Task Force
-      const assignedCap = (campaignData.captains || []).find(c => 
-        norm(c.player_name) === norm(fleet.player) && 
-        norm(c.task_force_id) === norm(fleet.task_force_id) && 
-        norm(c.status) !== 'kia'
-      );
-
-      let captainBanner = `
-        <div class="sidebar-field" style="border-left-color: var(--lcars-teal);">
-          <div class="field-label">COMMANDING OFFICER</div>
-          <div class="field-value" style="color: var(--lcars-teal); font-size: 1.15rem;">
-            ${assignedCap ? `${assignedCap.captain_name} (SKILL ${assignedCap.level})` : 'NO OFFICER ASSIGNED'}
-          </div>
-        </div>
-      `;
-
       let ordersHtml = '';
 
       if (isPhase2) {
@@ -2024,9 +2139,6 @@
               <button class="btn-combat-destroy" onclick="destroyFleet('${fleet.task_force_id}')">
                 DESTROY FLEET
               </button>
-              <button class="btn-combat-bonus" onclick="awardBonusRpPrompt('${fleet.player}')">
-                AWARD COMBAT BONUS RP
-              </button>
             </div>
           </div>
         `;
@@ -2042,7 +2154,6 @@
             <div class="field-label">DEPLOYED SECTOR</div>
             <div class="field-value">${sec.sector_name} (SEC ${String(sec.sector_id).padStart(2, '0')})</div>
           </div>
-          ${captainBanner}
         </div>
         ${ordersHtml}
         ${combatHtml}
