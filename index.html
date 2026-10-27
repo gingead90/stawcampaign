@@ -55,16 +55,8 @@
     .map-ctrl-btn:hover, .map-ctrl-btn:active { background: var(--lcars-amber); color: #000; }
     .map-ctrl-btn.btn-fit { width: 44px; font-size: 0.8rem; border-color: var(--lcars-blue); color: var(--lcars-blue); }
     .map-ctrl-btn.btn-fit:hover, .map-ctrl-btn.btn-fit:active { background: var(--lcars-blue); color: #000; }
-    
-    /* UPDATED: Sector number badge now uses flex layout to nicely align the text and the new icon */
-    .sector-number-badge { 
-      position: absolute; transform: translate(-50%, -50%); pointer-events: auto; font-size: 13px; font-weight: 700; 
-      line-height: 1; padding: 3px 6px; border-radius: 7px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.9), 0 0 5px currentColor; 
-      border: 1.5px solid transparent; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; z-index: 10; letter-spacing: 0.5px; 
-      display: flex; align-items: center; gap: 3px; justify-content: center;
-    }
+    .sector-number-badge { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; font-size: 13px; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 7px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.9), 0 0 5px currentColor; border: 1.5px solid transparent; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; z-index: 10; letter-spacing: 0.5px; display: flex; align-items: center; gap: 3px; justify-content: center; }
     .sector-number-badge:hover { transform: translate(-50%, -50%) scale(1.3); filter: brightness(1.3); z-index: 25; }
-    
     .fleet-token-pill { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer; box-shadow: 0 0 10px rgba(0, 0, 0, 0.95); transition: transform 0.15s ease; z-index: 15; letter-spacing: 1px; }
     .fleet-token-pill:hover { transform: translate(-50%, -50%) scale(1.18); z-index: 30; filter: brightness(1.25); }
     .fleet-dot { width: 6px; height: 6px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 6px #ffffff; }
@@ -1056,11 +1048,17 @@
       const destSector = document.getElementById(`order-dest-${taskForceId}`).value;
 
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'submit_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash, destinationSectorId: destSector })
         });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("SECURITY BREACH: Invalid PIN.");
+          return;
+        }
+
         delete unlockedForEdit[taskForceId];
         const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
         if (tf) tf.has_pending_order = true;
@@ -1075,21 +1073,26 @@
       if (enteredPin === null || enteredPin.trim() === '') return;
       const pinHash = await hashPin(enteredPin);
 
-      unlockedForEdit[taskForceId] = true;
-      const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
-      if (tf) tf.has_pending_order = false;
-      renderMap();
-
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'clear_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash })
         });
-      } catch (e) { console.error("Failed to clear backend order", e); }
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("SECURITY BREACH: Invalid PIN.");
+          return;
+        }
 
-      const sec = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === String(tf.sector_id).padStart(2, '0'));
-      showFleetSidebar(tf, sec);
+        unlockedForEdit[taskForceId] = true;
+        const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
+        if (tf) tf.has_pending_order = false;
+        renderMap();
+        
+        const sec = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === String(tf.sector_id).padStart(2, '0'));
+        showFleetSidebar(tf, sec);
+      } catch (e) { console.error("Failed to clear backend order", e); }
     }
 
     function retreatFleet(taskForceId, assignedPlayer, rawSectorId) {
@@ -1129,11 +1132,16 @@
       if (!select) return;
       const gmHash = await hashPin(rawPass);
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: select.value, gmHash: gmHash, rawPass: rawPass })
         });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("ACCESS DENIED: Invalid command passcode.");
+          return;
+        }
         alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${select.value}.`);
         closeSidebar();
         setTimeout(fetchCampaignData, 1200);
@@ -1146,11 +1154,16 @@
       if (!confirm(`RED ALERT: Confirm destruction of ${taskForceId}?`)) return;
       const gmHash = await hashPin(pass.trim());
       try {
-        await fetch(API_URL, {
+        const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: pass.trim() })
         });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') {
+          alert("ACCESS DENIED: Invalid command passcode.");
+          return;
+        }
         alert(`COMMAND LOG: ${taskForceId} decommissioned.`);
         closeSidebar();
         setTimeout(fetchCampaignData, 1200);
@@ -1185,7 +1198,7 @@
         // Append Shipyard Icon for Specific Sectors
         const shipyardSectors = ['01', '05', '10', '15', '20'];
         const isShipyard = shipyardSectors.includes(secId);
-        btn.innerHTML = `<span>${secId}</span>${isShipyard ? `<svg style="width:11px;height:11px;fill:currentColor;opacity:0.85" viewBox="0 0 24 24"><path d="M22.7 19.3L16 12.6V9.4L12.7 6.1c-.6-.6-1.5-.6-2.1 0L8.4 8.4c-.6.6-.6 1.5 0 2.1l3.3 3.3h3.2l6.7 6.7c.4.4 1 .4 1.4 0l.7-.7c.4-.4.4-1.1 0-1.5zM3.4 9.4l1.4-1.4 2.1 2.1c.4.4 1 .4 1.4 0l1.4-1.4c.4-.4.4-1 0-1.4L7.6 5.2 9 3.8C7.1 1.9 4 1.9 2.1 3.8c-1.9 1.9-1.9 5 0 6.9l.7.7c-.5.5-1.1.5-1.6 0L0 10.3l3.4-3.4 2.1 2.1z"/></svg>` : ''}`;
+        btn.innerHTML = `<span>${secId}</span>${isShipyard ? `<svg style="width:11px;height:11px;fill:currentColor;opacity:0.85" viewBox="0 0 24 24"><path d="M13 3V1h-2v2c-3.9.5-7 3.6-7.5 7.5H1v2h2.5c.5 3.9 3.6 7 7.5 7.5v2h2v-2c3.9-.5 7-3.6 7.5-7.5H23v-2h-2.5c-.5-3.9-3.6-7-7.5-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z"/></svg>` : ''}`;
 
         btn.addEventListener('click', (e) => { e.stopPropagation(); showSectorSidebar(sec); });
         layer.appendChild(btn);
