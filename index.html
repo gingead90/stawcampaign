@@ -618,24 +618,29 @@
       margin-top: 4px;
     }
 
+    /* Fixed Landscape Blocker Overlay */
     #landscape-prompt {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.98);
-      z-index: 9999;
+      width: 100vw;
+      height: 100dvh;
+      background: rgba(3, 7, 18, 0.98);
+      backdrop-filter: blur(8px);
+      z-index: 99999;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
       padding: 1.5rem;
+      user-select: none;
     }
 
     #landscape-prompt svg {
-      width: 58px;
-      height: 58px;
+      width: 64px;
+      height: 64px;
       fill: var(--lcars-orange);
-      margin-bottom: 1rem;
+      margin-bottom: 1.25rem;
       animation: rotateDevice 2s infinite ease-in-out;
     }
 
@@ -644,8 +649,11 @@
       50% { transform: rotate(90deg); }
     }
 
-    @media screen and (max-width: 899px) and (orientation: portrait) {
-      #landscape-prompt { display: flex; }
+    /* Responsive Orientation Gate: Triggers whenever height exceeds width */
+    @media (orientation: portrait), (max-aspect-ratio: 1/1) {
+      #landscape-prompt {
+        display: flex !important;
+      }
     }
 
     @media screen and (max-width: 900px) {
@@ -679,7 +687,7 @@
       <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
     </svg>
     <h3 style="color: #ff9900; margin-bottom: 0.5rem; font-size: 1.4rem;">ORIENTATION MISMATCH</h3>
-    <p style="color: #99ccff; font-size: 1rem; max-width: 280px;">
+    <p style="color: #99ccff; font-size: 1rem; max-width: 280px; line-height: 1.4;">
       ROTATE TERMINAL TO LANDSCAPE ORIENTATION FOR LCARS THEATER INTERFACE.
     </p>
   </div>
@@ -800,6 +808,22 @@
     function norm(str) {
       return String(str || '').trim().toLowerCase();
     }
+
+    // Dynamic Orientation Checker (Fail-Safe for mobile viewport quirks)
+    function enforceOrientation() {
+      const promptEl = document.getElementById('landscape-prompt');
+      if (!promptEl) return;
+      const isPortrait = window.innerHeight > window.innerWidth;
+      if (isPortrait) {
+        promptEl.style.setProperty('display', 'flex', 'important');
+      } else {
+        promptEl.style.display = 'none';
+      }
+    }
+
+    window.addEventListener('resize', enforceOrientation);
+    window.addEventListener('orientationchange', enforceOrientation);
+    window.addEventListener('DOMContentLoaded', enforceOrientation);
 
     async function hashPin(pin) {
       const msgUint8 = new TextEncoder().encode(String(pin).trim());
