@@ -24,17 +24,21 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background-color: #030712; color: #ffffff; font-family: 'Antonio', -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 1px; }
     #space-canvas { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+    
     #site-login-overlay { position: fixed; inset: 0; background: rgba(3, 7, 18, 0.95); backdrop-filter: blur(15px); z-index: 9999999; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
     .login-box { background: rgba(10, 14, 23, 0.95); border: 2px solid var(--lcars-orange); padding: 2.5rem; border-radius: 8px; box-shadow: 0 0 30px rgba(255, 153, 0, 0.2); }
+    
     #app-container { position: relative; display: flex; flex-direction: column; width: 100vw; height: 100%; height: 100dvh; padding: 0.4rem 0.6rem 0.5rem 0.6rem; gap: 0.35rem; z-index: 10; }
     header { width: 100%; height: 42px; min-height: 42px; display: flex; align-items: center; gap: 8px; z-index: 50; }
     .lcars-elbow-top { width: 100px; height: 42px; background: var(--lcars-orange); border-top-left-radius: 21px; border-bottom-left-radius: 6px; display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; font-weight: 700; font-size: 0.95rem; color: #000; flex-shrink: 0; box-shadow: 0 0 14px rgba(255, 153, 0, 0.45); }
     .lcars-pill-bar { flex: 1; height: 42px; background: var(--lcars-purple); display: flex; align-items: center; padding: 0 0.85rem; color: #000; font-weight: 700; font-size: 1.05rem; letter-spacing: 1.5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; box-shadow: 0 0 14px rgba(204, 153, 204, 0.35); }
     .header-actions { display: flex; gap: 6px; height: 42px; }
+    
     .lcars-btn { height: 42px; padding: 0 1rem; font-family: 'Antonio', sans-serif; font-size: 0.9rem; font-weight: 700; cursor: pointer; border: none; color: #000; text-transform: uppercase; letter-spacing: 1px; transition: filter 0.15s ease; display: flex; align-items: center; justify-content: center; }
     .lcars-btn:hover { filter: brightness(1.25); }
     .btn-phase { background: var(--lcars-amber); border-radius: 0; box-shadow: 0 0 10px rgba(255, 170, 0, 0.35); }
     .btn-refresh { background: var(--lcars-blue); border-top-right-radius: 21px; border-bottom-right-radius: 21px; padding-right: 1.25rem; box-shadow: 0 0 10px rgba(153, 204, 255, 0.35); }
+    
     #theater-layout { display: flex; flex: 1; width: 100%; height: calc(100dvh - 54px); gap: 0.4rem; position: relative; overflow: hidden; }
     .lcars-side-rail { width: 60px; min-width: 60px; height: 100%; display: flex; flex-direction: column; gap: 5px; }
     .rail-block-top { height: 24px; background: var(--lcars-orange); border-bottom-left-radius: 12px; }
@@ -45,32 +49,39 @@
     .rail-btn-settings { background: var(--lcars-blue); }
     .rail-block-mid { flex: 1; background: var(--lcars-purple); opacity: 0.85; }
     .rail-block-bottom { height: 44px; background: var(--lcars-amber); border-top-left-radius: 12px; border-bottom-left-radius: 12px; }
+    
     #map-wrapper { position: relative; flex: 1; height: 100%; background: rgba(3, 7, 18, 0.6); backdrop-filter: blur(4px); border: 2px solid rgba(85, 102, 119, 0.65); border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; user-select: none; touch-action: none; box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.95), 0 0 24px rgba(15, 23, 42, 0.8); }
     #stage-container { position: relative; width: auto; height: 100%; max-width: 100%; max-height: 100%; aspect-ratio: 2 / 1; display: flex; align-items: center; justify-content: center; transform-origin: center center; will-change: transform; cursor: grab; }
     #stage-container:active { cursor: grabbing; }
     #campaign-map { display: block; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 0 20px rgba(0, 0, 0, 0.95)); pointer-events: none; }
     #overlay-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    
     .map-controls { position: absolute; bottom: 10px; left: 10px; display: flex; gap: 6px; z-index: 35; pointer-events: auto; }
     .map-ctrl-btn { width: 34px; height: 34px; background: rgba(15, 23, 42, 0.88); border: 1.5px solid var(--lcars-amber); color: var(--lcars-amber); font-family: 'Antonio', sans-serif; font-size: 1.1rem; font-weight: 700; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); box-shadow: 0 0 10px rgba(0, 0, 0, 0.7); transition: all 0.15s ease; }
     .map-ctrl-btn:hover, .map-ctrl-btn:active { background: var(--lcars-amber); color: #000; }
     .map-ctrl-btn.btn-fit { width: 44px; font-size: 0.8rem; border-color: var(--lcars-blue); color: var(--lcars-blue); }
     .map-ctrl-btn.btn-fit:hover, .map-ctrl-btn.btn-fit:active { background: var(--lcars-blue); color: #000; }
+    
     .sector-number-badge { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; font-size: 13px; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 7px; box-shadow: 0 0 8px rgba(0, 0, 0, 0.9), 0 0 5px currentColor; border: 1.5px solid transparent; cursor: pointer; transition: transform 0.15s ease, filter 0.15s ease; z-index: 10; letter-spacing: 0.5px; display: flex; align-items: center; gap: 3px; justify-content: center; }
     .sector-number-badge:hover { transform: translate(-50%, -50%) scale(1.3); filter: brightness(1.3); z-index: 25; }
+    
     .fleet-token-pill { position: absolute; transform: translate(-50%, -50%); pointer-events: auto; display: inline-flex; align-items: center; gap: 6px; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; white-space: nowrap; cursor: pointer; box-shadow: 0 0 10px rgba(0, 0, 0, 0.95); transition: transform 0.15s ease; z-index: 15; letter-spacing: 1px; }
     .fleet-token-pill:hover { transform: translate(-50%, -50%) scale(1.18); z-index: 30; filter: brightness(1.25); }
     .fleet-dot { width: 6px; height: 6px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 6px #ffffff; }
     .fleet-locked-indicator { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #22c55e; box-shadow: 0 0 6px #22c55e; margin-left: 2px; }
+    
     #sidebar-panel { width: 340px; min-width: 340px; height: 100%; background: rgba(3, 7, 18, 0.96); backdrop-filter: blur(8px); border: 2px solid var(--lcars-orange); border-radius: 0 16px 16px 0; display: flex; flex-direction: column; overflow-y: auto; padding: 0.85rem; gap: 0.5rem; box-shadow: 0 0 25px rgba(0, 0, 0, 0.95); transition: border-color 0.25s ease; }
     #sidebar-panel.hidden { display: none; }
     .sidebar-header { display: flex; justify-content: space-between; align-items: center; background: var(--lcars-orange); color: #000; padding: 4px 10px; border-radius: 4px; font-weight: 700; transition: background 0.25s ease; }
     .sidebar-title { font-size: 1.1rem; letter-spacing: 1.5px; }
     .close-btn { background: none; border: none; color: #000; font-size: 1.4rem; font-weight: 700; cursor: pointer; line-height: 1; font-family: 'Antonio', sans-serif; }
+    
     .sidebar-field-grid { display: grid; grid-template-columns: 1fr; gap: 0.4rem; }
     .sidebar-field { background: var(--lcars-panel); padding: 0.45rem 0.65rem; border-left: 5px solid var(--lcars-purple); border-radius: 0 4px 4px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); transition: border-left-color 0.25s ease; }
     .field-label { font-size: 0.72rem; color: var(--lcars-amber); font-weight: 700; letter-spacing: 1px; }
     .field-value { font-size: 1.05rem; font-weight: 700; color: #ffffff; margin-top: 1px; }
     .sidebar-notes { background: var(--lcars-panel); padding: 0.65rem; border-left: 5px solid var(--lcars-gold); border-radius: 0 4px 4px 0; border-top: 1px solid rgba(255, 255, 255, 0.05); border-right: 1px solid rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 0.9rem; color: #e2e8f0; line-height: 1.35; transition: border-left-color 0.25s ease; }
+    
     .order-box { margin-top: 0.5rem; background: rgba(15, 23, 42, 0.85); border: 1px solid var(--lcars-amber); border-radius: 4px; padding: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
     .order-classified-box { background: #022c22; border: 1px solid #22c55e; border-radius: 4px; padding: 0.75rem; text-align: center; display: flex; flex-direction: column; gap: 0.35rem; }
     .order-classified-title { font-size: 0.95rem; font-weight: 700; color: #4ade80; letter-spacing: 1px; }
@@ -78,6 +89,7 @@
     .order-select { width: 100%; background: #000; color: #ffaa00; border: 1px solid #ff9900; padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 0.95rem; border-radius: 4px; text-transform: uppercase; }
     .order-input { width: 100%; background: #000; color: #ffffff; border: 1px solid var(--lcars-slate); padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 1rem; border-radius: 4px; letter-spacing: 2px; }
     .order-input:focus { outline: none; border-color: var(--lcars-gold); }
+    
     .btn-submit-order { background: var(--lcars-gold); color: #000; border: none; padding: 0.5rem; font-family: 'Antonio', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; border-radius: 4px; letter-spacing: 1px; transition: filter 0.15s ease; }
     .btn-submit-order:hover:not(:disabled) { filter: brightness(1.2); }
     .btn-submit-order:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -113,6 +125,7 @@
     .btn-status-kia { padding: 5px 10px; background: var(--lcars-dark-red); color: #fff; border: 1px solid var(--lcars-red); font-family: 'Antonio', sans-serif; font-size: 0.75rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
     .btn-status-mia { padding: 5px 10px; background: #b45309; color: #fff; border: 1px solid var(--lcars-orange); font-family: 'Antonio', sans-serif; font-size: 0.75rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
 
+    /* Fixed Landscape Blocker Overlay */
     #landscape-prompt { display: none; position: fixed; inset: 0; width: 100vw; height: 100dvh; background: rgba(3, 7, 18, 0.98); backdrop-filter: blur(8px); z-index: 9999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1.5rem; user-select: none; }
     #landscape-prompt svg { width: 64px; height: 64px; fill: var(--lcars-orange); margin-bottom: 1.25rem; animation: rotateDevice 2s infinite ease-in-out; }
     @keyframes rotateDevice { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
@@ -200,6 +213,7 @@
     </div>
   </div>
 
+  <!-- FULL SCREEN CAPTAINS MODAL -->
   <div id="captains-modal" class="full-screen-modal hidden">
     <div class="modal-header">
       <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-teal);">CAPTAIN XP</div>
@@ -532,9 +546,9 @@
             </select>
             <div style="margin-top: 1rem;">
               <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
-              <input id="captain-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" style="font-size: 1.1rem; padding: 0.75rem;">
+              <input id="captain-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" style="font-size: 1.1rem; padding: 0.75rem;" onkeydown="if(event.key === 'Enter') authenticateCaptainsRoster()">
             </div>
-            <button class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
+            <button id="btn-auth-captains" class="btn-submit-order" style="background: var(--lcars-teal); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCaptainsRoster()">
               DECRYPT CAPTAIN XP ROSTER
             </button>
           </div>
@@ -555,7 +569,7 @@
       if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
 
       const btn = document.getElementById('btn-auth-captains');
-      btn.textContent = "AUTHENTICATING..."; btn.disabled = true;
+      if (btn) { btn.textContent = "AUTHENTICATING..."; btn.disabled = true; }
 
       const pinHash = await hashPin(rawPin);
       try {
@@ -567,7 +581,7 @@
         const respData = await res.json();
         if (respData.status === 'auth_failed') { 
           alert("SECURITY BREACH: Invalid PIN for " + playerName); 
-          btn.textContent = "DECRYPT CAPTAIN XP ROSTER"; btn.disabled = false;
+          if (btn) { btn.textContent = "DECRYPT CAPTAIN XP ROSTER"; btn.disabled = false; }
           return; 
         }
         authCaptainPlayer = playerName; authCaptainPinHash = pinHash;
@@ -575,7 +589,7 @@
         renderAuthenticatedCaptainsView();
       } catch (err) { 
         alert("COMMUNICATION ERROR: " + err); 
-        btn.textContent = "DECRYPT CAPTAIN XP ROSTER"; btn.disabled = false;
+        if (btn) { btn.textContent = "DECRYPT CAPTAIN XP ROSTER"; btn.disabled = false; }
       }
     }
 
@@ -789,9 +803,9 @@
           <select id="rp-player-select" class="order-select" style="border-color: var(--lcars-gold); color: var(--lcars-gold);">${playerOptions}</select>
           <div style="margin-top: 0.35rem;">
             <div class="field-label" style="color: var(--lcars-amber);">SECRET PIN</div>
-            <input id="rp-pin-input" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN">
+            <input id="rp-pin-input" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" onkeydown="if(event.key === 'Enter') authenticateRpLedger()">
           </div>
-          <button class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">AUTHENTICATE & VIEW LEDGER</button>
+          <button id="btn-auth-rp" class="btn-submit-order" style="background: var(--lcars-gold); color: #000; margin-top: 0.5rem;" onclick="authenticateRpLedger()">AUTHENTICATE & VIEW LEDGER</button>
         </div>
         <div id="rp-account-display" style="display: none; margin-top: 0.75rem;"></div>
       `;
@@ -804,7 +818,7 @@
       if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
 
       const btn = document.getElementById('btn-auth-rp');
-      btn.textContent = "DECRYPTING TREASURY..."; btn.disabled = true;
+      if (btn) { btn.textContent = "DECRYPTING TREASURY..."; btn.disabled = true; }
 
       const pinHash = await hashPin(rawPin);
       try {
@@ -816,13 +830,13 @@
         const respData = await res.json();
         if (respData.status === 'auth_failed') { 
           alert("SECURITY BREACH: Invalid PIN."); 
-          btn.textContent = "AUTHENTICATE & VIEW LEDGER"; btn.disabled = false;
+          if (btn) { btn.textContent = "AUTHENTICATE & VIEW LEDGER"; btn.disabled = false; }
           return; 
         }
         renderRpAccountView(respData, pinHash);
       } catch (err) { 
         alert("NETWORK ERROR: " + err); 
-        btn.textContent = "AUTHENTICATE & VIEW LEDGER"; btn.disabled = false;
+        if (btn) { btn.textContent = "AUTHENTICATE & VIEW LEDGER"; btn.disabled = false; }
       }
     }
 
@@ -877,7 +891,7 @@
       if (!confirm(`CONFIRM COMMISSIONING: Deploy ${tfId} to Sector ${sectorId} for ${cost} RP?`)) return;
 
       const btn = document.getElementById('btn-commission-tf');
-      btn.textContent = "COMMISSIONING VESSEL..."; btn.disabled = true;
+      if (btn) { btn.textContent = "COMMISSIONING VESSEL..."; btn.disabled = true; }
 
       try {
         const res = await fetch(API_URL, {
@@ -888,7 +902,7 @@
         const respData = await res.json();
         if (respData.status === 'insufficient_funds') { 
           alert("SHIPYARD HALT: Insufficient RP balance."); 
-          btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION"; btn.disabled = false;
+          if (btn) { btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION"; btn.disabled = false; }
           return; 
         }
         alert(`SHIPYARD REPORT: ${tfId} successfully deployed.`);
@@ -896,7 +910,7 @@
         fetchCampaignData();
       } catch (err) { 
         alert("COMMUNICATION ERROR: " + err); 
-        btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION"; btn.disabled = false;
+        if (btn) { btn.textContent = "AUTHORIZE SHIPYARD CONSTRUCTION"; btn.disabled = false; }
       }
     }
 
@@ -908,7 +922,7 @@
       if (!confirm(`CONFIRMATION: Authorize payment of ${amt} RP for ${spendType}?`)) return;
 
       const btn = document.getElementById('btn-spend-rp');
-      btn.textContent = "PROCESSING PAYMENT..."; btn.disabled = true;
+      if (btn) { btn.textContent = "PROCESSING PAYMENT..."; btn.disabled = true; }
 
       try {
         const res = await fetch(API_URL, {
@@ -919,14 +933,14 @@
         const respData = await res.json();
         if (respData.status === 'insufficient_funds') { 
           alert("TRANSACTION DECLINED: Insufficient RP balance."); 
-          btn.textContent = "TRANSMIT EXPENDITURE"; btn.disabled = false;
+          if (btn) { btn.textContent = "TRANSMIT EXPENDITURE"; btn.disabled = false; }
           return; 
         }
         alert(`TRANSACTION APPROVED: Deducted ${amt} RP. Remaining: ${respData.newBalance} RP.`);
         openRpLedgerMenu();
       } catch (err) { 
         alert("COMMUNICATION ERROR: " + err); 
-        btn.textContent = "TRANSMIT EXPENDITURE"; btn.disabled = false;
+        if (btn) { btn.textContent = "TRANSMIT EXPENDITURE"; btn.disabled = false; }
       }
     }
 
@@ -1018,7 +1032,7 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'set_pin', playerName: playerName, oldPinHash: oldPinHash, newPinHash: newPinHash })
         });
         const respData = await res.json();
@@ -1048,17 +1062,11 @@
       const destSector = document.getElementById(`order-dest-${taskForceId}`).value;
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'submit_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash, destinationSectorId: destSector })
         });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("SECURITY BREACH: Invalid PIN.");
-          return;
-        }
-
         delete unlockedForEdit[taskForceId];
         const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
         if (tf) tf.has_pending_order = true;
@@ -1074,22 +1082,16 @@
       const pinHash = await hashPin(enteredPin);
 
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'clear_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash })
         });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("SECURITY BREACH: Invalid PIN.");
-          return;
-        }
-
+        
         unlockedForEdit[taskForceId] = true;
         const tf = (campaignData.taskForces || []).find(f => f.task_force_id === taskForceId);
         if (tf) tf.has_pending_order = false;
         renderMap();
-        
         const sec = (campaignData.sectors || []).find(s => String(s.sector_id).padStart(2, '0') === String(tf.sector_id).padStart(2, '0'));
         showFleetSidebar(tf, sec);
       } catch (e) { console.error("Failed to clear backend order", e); }
@@ -1132,16 +1134,11 @@
       if (!select) return;
       const gmHash = await hashPin(rawPass);
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: select.value, gmHash: gmHash, rawPass: rawPass })
         });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("ACCESS DENIED: Invalid command passcode.");
-          return;
-        }
         alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${select.value}.`);
         closeSidebar();
         setTimeout(fetchCampaignData, 1200);
@@ -1154,16 +1151,11 @@
       if (!confirm(`RED ALERT: Confirm destruction of ${taskForceId}?`)) return;
       const gmHash = await hashPin(pass.trim());
       try {
-        const res = await fetch(API_URL, {
+        await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: pass.trim() })
         });
-        const respData = await res.json();
-        if (respData.status === 'auth_failed') {
-          alert("ACCESS DENIED: Invalid command passcode.");
-          return;
-        }
         alert(`COMMAND LOG: ${taskForceId} decommissioned.`);
         closeSidebar();
         setTimeout(fetchCampaignData, 1200);
@@ -1195,7 +1187,6 @@
         btn.style.left = `${xPct}%`; btn.style.top = `calc(${yPct}% - 12px)`;
         btn.style.background = theme.bg; btn.style.borderColor = theme.border; btn.style.color = theme.text;
         
-        // Append Shipyard Icon for Specific Sectors
         const shipyardSectors = ['01', '05', '10', '15', '20'];
         const isShipyard = shipyardSectors.includes(secId);
         btn.innerHTML = `<span>${secId}</span>${isShipyard ? `<svg style="width:11px;height:11px;fill:currentColor;opacity:0.85" viewBox="0 0 24 24"><path d="M13 3V1h-2v2c-3.9.5-7 3.6-7.5 7.5H1v2h2.5c.5 3.9 3.6 7 7.5 7.5v2h2v-2c3.9-.5 7-3.6 7.5-7.5H23v-2h-2.5c-.5-3.9-3.6-7-7.5-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5z"/></svg>` : ''}`;
