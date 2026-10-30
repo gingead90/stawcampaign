@@ -267,6 +267,33 @@
     </div>
   </div>
 
+  <!-- SHARED CREW ASSIMILATION / TRANSFER POPUP -->
+  <div id="crew-transfer-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
+    <div class="enlist-panel" style="margin: 0; width: 90%; max-width: 450px; border-color: var(--lcars-lilac);">
+      <div class="field-label" style="color: var(--lcars-lilac); font-size: 1.1rem; margin-bottom: 1rem;">TRANSFER / ASSIMILATE CREW</div>
+      <div class="field-label">SELECT NEW COMMANDING ALLEGIANCE</div>
+      <select id="crew-transfer-select" class="order-select" style="border-color: var(--lcars-lilac); color: #fff;"></select>
+      <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+        <button class="btn-submit-order" style="flex: 1; background: var(--lcars-red);" onclick="document.getElementById('crew-transfer-modal').classList.add('hidden')">CANCEL</button>
+        <button class="btn-submit-order" style="flex: 1; background: var(--lcars-lilac);" onclick="confirmCrewTransfer()">CONFIRM TRANSFER</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHARED SHIP UPGRADE POPUP -->
+  <div id="ship-upgrade-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
+    <div class="enlist-panel" style="margin: 0; width: 90%; max-width: 450px; border-color: var(--lcars-green);">
+      <div class="field-label" style="color: var(--lcars-green); font-size: 1.1rem; margin-bottom: 1rem;">MODIFY VESSEL UPGRADES</div>
+      <div class="field-label">INSTALLED TECH & WEAPONRY (COMMA SEPARATED)</div>
+      <input id="ship-upgrade-input" type="text" class="order-input" placeholder="E.G. ABLATIVE ARMOR, PHOTON TORPEDOES" style="font-size: 1.1rem; padding: 0.6rem;">
+      <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
+        <button class="btn-submit-order" style="flex: 1; background: var(--lcars-red);" onclick="document.getElementById('ship-upgrade-modal').classList.add('hidden')">CANCEL</button>
+        <button class="btn-submit-order" style="flex: 1; background: var(--lcars-green);" onclick="confirmShipUpgrades()">SAVE UPGRADES</button>
+      </div>
+    </div>
+  </div>
+
+
   <script>
     (function initCosmos() {
       const canvas = document.getElementById('space-canvas');
@@ -302,6 +329,8 @@
 
     let pendingShipAssignId = null;
     let pendingShipAssignType = null;
+    let pendingCrewTransferId = null;
+    let pendingShipUpgradeId = null;
 
     function norm(str) { return String(str || '').trim().toLowerCase(); }
     
@@ -573,8 +602,10 @@
       const datalist = document.getElementById('shared-ships-list');
       if (!datalist) return;
       const activeShips = (authenticatedShips || []).filter(s => norm(s.status) !== 'destroyed');
+      
+      const uniqueNames = [...new Set(activeShips.map(s => String(s.ship_name).trim()))];
       datalist.innerHTML = `<option value="UNASSIGNED"></option>` + 
-                           activeShips.map(s => `<option value="${s.ship_name}"></option>`).join('');
+                           uniqueNames.map(name => `<option value="${name}"></option>`).join('');
     }
 
     function openShipAssignModal(id, currentShip, type) {
@@ -582,7 +613,6 @@
       pendingShipAssignType = type;
       
       const input = document.getElementById('ship-assign-input');
-      // Blank out the input so the browser shows the full datalist on click
       input.value = ''; 
       
       const currentLabel = document.getElementById('ship-assign-current');
@@ -610,8 +640,6 @@
 
     async function confirmShipAssignment() {
       const inputVal = document.getElementById('ship-assign-input').value.trim();
-      
-      // If left totally blank when clicking confirm, just cancel the edit
       if (!inputVal) {
          document.getElementById('ship-assign-modal').classList.add('hidden');
          return; 
@@ -1062,6 +1090,33 @@
       }
     }
 
+    function openCrewTransferModal(crewId) {
+      pendingCrewTransferId = crewId;
+      const select = document.getElementById('crew-transfer-select');
+      const otherPlayers = (campaignData.players || []).filter(p => norm(p.player_name) !== norm(authCrewPlayer));
+      select.innerHTML = otherPlayers.map(p => `<option value="${p.player_name}">${p.player_name}</option>`).join('');
+      document.getElementById('crew-transfer-modal').classList.remove('hidden');
+    }
+
+    async function confirmCrewTransfer() {
+      const targetPlayer = document.getElementById('crew-transfer-select').value;
+      if (!targetPlayer) return;
+      document.getElementById('crew-transfer-modal').classList.add('hidden');
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'modify_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash, crewId: pendingCrewTransferId, transferPlayer: targetPlayer })
+        });
+        
+        // Remove them from local array since they don't belong to this player anymore
+        authenticatedCrew = authenticatedCrew.filter(c => c.crew_id !== pendingCrewTransferId);
+        renderAuthenticatedCrewView();
+        alert(`TRANSFER COMPLETE: Crew member assimilated by ${targetPlayer}.`);
+      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+    }
+
     async function toggleCrewStatus(crewId, newStatus) {
       if (!confirm(`CONFIRMATION: Mark crew member as ${newStatus}?`)) return;
       try {
@@ -1153,7 +1208,8 @@
                 <button class="btn-edit-ship" onclick="openShipAssignModal('${c.crew_id}', '${shipName.replace(/'/g, "\\'")}', 'CREW')" ${isKia ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>[EDIT]</button>
               </div>
               <div class="captain-btn-row" style="margin-top: 8px;">
-                <button class="btn-status-kia" style="width: 100%;" onclick="toggleCrewStatus('${c.crew_id}', '${isKia ? 'ACTIVE' : 'DEAD'}')">${isKia ? 'REVIVE' : 'MARK DEAD'}</button>
+                <button class="btn-status-kia" style="width: 50%;" onclick="toggleCrewStatus('${c.crew_id}', '${isKia ? 'ACTIVE' : 'DEAD'}')">${isKia ? 'REVIVE' : 'MARK DEAD'}</button>
+                <button class="btn-status-kia" style="width: 50%; background: #334155; border-color: #475569; color: #fff;" onclick="openCrewTransferModal('${c.crew_id}')">TRANSFER</button>
               </div>
             </div>
           `;
@@ -1283,6 +1339,28 @@
       }
     }
 
+    function openShipUpgradeModal(shipId, currentUpgrades) {
+      pendingShipUpgradeId = shipId;
+      document.getElementById('ship-upgrade-input').value = currentUpgrades;
+      document.getElementById('ship-upgrade-modal').classList.remove('hidden');
+    }
+
+    async function confirmShipUpgrades() {
+      const newUpgrades = document.getElementById('ship-upgrade-input').value.trim();
+      document.getElementById('ship-upgrade-modal').classList.add('hidden');
+      
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'modify_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipId: pendingShipUpgradeId, upgrades: newUpgrades })
+        });
+        const ship = authenticatedShips.find(s => s.ship_id === pendingShipUpgradeId);
+        if (ship) ship.upgrades = newUpgrades;
+        renderAuthenticatedShipsView();
+      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+    }
+
     async function assignShipToFleet(shipId) {
       const select = document.getElementById(`assign-ship-select-${shipId}`);
       if (!select) return;
@@ -1311,8 +1389,13 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          const ship = authenticatedShips.find(s => s.ship_id === shipId);
-          if (ship) ship.status = newStatus;
+          const refRes = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'get_ships', playerName: authShipsPlayer, pinHash: authShipsPinHash })
+          });
+          const refData = await refRes.json();
+          authenticatedShips = refData.ships || [];
           renderAuthenticatedShipsView();
         }
       } catch (err) { alert("TRANSMISSION ERROR: " + err); }
@@ -1322,6 +1405,9 @@
       const name = document.getElementById('enlist-ship-name').value.trim();
       const cls = document.getElementById('enlist-ship-class').value.trim() || 'UNKNOWN CLASS';
       const tf = document.getElementById('enlist-ship-fleet').value;
+      const namedSelect = document.getElementById('enlist-ship-named');
+      const isNamed = namedSelect ? namedSelect.value : 'FALSE';
+      const upgrades = document.getElementById('enlist-ship-upgrades').value.trim();
 
       if (!name) { alert("INPUT ERROR: Please provide a valid unique Ship Name / Registry."); return; }
 
@@ -1329,7 +1415,7 @@
         const res = await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'add_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipName: name, shipClass: cls, taskForceId: tf })
+          body: JSON.stringify({ action: 'add_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipName: name, shipClass: cls, taskForceId: tf, isNamed: isNamed, upgrades: upgrades })
         });
         const respData = await res.json();
         if (respData.status === 'success') {
@@ -1338,6 +1424,8 @@
           
           document.getElementById('enlist-ship-name').value = '';
           document.getElementById('enlist-ship-class').value = '';
+          document.getElementById('enlist-ship-upgrades').value = '';
+          
           alert(`SHIPYARD REPORT: ${name} commissioned.`);
           
           const refRes = await fetch(API_URL, {
@@ -1374,16 +1462,25 @@
         cardsHtml = filteredShips.map(ship => {
           const isDead = norm(ship.status) === 'destroyed';
           const isAssigned = !isDead;
-
+          const isNamed = norm(ship.is_named) === 'true' || norm(ship.is_named) === 'yes';
+          const cooldown = Number(ship.cooldown_timer) || 0;
+          
           const assignedCaps = authenticatedCaptains.filter(c => norm(c.assigned_ship) === norm(ship.ship_name) && norm(c.status) !== 'kia' && norm(c.status) !== 'mia');
           const assignedCrewArr = authenticatedCrew.filter(c => norm(c.assigned_ship) === norm(ship.ship_name) && norm(c.status) !== 'kia' && norm(c.status) !== 'dead' && norm(c.status) !== 'destroyed');
           
           const currentTfOptions = `<option value="RESERVE" ${norm(ship.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(ship.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}`;
 
+          let repairBtnText = isDead ? 'REPAIR / SALVAGE' : 'MARK DESTROYED';
+          let repairDisabled = '';
+          if (isDead && isNamed && cooldown > 0) {
+            repairBtnText = `COOLDOWN (${cooldown} TURNS)`;
+            repairDisabled = 'disabled style="opacity: 0.5; cursor: not-allowed;"';
+          }
+
           return `
             <div class="captain-card ${isDead ? 'kia' : ''}" style="border-left-color: var(--lcars-green);">
               <div class="captain-header">
-                <span class="captain-name">${ship.ship_name}</span>
+                <span class="captain-name">${ship.ship_name} ${isNamed ? '<span style="color:var(--lcars-gold); font-size: 0.8rem; vertical-align: middle;">★</span>' : ''}</span>
                 <div class="captain-badges">
                   <span class="badge-vet" style="background: var(--lcars-green); color: #000;">${ship.ship_class}</span>
                 </div>
@@ -1392,6 +1489,11 @@
                 <span>STATUS: <strong style="color: ${isDead ? 'var(--lcars-red)' : '#4ade80'};">${isDead ? 'DESTROYED' : 'ACTIVE'}</strong></span>
               </div>
               
+              <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px; padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">UPGRADES: <strong style="color: var(--lcars-blue);">${ship.upgrades || 'NONE'}</strong></span>
+                <button class="btn-edit-ship" onclick="openShipUpgradeModal('${ship.ship_id}', '${(ship.upgrades || '').replace(/'/g, "\\'")}')" ${!isAssigned ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>[EDIT]</button>
+              </div>
+
               <div style="margin-top: 6px; padding: 6px; background: rgba(0,0,0,0.4); border-radius: 4px;">
                 <div style="font-size: 0.7rem; color: var(--lcars-green); font-weight: bold; margin-bottom: 4px; letter-spacing: 1px;">PERSONNEL ABOARD:</div>
                 <div style="font-size: 0.8rem; color: #fff; display: flex; flex-direction: column; gap: 3px;">
@@ -1405,7 +1507,7 @@
                 <button class="btn-xp-mod" style="flex: none; padding: 4px 12px; background: var(--lcars-green); color: #000;" onclick="assignShipToFleet('${ship.ship_id}')" ${!isAssigned ? 'disabled' : ''}>ASSIGN</button>
               </div>
               <div class="captain-btn-row" style="margin-top: 8px;">
-                <button class="btn-status-kia" style="width: 100%; border-color: var(--lcars-green); background: ${isDead ? 'var(--lcars-blue)' : 'var(--lcars-dark-red)'}; color: ${isDead ? '#000' : '#fff'};" onclick="toggleShipStatus('${ship.ship_id}', '${isDead ? 'ACTIVE' : 'DESTROYED'}')">${isDead ? 'REPAIR / SALVAGE' : 'MARK DESTROYED'}</button>
+                <button class="btn-status-kia" style="width: 100%; border-color: var(--lcars-green); background: ${isDead ? 'var(--lcars-blue)' : 'var(--lcars-dark-red)'}; color: ${isDead ? '#000' : '#fff'};" onclick="toggleShipStatus('${ship.ship_id}', '${isDead ? 'ACTIVE' : 'DESTROYED'}')" ${repairDisabled}>${repairBtnText}</button>
               </div>
             </div>
           `;
@@ -1440,11 +1542,23 @@
               <button class="close-btn" style="color: var(--lcars-green);" onclick="document.getElementById('popup-enlist-ship').classList.add('hidden')">&times;</button>
             </div>
             <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 0.75rem;">
-              <div><div class="field-label">UNIQUE SHIP NAME / REGISTRY</div><input id="enlist-ship-name" type="text" class="order-input" placeholder="E.G. U.S.S. ENTERPRISE OR NX-01"></div>
+              <div>
+                <div style="display: flex; justify-content: space-between;">
+                  <div class="field-label">UNIQUE SHIP NAME / REGISTRY</div>
+                  <select id="enlist-ship-named" class="order-select" style="width: auto; padding: 0 4px; font-size: 0.75rem; border-color: var(--lcars-amber); color: #fff;">
+                    <option value="FALSE">STANDARD VESSEL</option>
+                    <option value="TRUE">NAMED SHIP CARD</option>
+                  </select>
+                </div>
+                <input id="enlist-ship-name" type="text" class="order-input" placeholder="E.G. U.S.S. ENTERPRISE OR NX-01" style="margin-top: 4px;">
+              </div>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
               <div><div class="field-label">SHIP CLASS</div><input id="enlist-ship-class" type="text" class="order-input" placeholder="E.G. GALAXY CLASS"></div>
               <div><div class="field-label">FLEET ASSIGNMENT</div><select id="enlist-ship-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">${fleetEnlistOptions}</select></div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 0.75rem;">
+              <div><div class="field-label">UPGRADES (OPTIONAL)</div><input id="enlist-ship-upgrades" type="text" class="order-input" placeholder="E.G. ABLATIVE ARMOR"></div>
             </div>
             <button class="btn-submit-order" style="background: var(--lcars-green); color: #000; margin-top: 1rem; width: 100%;" onclick="executeCommissionShip()">COMMISSION VESSEL</button>
           </div>
