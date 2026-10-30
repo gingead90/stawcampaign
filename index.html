@@ -673,27 +673,31 @@
       document.getElementById('ship-assign-modal').classList.add('hidden');
       
       if (pendingShipAssignType === 'CAPTAIN') {
+        // Optimistic UI Update
+        const cap = authenticatedCaptains.find(c => c.captain_id === pendingShipAssignId);
+        if (cap) cap.assigned_ship = newShip;
+        renderAuthenticatedCaptainsView();
+        
         try {
-          await fetch(API_URL, {
+          fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action: 'modify_captain_stats', playerName: authCaptainPlayer, pinHash: authCaptainPinHash, captainId: pendingShipAssignId, assignedShip: newShip })
           });
-          const cap = authenticatedCaptains.find(c => c.captain_id === pendingShipAssignId);
-          if (cap) cap.assigned_ship = newShip;
-          renderAuthenticatedCaptainsView();
-        } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+        } catch (err) { console.error("Sync error:", err); }
       } else if (pendingShipAssignType === 'CREW') {
+        // Optimistic UI Update
+        const crew = authenticatedCrew.find(c => c.crew_id === pendingShipAssignId);
+        if (crew) crew.assigned_ship = newShip;
+        renderAuthenticatedCrewView();
+        
         try {
-          await fetch(API_URL, {
+          fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify({ action: 'modify_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash, crewId: pendingShipAssignId, assignedShip: newShip })
           });
-          const crew = authenticatedCrew.find(c => c.crew_id === pendingShipAssignId);
-          if (crew) crew.assigned_ship = newShip;
-          renderAuthenticatedCrewView();
-        } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+        } catch (err) { console.error("Sync error:", err); }
       }
     }
 
@@ -919,69 +923,84 @@
       `;
     }
 
-    async function updateCaptainPerks(captainId) {
+    function updateCaptainPerks(captainId) {
       const p1El = document.getElementById(`perk1-${captainId}`);
       const p2El = document.getElementById(`perk2-${captainId}`);
       let combined = [p1El ? p1El.value : 'NONE', p2El ? p2El.value : 'NONE'].filter(p => p !== 'NONE').join(', ');
       if (combined === '') combined = 'NONE';
+      
+      const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+      if(cap) cap.perks = combined;
+      
       try {
-        await fetch(API_URL, {
+        fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'modify_captain_stats', playerName: authCaptainPlayer, pinHash: authCaptainPinHash, captainId: captainId, perks: combined })
         });
-      } catch (err) { console.error("Transmission error:", err); }
+      } catch (err) { console.error("Sync error:", err); }
     }
 
-    async function assignCaptainToFleet(captainId) {
+    function assignCaptainToFleet(captainId) {
       const select = document.getElementById(`assign-select-${captainId}`);
       if (!select) return;
+      
+      // Optimistic UI
+      const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+      if (cap) cap.task_force_id = select.value;
+      renderAuthenticatedCaptainsView();
+      
       try {
-        const res = await fetch(API_URL, {
+        fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'assign_captain_fleet', playerName: authCaptainPlayer, pinHash: authCaptainPinHash, captainId: captainId, taskForceId: select.value })
         });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
-          if (cap) cap.task_force_id = select.value;
-          renderAuthenticatedCaptainsView();
-          fetchCampaignData();
-        }
-      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+      } catch (err) { console.error("Sync error:", err); }
     }
 
-    async function adjustCaptainStats(captainId, addedXp, newStatus) {
+    function adjustCaptainStats(captainId, addedXp, newStatus) {
+      // Optimistic UI
+      const cap = authenticatedCaptains.find(c => c.captain_id === captainId);
+      if (cap) {
+        if (addedXp) cap.xp = (Number(cap.xp) || 0) + addedXp;
+        if (newStatus) {
+          cap.status = newStatus.toUpperCase();
+          if (cap.status === 'MIA') {
+             cap.xp = Math.floor((Number(cap.xp) || 0) / 2);
+             cap.mia_timer = 2;
+             cap.task_force_id = 'RESERVE';
+          } else if (cap.status === 'ACTIVE') {
+             cap.mia_timer = 0;
+          }
+        }
+        
+        const bSkill = Number(cap.base_skill) || 1;
+        const val = Number(cap.xp) || 0;
+        if (val >= 25) { cap.tier = 'Tier III (Fleet Legend)'; cap.current_skill = bSkill + 2; }
+        else if (val >= 10) { cap.tier = 'Tier II (Veteran)'; cap.current_skill = bSkill + 1; }
+        else { cap.tier = 'Tier I (Line Captain)'; cap.current_skill = bSkill; }
+      }
+      renderAuthenticatedCaptainsView();
+
       const payload = { action: 'modify_captain_stats', playerName: authCaptainPlayer, pinHash: authCaptainPinHash, captainId: captainId };
       if (addedXp) payload.addedXp = addedXp;
       if (newStatus) payload.status = newStatus;
 
       try {
-        const res = await fetch(API_URL, {
+        fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify(payload)
         });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          const refRes = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'get_captains', playerName: authCaptainPlayer, pinHash: authCaptainPinHash })
-          });
-          const refData = await refRes.json();
-          authenticatedCaptains = refData.captains || [];
-          renderAuthenticatedCaptainsView();
-        }
-      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+      } catch (err) { console.error("Sync error:", err); }
     }
 
-    async function toggleCaptainStatus(captainId, newStatus) {
+    function toggleCaptainStatus(captainId, newStatus) {
       let promptMsg = `CONFIRMATION: Mark captain as ${newStatus}?`;
       if (newStatus === 'MIA') promptMsg = `WARNING: Marking MIA halves XP and sets a 2-turn cooldown.\n\nProceed?`;
       if (!confirm(promptMsg)) return;
-      await adjustCaptainStats(captainId, 0, newStatus);
+      adjustCaptainStats(captainId, 0, newStatus);
     }
 
     async function executeEnlistCaptain() {
@@ -992,6 +1011,9 @@
       const tf = document.getElementById('enlist-cap-fleet').value;
 
       if (!name) { alert("INPUT ERROR: Please provide a Captain name."); return; }
+      
+      const popup = document.getElementById('popup-enlist-captain');
+      if(popup) popup.classList.add('hidden');
 
       try {
         const res = await fetch(API_URL, {
@@ -1010,9 +1032,6 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          const popup = document.getElementById('popup-enlist-captain');
-          if(popup) popup.classList.add('hidden');
-          
           alert(`COMMISSION REPORT: ${name} added.`);
           const [refCaps, refShips] = await Promise.all([
             fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_captains', playerName: authCaptainPlayer, pinHash: authCaptainPinHash }) }),
@@ -1122,44 +1141,40 @@
       document.getElementById('crew-transfer-modal').classList.remove('hidden');
     }
 
-    async function confirmCrewTransfer() {
+    function confirmCrewTransfer() {
       const targetPlayer = document.getElementById('crew-transfer-select').value;
       if (!targetPlayer) return;
       document.getElementById('crew-transfer-modal').classList.add('hidden');
 
+      // Optimistic UI Update
+      authenticatedCrew = authenticatedCrew.filter(c => c.crew_id !== pendingCrewTransferId);
+      renderAuthenticatedCrewView();
+      
       try {
-        await fetch(API_URL, {
+        fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'modify_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash, crewId: pendingCrewTransferId, transferPlayer: targetPlayer })
         });
-        
-        authenticatedCrew = authenticatedCrew.filter(c => c.crew_id !== pendingCrewTransferId);
-        renderAuthenticatedCrewView();
         alert(`TRANSFER COMPLETE: Crew member assimilated by ${targetPlayer}.`);
-      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+      } catch (err) { console.error("Sync error:", err); }
     }
 
-    async function toggleCrewStatus(crewId, newStatus) {
+    function toggleCrewStatus(crewId, newStatus) {
       if (!confirm(`CONFIRMATION: Mark crew member as ${newStatus}?`)) return;
+      
+      // Optimistic UI Update
+      const crew = authenticatedCrew.find(c => c.crew_id === crewId);
+      if (crew) crew.status = newStatus;
+      renderAuthenticatedCrewView();
+      
       try {
-        const res = await fetch(API_URL, {
+        fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'modify_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash, crewId: crewId, status: newStatus })
         });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          const refRes = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'get_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash })
-          });
-          const refData = await refRes.json();
-          authenticatedCrew = refData.crew || [];
-          renderAuthenticatedCrewView();
-        }
-      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+      } catch (err) { console.error("Sync error:", err); }
     }
 
     async function executeEnlistCrew() {
@@ -1167,6 +1182,9 @@
       const ship = document.getElementById('enlist-crew-ship').value.trim() || 'UNASSIGNED';
 
       if (!name) { alert("INPUT ERROR: Please provide a Crew name."); return; }
+      
+      const popup = document.getElementById('popup-enlist-crew');
+      if(popup) popup.classList.add('hidden');
 
       try {
         const res = await fetch(API_URL, {
@@ -1176,9 +1194,6 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          const popup = document.getElementById('popup-enlist-crew');
-          if(popup) popup.classList.add('hidden');
-
           alert(`COMMISSION REPORT: ${name} added.`);
           const [refCrew, refShips] = await Promise.all([
             fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash }) }),
@@ -1394,7 +1409,7 @@
       document.getElementById('ship-master-edit-modal').classList.remove('hidden');
     }
 
-    async function confirmMasterShipEdit() {
+    function confirmMasterShipEdit() {
       const newName = document.getElementById('edit-ship-name').value.trim();
       const newClass = document.getElementById('edit-ship-class').value.trim();
       const newUpgrades = document.getElementById('edit-ship-upgrades').value.trim();
@@ -1404,9 +1419,27 @@
       if (!newName) { alert("INPUT ERROR: Ship Name cannot be blank."); return; }
 
       document.getElementById('ship-master-edit-modal').classList.add('hidden');
+
+      // Optimistic UI Update
+      const ship = authenticatedShips.find(s => s.ship_id === pendingShipEditId);
+      if (ship) {
+        const oldName = ship.ship_name;
+        ship.ship_name = newName;
+        ship.ship_class = newClass;
+        ship.upgrades = newUpgrades;
+        ship.task_force_id = newFleet;
+        ship.is_named = isNamed;
+
+        // Cascade name change locally if it changed
+        if (oldName && oldName !== newName) {
+          authenticatedCaptains.forEach(c => { if (norm(c.assigned_ship) === norm(oldName)) c.assigned_ship = newName; });
+          authenticatedCrew.forEach(c => { if (norm(c.assigned_ship) === norm(oldName)) c.assigned_ship = newName; });
+        }
+      }
+      renderAuthenticatedShipsView();
       
       try {
-        await fetch(API_URL, {
+        fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ 
@@ -1422,45 +1455,67 @@
           })
         });
         
-        // Refetch everything to ensure cascades applied correctly
-        const [resShips, resCaps, resCrew] = await Promise.all([
-          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_ships', playerName: authShipsPlayer, pinHash: authShipsPinHash }) }),
-          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_captains', playerName: authShipsPlayer, pinHash: authShipsPinHash }) }),
-          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_crew', playerName: authShipsPlayer, pinHash: authShipsPinHash }) })
-        ]);
-        
-        const dataShips = await resShips.json();
-        const dataCaps = await resCaps.json();
-        const dataCrew = await resCrew.json();
+        // Quietly background sync after 2 seconds to catch any server-side cascades
+        setTimeout(async () => {
+          const [resShips, resCaps, resCrew] = await Promise.all([
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_ships', playerName: authShipsPlayer, pinHash: authShipsPinHash }) }),
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_captains', playerName: authShipsPlayer, pinHash: authShipsPinHash }) }),
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_crew', playerName: authShipsPlayer, pinHash: authShipsPinHash }) })
+          ]);
+          const dShips = await resShips.json();
+          const dCaps = await resCaps.json();
+          const dCrew = await resCrew.json();
+          authenticatedShips = dShips.ships || [];
+          authenticatedCaptains = dCaps.captains || [];
+          authenticatedCrew = dCrew.crew || [];
+          
+          if(!document.getElementById('ships-modal').classList.contains('hidden')) {
+              renderAuthenticatedShipsView();
+          }
+        }, 2000);
 
-        authenticatedShips = dataShips.ships || [];
-        authenticatedCaptains = dataCaps.captains || [];
-        authenticatedCrew = dataCrew.crew || [];
-        
-        renderAuthenticatedShipsView();
-      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+      } catch (err) { console.error("Sync error:", err); }
     }
 
-    async function toggleShipStatus(shipId, newStatus) {
-      if (!confirm(`CONFIRMATION: Mark vessel as ${newStatus}?`)) return;
+    function assignShipToFleet(shipId) {
+      const select = document.getElementById(`assign-ship-select-${shipId}`);
+      if (!select) return;
+      
+      // Optimistic UI Update
+      const ship = authenticatedShips.find(s => s.ship_id === shipId);
+      if (ship) ship.task_force_id = select.value;
+      renderAuthenticatedShipsView();
+
       try {
-        const res = await fetch(API_URL, {
+        fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'modify_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipId: shipId, taskForceId: select.value })
+        });
+      } catch (err) { console.error("Sync error:", err); }
+    }
+
+    function toggleShipStatus(shipId, newStatus) {
+      if (!confirm(`CONFIRMATION: Mark vessel as ${newStatus}?`)) return;
+      
+      // Optimistic UI Update
+      const ship = authenticatedShips.find(s => s.ship_id === shipId);
+      if (ship) {
+          ship.status = newStatus;
+          if (newStatus === 'DESTROYED') {
+              const isNamed = norm(ship.is_named) === 'true' || norm(ship.is_named) === 'yes';
+              if (isNamed) { ship.cooldown_timer = 2; }
+          }
+      }
+      renderAuthenticatedShipsView();
+      
+      try {
+        fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'modify_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipId: shipId, status: newStatus })
         });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          const refRes = await fetch(API_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            body: JSON.stringify({ action: 'get_ships', playerName: authShipsPlayer, pinHash: authShipsPinHash })
-          });
-          const refData = await refRes.json();
-          authenticatedShips = refData.ships || [];
-          renderAuthenticatedShipsView();
-        }
-      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+      } catch (err) { console.error("Sync error:", err); }
     }
 
     async function executeCommissionShip() {
@@ -1472,6 +1527,9 @@
       const upgrades = document.getElementById('enlist-ship-upgrades').value.trim();
 
       if (!name) { alert("INPUT ERROR: Please provide a valid unique Ship Name / Registry."); return; }
+      
+      const popup = document.getElementById('popup-enlist-ship');
+      if(popup) popup.classList.add('hidden');
 
       try {
         const res = await fetch(API_URL, {
@@ -1481,12 +1539,10 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          const popup = document.getElementById('popup-enlist-ship');
-          if(popup) popup.classList.add('hidden');
-          
           document.getElementById('enlist-ship-name').value = '';
           document.getElementById('enlist-ship-class').value = '';
           document.getElementById('enlist-ship-upgrades').value = '';
+          if (namedSelect) namedSelect.checked = false;
           
           alert(`SHIPYARD REPORT: ${name} commissioned.`);
           
@@ -1530,6 +1586,8 @@
           const assignedCaps = authenticatedCaptains.filter(c => norm(c.assigned_ship) === norm(ship.ship_name) && norm(c.status) !== 'kia' && norm(c.status) !== 'mia');
           const assignedCrewArr = authenticatedCrew.filter(c => norm(c.assigned_ship) === norm(ship.ship_name) && norm(c.status) !== 'kia' && norm(c.status) !== 'dead' && norm(c.status) !== 'destroyed');
           
+          const currentTfOptions = `<option value="RESERVE" ${norm(ship.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(ship.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}`;
+
           let repairBtnText = isDead ? 'REPAIR / SALVAGE' : 'MARK DESTROYED';
           let repairDisabled = '';
           if (isDead && isNamed && cooldown > 0) {
@@ -1569,6 +1627,10 @@
                 <div class="captain-btn-row" style="margin-top: 12px; gap: 10px;">
                   <button class="btn-xp-mod" style="background: var(--lcars-green); color: #000; font-size: 0.75rem;" onclick="openShipMasterEditModal('${ship.ship_id}')">[EDIT ALL VESSEL DETAILS]</button>
                   <button class="btn-status-kia" style="flex: 1; border-color: var(--lcars-green); background: ${isDead ? 'var(--lcars-blue)' : 'var(--lcars-dark-red)'}; color: ${isDead ? '#000' : '#fff'};" onclick="toggleShipStatus('${ship.ship_id}', '${isDead ? 'ACTIVE' : 'DESTROYED'}')" ${repairDisabled}>${repairBtnText}</button>
+                </div>
+                <div style="display: flex; gap: 6px; align-items: center; margin-top: 8px;">
+                  <select id="assign-ship-select-${ship.ship_id}" class="order-select" style="font-size: 0.85rem; padding: 4px; border-color: var(--lcars-green); color: #fff;" ${!isAssigned ? 'disabled' : ''}>${currentTfOptions}</select>
+                  <button class="btn-xp-mod" style="flex: none; padding: 4px 12px; background: var(--lcars-green); color: #000;" onclick="assignShipToFleet('${ship.ship_id}')" ${!isAssigned ? 'disabled' : ''}>ASSIGN</button>
                 </div>
               </div>
 
