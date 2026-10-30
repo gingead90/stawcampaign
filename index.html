@@ -227,6 +227,7 @@
     </div>
   </div>
 
+  <!-- MAIN MODALS -->
   <div id="captains-modal" class="full-screen-modal hidden">
     <div class="modal-header">
       <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-teal);">CAPTAIN XP</div>
@@ -257,7 +258,10 @@
   <!-- SHARED SHIP ASSIGNMENT POPUP -->
   <div id="ship-assign-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
     <div id="ship-assign-panel" class="enlist-panel" style="margin: 0; width: 90%; max-width: 450px; border-color: var(--lcars-blue);">
-      <div id="ship-assign-title" class="field-label" style="color: var(--lcars-blue); font-size: 1.1rem; margin-bottom: 0.2rem;">ASSIGN PERSONNEL TO VESSEL</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.2rem;">
+        <div id="ship-assign-title" class="field-label" style="color: var(--lcars-blue); font-size: 1.1rem; margin: 0;">ASSIGN PERSONNEL TO VESSEL</div>
+        <button class="lcars-btn" style="background: var(--lcars-red); color: #000; height: 28px; padding: 0 15px; font-size: 0.8rem; border-radius: 14px;" onclick="document.getElementById('ship-assign-modal').classList.add('hidden')">CLOSE</button>
+      </div>
       <div id="ship-assign-current" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.2rem; font-weight: 700; letter-spacing: 1px;">CURRENT ASSIGNMENT: UNASSIGNED</div>
       
       <div class="field-label">SELECT EXISTING SHIP OR TYPE NEW NAME</div>
@@ -274,7 +278,10 @@
   <!-- SHARED CREW ASSIMILATION / TRANSFER POPUP -->
   <div id="crew-transfer-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
     <div class="enlist-panel" style="margin: 0; width: 90%; max-width: 450px; border-color: var(--lcars-lilac);">
-      <div class="field-label" style="color: var(--lcars-lilac); font-size: 1.1rem; margin-bottom: 1rem;">TRANSFER / ASSIMILATE CREW</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div class="field-label" style="color: var(--lcars-lilac); font-size: 1.1rem; margin: 0;">TRANSFER / ASSIMILATE CREW</div>
+        <button class="lcars-btn" style="background: var(--lcars-red); color: #000; height: 28px; padding: 0 15px; font-size: 0.8rem; border-radius: 14px;" onclick="document.getElementById('crew-transfer-modal').classList.add('hidden')">CLOSE</button>
+      </div>
       <div class="field-label">SELECT NEW COMMANDING ALLEGIANCE</div>
       <select id="crew-transfer-select" class="order-select" style="border-color: var(--lcars-lilac); color: #fff;"></select>
       <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
@@ -288,8 +295,8 @@
   <div id="ship-details-modal" class="full-screen-modal hidden" style="z-index: 150; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
     <div class="enlist-panel" style="margin: 0; width: 90%; max-width: 500px; border-color: var(--lcars-green); max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-        <div id="ship-details-title" class="field-label" style="color: var(--lcars-green); font-size: 1.25rem;">SHIP DETAILS</div>
-        <button class="close-btn" style="color: var(--lcars-green);" onclick="document.getElementById('ship-details-modal').classList.add('hidden')">&times;</button>
+        <div id="ship-details-title" class="field-label" style="color: var(--lcars-green); font-size: 1.25rem; margin: 0;">SHIP DETAILS</div>
+        <button class="lcars-btn" style="background: var(--lcars-red); color: #000; height: 28px; padding: 0 15px; font-size: 0.8rem; border-radius: 14px;" onclick="document.getElementById('ship-details-modal').classList.add('hidden')">CLOSE</button>
       </div>
       <div id="ship-details-content"></div>
     </div>
@@ -298,7 +305,10 @@
   <!-- MASTER SHIP EDIT MODAL -->
   <div id="ship-master-edit-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
     <div class="enlist-panel" style="margin: 0; width: 90%; max-width: 450px; border-color: var(--lcars-green);">
-      <div class="field-label" style="color: var(--lcars-green); font-size: 1.1rem; margin-bottom: 1rem;">MODIFY SHIP PARAMETERS</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div class="field-label" style="color: var(--lcars-green); font-size: 1.1rem; margin: 0;">MODIFY SHIP PARAMETERS</div>
+        <button class="lcars-btn" style="background: var(--lcars-red); color: #000; height: 28px; padding: 0 15px; font-size: 0.8rem; border-radius: 14px;" onclick="document.getElementById('ship-master-edit-modal').classList.add('hidden')">CLOSE</button>
+      </div>
       
       <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 0.75rem;">
         <div>
@@ -333,7 +343,10 @@
   <!-- SHIP UPGRADE QUICK EDIT MODAL -->
   <div id="ship-upgrade-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
     <div class="enlist-panel" style="margin: 0; width: 90%; max-width: 450px; border-color: var(--lcars-green);">
-      <div class="field-label" style="color: var(--lcars-green); font-size: 1.1rem; margin-bottom: 1rem;">MODIFY VESSEL UPGRADES</div>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <div class="field-label" style="color: var(--lcars-green); font-size: 1.1rem; margin: 0;">MODIFY VESSEL UPGRADES</div>
+        <button class="lcars-btn" style="background: var(--lcars-red); color: #000; height: 28px; padding: 0 15px; font-size: 0.8rem; border-radius: 14px;" onclick="document.getElementById('ship-upgrade-modal').classList.add('hidden')">CLOSE</button>
+      </div>
       <div class="field-label">INSTALLED TECH & WEAPONRY (COMMA SEPARATED)</div>
       <input id="ship-upgrade-input" type="text" class="order-input" placeholder="E.G. ABLATIVE ARMOR, PHOTON TORPEDOES" style="font-size: 1.1rem; padding: 0.6rem;">
       <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
@@ -934,8 +947,8 @@
         <div id="popup-enlist-captain" class="full-screen-modal hidden" style="z-index: 100; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); position: fixed; inset: 0;">
           <div class="enlist-panel" style="border-color: var(--lcars-teal);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <div class="field-label" style="color: var(--lcars-amber); font-size: 0.95rem;">ENLIST NEW OFFICER</div>
-              <button class="close-btn" style="color: var(--lcars-amber);" onclick="document.getElementById('popup-enlist-captain').classList.add('hidden')">&times;</button>
+              <div class="field-label" style="color: var(--lcars-amber); font-size: 0.95rem; margin: 0;">ENLIST NEW OFFICER</div>
+              <button class="lcars-btn" style="background: var(--lcars-red); color: #000; height: 28px; padding: 0 15px; font-size: 0.8rem; border-radius: 14px;" onclick="document.getElementById('popup-enlist-captain').classList.add('hidden')">CLOSE</button>
             </div>
             <input id="enlist-cap-name" type="text" class="order-input" placeholder="CAPTAIN NAME (E.G. JEAN-LUC PICARD)">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
@@ -1038,6 +1051,9 @@
       const tf = document.getElementById('enlist-cap-fleet').value;
 
       if (!name) { alert("INPUT ERROR: Please provide a Captain name."); return; }
+      
+      const popup = document.getElementById('popup-enlist-captain');
+      if(popup) popup.classList.add('hidden');
 
       try {
         const res = await fetch(API_URL, {
@@ -1056,9 +1072,6 @@
         });
         const respData = await res.json();
         if (respData.status === 'success') {
-          const popup = document.getElementById('popup-enlist-captain');
-          if(popup) popup.classList.add('hidden');
-          
           alert(`COMMISSION REPORT: ${name} added.`);
           const [refCaps, refShips] = await Promise.all([
             fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_captains', playerName: authCaptainPlayer, pinHash: authCaptainPinHash }) }),
@@ -1302,8 +1315,8 @@
         <div id="popup-enlist-crew" class="full-screen-modal hidden" style="z-index: 100; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); position: fixed; inset: 0;">
           <div class="enlist-panel" style="border-color: var(--lcars-lilac);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <div class="field-label" style="color: var(--lcars-lilac); font-size: 0.95rem;">ENLIST NEW CREW MEMBER</div>
-              <button class="close-btn" style="color: var(--lcars-lilac);" onclick="document.getElementById('popup-enlist-crew').classList.add('hidden')">&times;</button>
+              <div class="field-label" style="color: var(--lcars-lilac); font-size: 0.95rem; margin: 0;">ENLIST NEW CREW MEMBER</div>
+              <button class="lcars-btn" style="background: var(--lcars-red); color: #000; height: 28px; padding: 0 15px; font-size: 0.8rem; border-radius: 14px;" onclick="document.getElementById('popup-enlist-crew').classList.add('hidden')">CLOSE</button>
             </div>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
               <div><div class="field-label">CREW NAME</div><input id="enlist-crew-name" type="text" class="order-input" placeholder="E.G. WORF"></div>
@@ -1402,6 +1415,33 @@
         shipsViewFilter = select.value;
         renderAuthenticatedShipsView();
       }
+    }
+
+    function openShipUpgradeModal(shipId, currentUpgrades) {
+      pendingShipUpgradeId = shipId;
+      document.getElementById('ship-upgrade-input').value = currentUpgrades;
+      document.getElementById('ship-upgrade-modal').classList.remove('hidden');
+    }
+
+    function confirmShipUpgrades() {
+      const newUpgrades = document.getElementById('ship-upgrade-input').value.trim();
+      document.getElementById('ship-upgrade-modal').classList.add('hidden');
+      
+      // Optimistic Update
+      const ship = authenticatedShips.find(s => s.ship_id === pendingShipUpgradeId);
+      if (ship) ship.upgrades = newUpgrades;
+      renderAuthenticatedShipsView();
+      if (!document.getElementById('ship-details-modal').classList.contains('hidden')) {
+          openShipDetailsModal(pendingShipUpgradeId);
+      }
+      
+      try {
+        fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'modify_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipId: pendingShipUpgradeId, upgrades: newUpgrades })
+        });
+      } catch (err) { console.error("Sync error:", err); }
     }
 
     function openShipMasterEditModal(shipId) {
@@ -1621,6 +1661,7 @@
         
         <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 10px; padding: 8px; background: rgba(0,0,0,0.3); border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
           <span style="overflow: hidden; white-space: normal;">UPGRADES: <strong style="color: var(--lcars-blue);">${ship.upgrades || 'NONE'}</strong></span>
+          <button class="btn-edit-ship" onclick="openShipUpgradeModal('${ship.ship_id}', '${(ship.upgrades || '').replace(/'/g, "\\'")}')" ${!isAssigned ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>[EDIT]</button>
         </div>
 
         <div style="margin-top: 10px; padding: 10px; background: rgba(0,0,0,0.4); border-radius: 4px;">
@@ -1706,8 +1747,8 @@
         <div id="popup-enlist-ship" class="full-screen-modal hidden" style="z-index: 100; align-items: center; justify-content: center; background: rgba(0,0,0,0.85); position: fixed; inset: 0;">
           <div class="enlist-panel" style="border-color: var(--lcars-green);">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-              <div class="field-label" style="color: var(--lcars-green); font-size: 0.95rem;">COMMISSION NEW VESSEL</div>
-              <button class="close-btn" style="color: var(--lcars-green);" onclick="document.getElementById('popup-enlist-ship').classList.add('hidden')">&times;</button>
+              <div class="field-label" style="color: var(--lcars-green); font-size: 0.95rem; margin: 0;">COMMISSION NEW VESSEL</div>
+              <button class="lcars-btn" style="background: var(--lcars-red); color: #000; height: 28px; padding: 0 15px; font-size: 0.8rem; border-radius: 14px;" onclick="document.getElementById('popup-enlist-ship').classList.add('hidden')">CLOSE</button>
             </div>
             <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 0.75rem;">
               <div>
