@@ -253,10 +253,13 @@
   <!-- SHARED SHIP ASSIGNMENT POPUP -->
   <div id="ship-assign-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
     <div id="ship-assign-panel" class="enlist-panel" style="margin: 0; width: 90%; max-width: 450px; border-color: var(--lcars-blue);">
-      <div id="ship-assign-title" class="field-label" style="color: var(--lcars-blue); font-size: 1.1rem; margin-bottom: 1rem;">ASSIGN PERSONNEL TO VESSEL</div>
+      <div id="ship-assign-title" class="field-label" style="color: var(--lcars-blue); font-size: 1.1rem; margin-bottom: 0.2rem;">ASSIGN PERSONNEL TO VESSEL</div>
+      <div id="ship-assign-current" style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.2rem; font-weight: 700; letter-spacing: 1px;">CURRENT ASSIGNMENT: UNASSIGNED</div>
+      
       <div class="field-label">SELECT EXISTING SHIP OR TYPE NEW NAME</div>
-      <input id="ship-assign-input" list="shared-ships-list" type="text" class="order-input" placeholder="SHIP NAME / REGISTRY" style="font-size: 1.1rem; padding: 0.6rem;">
+      <input id="ship-assign-input" list="shared-ships-list" type="text" class="order-input" placeholder="SELECT OR TYPE VESSEL" style="font-size: 1.1rem; padding: 0.6rem;">
       <datalist id="shared-ships-list"></datalist>
+      
       <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
         <button class="btn-submit-order" style="flex: 1; background: var(--lcars-red);" onclick="document.getElementById('ship-assign-modal').classList.add('hidden')">CANCEL</button>
         <button id="btn-confirm-assign" class="btn-submit-order" style="flex: 1; background: var(--lcars-blue);" onclick="confirmShipAssignment()">CONFIRM ASSIGNMENT</button>
@@ -577,8 +580,15 @@
     function openShipAssignModal(id, currentShip, type) {
       pendingShipAssignId = id;
       pendingShipAssignType = type;
+      
       const input = document.getElementById('ship-assign-input');
-      input.value = currentShip === 'UNASSIGNED' ? '' : currentShip;
+      // Blank out the input so the browser shows the full datalist on click
+      input.value = ''; 
+      
+      const currentLabel = document.getElementById('ship-assign-current');
+      if(currentLabel) {
+        currentLabel.textContent = `CURRENT ASSIGNMENT: ${currentShip}`;
+      }
       
       const panel = document.getElementById('ship-assign-panel');
       const btn = document.getElementById('btn-confirm-assign');
@@ -600,8 +610,14 @@
 
     async function confirmShipAssignment() {
       const inputVal = document.getElementById('ship-assign-input').value.trim();
-      const newShip = inputVal || 'UNASSIGNED';
       
+      // If left totally blank when clicking confirm, just cancel the edit
+      if (!inputVal) {
+         document.getElementById('ship-assign-modal').classList.add('hidden');
+         return; 
+      }
+      
+      const newShip = inputVal;
       document.getElementById('ship-assign-modal').classList.add('hidden');
       
       if (pendingShipAssignType === 'CAPTAIN') {
