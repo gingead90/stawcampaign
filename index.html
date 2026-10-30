@@ -20,6 +20,7 @@
       --lcars-slate: #556677;
       --lcars-teal: #00aaaa;
       --lcars-panel: rgba(10, 14, 23, 0.9);
+      --lcars-lilac: #c084fc;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background-color: #030712; color: #ffffff; font-family: 'Antonio', -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 1px; }
@@ -45,6 +46,7 @@
     .rail-btn { height: 48px; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Antonio', sans-serif; font-weight: 700; font-size: 0.72rem; color: #000; letter-spacing: 0.5px; padding: 2px; transition: filter 0.15s ease; }
     .rail-btn:hover { filter: brightness(1.3); }
     .rail-btn-captains { background: var(--lcars-teal); }
+    .rail-btn-crew { background: var(--lcars-lilac); }
     .rail-btn-rp { background: var(--lcars-gold); }
     .rail-btn-settings { background: var(--lcars-blue); }
     .rail-block-mid { flex: 1; background: var(--lcars-purple); opacity: 0.85; }
@@ -99,7 +101,7 @@
     .btn-combat-retreat { background: var(--lcars-blue); color: #000; border: none; padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
     .btn-combat-destroy { background: var(--lcars-dark-red); color: #fff; border: 1px solid var(--lcars-red); padding: 0.45rem; font-family: 'Antonio', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
     
-    /* FULL-SCREEN MODAL FOR CAPTAINS */
+    /* FULL-SCREEN MODALS */
     .full-screen-modal { position: fixed; inset: 0; background: rgba(3, 7, 18, 0.97); backdrop-filter: blur(12px); z-index: 80; display: flex; flex-direction: column; padding: 0.6rem; gap: 0.5rem; }
     .full-screen-modal.hidden { display: none !important; }
     .modal-header { display: flex; gap: 8px; height: 44px; align-items: center; }
@@ -122,7 +124,6 @@
     .btn-edit-ship:hover { background: var(--lcars-blue); color: #000; }
 
     .captain-btn-row { display: flex; gap: 5px; margin-top: 0.5rem; }
-
     .btn-xp-mod { flex: 1; padding: 5px 0; background: #334155; color: #ffffff; border: 1px solid #475569; font-family: 'Antonio', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; border-radius: 4px; transition: background 0.15s ease; }
     .btn-xp-mod:hover:not(:disabled) { background: var(--lcars-amber); color: #000; }
     .btn-xp-mod:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -174,11 +175,16 @@
       </div>
     </header>
     <div id="theater-layout">
+      <!-- Left LCARS Side Rail -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
         <button class="rail-btn rail-btn-captains" onclick="openCaptainsMenu()" title="Open Captain XP Roster">
           <span>CAPTAIN</span>
           <span style="font-size: 0.58rem; color: #1e293b;">XP</span>
+        </button>
+        <button class="rail-btn rail-btn-crew" onclick="openCrewMenu()" title="Open Crew Roster">
+          <span>CREW</span>
+          <span style="font-size: 0.58rem; color: #1e293b;">ROSTER</span>
         </button>
         <button class="rail-btn rail-btn-rp" onclick="openRpLedgerMenu()" title="Open Confidential RP Treasury">
           <span>RP</span>
@@ -212,13 +218,24 @@
     </div>
   </div>
 
+  <!-- FULL SCREEN CAPTAINS MODAL -->
   <div id="captains-modal" class="full-screen-modal hidden">
     <div class="modal-header">
       <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-teal);">CAPTAIN XP</div>
       <div class="lcars-pill-bar" style="background: var(--lcars-blue);" id="captains-modal-title">PERSONNEL & OFFICERS LOG</div>
       <button class="lcars-btn" style="background: var(--lcars-red); border-radius: 0 21px 21px 0;" onclick="closeCaptainsMenu()">CLOSE X</button>
     </div>
-    <div id="captains-modal-content" class="modal-content"></div>
+    <div id="captains-modal-content" class="modal-content" style="border-color: var(--lcars-teal);"></div>
+  </div>
+  
+  <!-- FULL SCREEN CREW MODAL -->
+  <div id="crew-modal" class="full-screen-modal hidden">
+    <div class="modal-header">
+      <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-lilac);">CREW ROSTER</div>
+      <div class="lcars-pill-bar" style="background: var(--lcars-blue);" id="crew-modal-title">UNIQUE CREW ASSIGNMENTS</div>
+      <button class="lcars-btn" style="background: var(--lcars-red); border-radius: 0 21px 21px 0;" onclick="closeCrewMenu()">CLOSE X</button>
+    </div>
+    <div id="crew-modal-content" class="modal-content" style="border-color: var(--lcars-lilac);"></div>
   </div>
 
   <script>
@@ -586,7 +603,7 @@
         authCaptainPlayer = playerName; 
         authCaptainPinHash = pinHash;
         authenticatedCaptains = respData.captains || [];
-        captainViewFilter = 'ALL'; 
+        captainViewFilter = 'ALL';
         renderAuthenticatedCaptainsView();
       } catch (err) { 
         alert("COMMUNICATION ERROR: " + err); 
@@ -633,7 +650,7 @@
           const isMia = norm(c.status) === 'mia';
           if (captainViewFilter === 'KIA') return isKia;
           if (captainViewFilter === 'MIA') return isMia;
-          if (isKia || isMia) return false;
+          if (isKia || isMia) return false; 
           return norm(c.task_force_id) === norm(captainViewFilter);
         });
       }
@@ -731,12 +748,14 @@
         <div class="enlist-panel">
           <div class="field-label" style="color: var(--lcars-amber); font-size: 0.95rem; margin-bottom: 0.5rem;">ENLIST NEW OFFICER</div>
           <input id="enlist-cap-name" type="text" class="order-input" placeholder="CAPTAIN NAME (E.G. JEAN-LUC PICARD)">
+          
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
             <div><div class="field-label">BASE SKILL (1-9)</div><input id="enlist-cap-skill" type="number" min="1" max="9" value="6" class="order-input"></div>
             <div><div class="field-label">STARTING XP</div><input id="enlist-cap-xp" type="number" min="0" value="0" class="order-input"></div>
             <div><div class="field-label">ASSIGNED VESSEL</div><input id="enlist-cap-ship" type="text" class="order-input" placeholder="SHIP NAME"></div>
             <div><div class="field-label">FLEET ASSIGNMENT</div><select id="enlist-cap-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">${fleetEnlistOptions}</select></div>
           </div>
+
           <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 1rem; width: 100%;" onclick="executeEnlistCaptain()">COMMISSION NEW OFFICER</button>
         </div>
       `;
@@ -846,6 +865,228 @@
           renderAuthenticatedCaptainsView();
         }
       } catch (err) { alert("COMMUNICATION ERROR: " + err); }
+    }
+
+    // --- FULL SCREEN CREW ROSTER ---
+    let authCrewPlayer = '';
+    let authCrewPinHash = '';
+    let authenticatedCrew = [];
+    let crewViewFilter = 'ALL';
+
+    function openCrewMenu() {
+      closeSidebar();
+      const modal = document.getElementById('crew-modal');
+      const content = document.getElementById('crew-modal-content');
+      const playerOptions = (campaignData.players || []).map(p => `<option value="${p.player_name}">${p.player_name}</option>`).join('');
+
+      content.innerHTML = `
+        <div style="max-width: 450px; margin: 3rem auto;">
+          <div class="sidebar-notes" style="border-left-color: var(--lcars-lilac); margin-bottom: 1rem;">
+            <div class="field-label" style="color: var(--lcars-lilac); margin-bottom: 2px;">CREW MANIFEST</div>
+            UNIQUE CREW FILES ARE SEALED. ENTER SECURITY PIN TO ACCESS YOUR ROSTER.
+          </div>
+          <div class="order-box" style="border-color: var(--lcars-lilac); padding: 1.5rem;">
+            <div class="field-label" style="color: var(--lcars-lilac);">SELECT ALLEGIANCE</div>
+            <select id="crew-auth-player" class="order-select" style="border-color: var(--lcars-lilac); color: var(--lcars-lilac); font-size: 1.1rem; padding: 0.75rem;">
+              ${playerOptions}
+            </select>
+            <div style="margin-top: 1rem;">
+              <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
+              <input id="crew-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" style="font-size: 1.1rem; padding: 0.75rem;" onkeydown="if(event.key === 'Enter') authenticateCrewRoster()">
+            </div>
+            <button id="btn-auth-crew" class="btn-submit-order" style="background: var(--lcars-lilac); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateCrewRoster()">
+              DECRYPT CREW ROSTER
+            </button>
+          </div>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    function closeCrewMenu() { document.getElementById('crew-modal').classList.add('hidden'); }
+
+    async function authenticateCrewRoster() {
+      const pSelect = document.getElementById('crew-auth-player');
+      const pinInput = document.getElementById('crew-auth-pin');
+      if (!pSelect || !pinInput) return;
+      const playerName = pSelect.value;
+      const rawPin = pinInput.value;
+
+      if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
+
+      const btn = document.getElementById('btn-auth-crew');
+      if (btn) { btn.textContent = "AUTHENTICATING..."; btn.disabled = true; }
+
+      const pinHash = await hashPin(rawPin);
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'get_crew', playerName: playerName, pinHash: pinHash })
+        });
+        const respData = await res.json();
+        if (respData.status === 'auth_failed') { 
+          alert("SECURITY BREACH: Invalid PIN for " + playerName); 
+          if (btn) { btn.textContent = "DECRYPT CREW ROSTER"; btn.disabled = false; }
+          return; 
+        }
+        authCrewPlayer = playerName; 
+        authCrewPinHash = pinHash;
+        authenticatedCrew = respData.crew || [];
+        crewViewFilter = 'ALL';
+        renderAuthenticatedCrewView();
+      } catch (err) { 
+        alert("COMMUNICATION ERROR: " + err); 
+        if (btn) { btn.textContent = "DECRYPT CREW ROSTER"; btn.disabled = false; }
+      }
+    }
+
+    function updateCrewViewFilter() {
+      const select = document.getElementById('crew-view-filter');
+      if (select) {
+        crewViewFilter = select.value;
+        renderAuthenticatedCrewView();
+      }
+    }
+
+    async function editCrewShip(crewId, currentShip) {
+      const val = prompt(`ASSIGN VESSEL:\nEnter the name/class of the ship for this crew member:`, currentShip === 'UNASSIGNED' ? '' : currentShip);
+      if (val === null) return;
+      const newShip = val.trim() || 'UNASSIGNED';
+      
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'modify_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash, crewId: crewId, assignedShip: newShip })
+        });
+        const crew = authenticatedCrew.find(c => c.crew_id === crewId);
+        if (crew) crew.assigned_ship = newShip;
+        renderAuthenticatedCrewView();
+      } catch (err) {
+        alert("TRANSMISSION ERROR: " + err);
+      }
+    }
+
+    async function toggleCrewStatus(crewId, newStatus) {
+      if (!confirm(`CONFIRMATION: Mark crew member as ${newStatus}?`)) return;
+      
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'modify_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash, crewId: crewId, status: newStatus })
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          const refRes = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'get_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash })
+          });
+          const refData = await refRes.json();
+          authenticatedCrew = refData.crew || [];
+          renderAuthenticatedCrewView();
+        }
+      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+    }
+
+    async function executeEnlistCrew() {
+      const name = document.getElementById('enlist-crew-name').value.trim();
+      const ship = document.getElementById('enlist-crew-ship').value.trim() || 'UNASSIGNED';
+
+      if (!name) { alert("INPUT ERROR: Please provide a Crew name."); return; }
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'add_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash, crewName: name, assignedShip: ship })
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          document.getElementById('enlist-crew-name').value = '';
+          document.getElementById('enlist-crew-ship').value = '';
+          alert(`COMMISSION REPORT: ${name} added.`);
+          const refRes = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'get_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash })
+          });
+          const refData = await refRes.json();
+          authenticatedCrew = refData.crew || [];
+          renderAuthenticatedCrewView();
+        }
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
+    }
+
+    function renderAuthenticatedCrewView() {
+      const content = document.getElementById('crew-modal-content');
+      if (!content) return;
+      
+      let filteredCrew = authenticatedCrew;
+      if (crewViewFilter !== 'ALL') {
+        filteredCrew = authenticatedCrew.filter(c => {
+          const isKia = norm(c.status) === 'kia' || norm(c.status) === 'dead' || norm(c.status) === 'destroyed';
+          if (crewViewFilter === 'DEAD') return isKia;
+          if (crewViewFilter === 'ACTIVE') return !isKia;
+          return true;
+        });
+      }
+
+      let cardsHtml = '';
+      if (filteredCrew.length === 0) {
+        cardsHtml = `<div style="text-align: center; color: #94a3b8; font-size: 1rem; padding: 2rem; border: 1px dashed var(--lcars-slate); grid-column: 1 / -1; border-radius: 8px;">NO CREW MEMBERS FOUND.</div>`;
+      } else {
+        cardsHtml = filteredCrew.map(c => {
+          const isKia = norm(c.status) === 'kia' || norm(c.status) === 'dead' || norm(c.status) === 'destroyed';
+          const shipName = String(c.assigned_ship || 'UNASSIGNED').trim();
+
+          return `
+            <div class="captain-card ${isKia ? 'kia' : ''}" style="border-left-color: var(--lcars-lilac);">
+              <div class="captain-header">
+                <span class="captain-name">${c.crew_name}</span>
+                <div class="captain-badges">
+                  <span class="badge-vet" style="background: var(--lcars-lilac); color: #000;">${c.crew_id}</span>
+                </div>
+              </div>
+              <div class="captain-stats-row">
+                <span>STATUS: <strong style="color: ${isKia ? 'var(--lcars-red)' : '#4ade80'};">${isKia ? 'DEAD / KIA' : 'ACTIVE'}</strong></span>
+              </div>
+              <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px; padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
+                <span style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">VESSEL: <strong style="color: var(--lcars-blue);">${shipName}</strong></span>
+                <button class="btn-edit-ship" onclick="editCrewShip('${c.crew_id}', '${shipName.replace(/'/g, "\\'")}')" ${isKia ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>[EDIT]</button>
+              </div>
+              <div class="captain-btn-row" style="margin-top: 8px;">
+                <button class="btn-status-kia" style="width: 100%;" onclick="toggleCrewStatus('${c.crew_id}', '${isKia ? 'ACTIVE' : 'DEAD'}')">${isKia ? 'REVIVE' : 'MARK DEAD'}</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      content.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 1.25rem; color: var(--lcars-lilac); font-weight: 700;">CREW MANIFEST: ${authCrewPlayer.toUpperCase()}</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--lcars-lilac); font-size: 0.8rem; font-weight: 700;">FILTER:</span>
+            <select id="crew-view-filter" class="order-select" style="width: auto; padding: 4px 8px; font-size: 0.9rem; border-color: var(--lcars-lilac); color: #fff;" onchange="updateCrewViewFilter()">
+              <option value="ALL" ${crewViewFilter === 'ALL' ? 'selected' : ''}>ALL CREW</option>
+              <option value="ACTIVE" ${crewViewFilter === 'ACTIVE' ? 'selected' : ''}>ACTIVE</option>
+              <option value="DEAD" ${crewViewFilter === 'DEAD' ? 'selected' : ''}>DEAD (KIA)</option>
+            </select>
+          </div>
+        </div>
+        <div class="captains-grid">${cardsHtml}</div>
+        <div class="enlist-panel" style="border-color: var(--lcars-lilac);">
+          <div class="field-label" style="color: var(--lcars-lilac); font-size: 0.95rem; margin-bottom: 0.5rem;">ENLIST NEW CREW MEMBER</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
+            <div><div class="field-label">CREW NAME</div><input id="enlist-crew-name" type="text" class="order-input" placeholder="E.G. WORF"></div>
+            <div><div class="field-label">ASSIGNED VESSEL</div><input id="enlist-crew-ship" type="text" class="order-input" placeholder="SHIP NAME"></div>
+          </div>
+          <button class="btn-submit-order" style="background: var(--lcars-lilac); color: #000; margin-top: 1rem; width: 100%;" onclick="executeEnlistCrew()">COMMISSION NEW CREW</button>
+        </div>
+      `;
     }
 
     // --- RP LEDGER SYSTEM ---
