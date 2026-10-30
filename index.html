@@ -108,7 +108,7 @@
     .full-screen-modal.hidden { display: none !important; }
     .modal-header { display: flex; gap: 8px; height: 44px; align-items: center; }
     .modal-content { flex: 1; overflow-y: auto; padding: 1rem; border: 2px solid var(--lcars-teal); border-radius: 8px; background: rgba(10, 14, 23, 0.85); box-shadow: inset 0 0 30px rgba(0,0,0,0.9); }
-    .captains-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; margin-top: 1rem; }
+    .captains-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(310px, 1fr)); gap: 1rem; margin-top: 1rem; align-items: start; }
     .enlist-panel { max-width: 500px; width: 100%; margin: auto; border: 1px solid var(--lcars-amber); background: rgba(15, 23, 42, 0.95); padding: 1.5rem; border-radius: 8px; box-shadow: 0 0 25px rgba(0,0,0,0.9); }
 
     .captain-card { background: rgba(15, 23, 42, 0.9); border: 1px solid var(--lcars-slate); border-left: 5px solid var(--lcars-teal); border-radius: 6px; padding: 0.85rem; display: flex; flex-direction: column; gap: 0.4rem; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
@@ -122,8 +122,8 @@
     .badge-vet { font-size: 0.72rem; font-weight: 700; padding: 2px 6px; background: var(--lcars-teal); color: #000; border-radius: 3px; }
     .captain-stats-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: #94a3b8; background: rgba(0, 0, 0, 0.5); padding: 6px 8px; border-radius: 4px; margin-top: 4px; }
     
-    .btn-edit-ship { background: transparent; border: 1px solid var(--lcars-slate); color: var(--lcars-blue); font-size: 0.65rem; padding: 2px 6px; cursor: pointer; border-radius: 3px; margin-left: auto; }
-    .btn-edit-ship:hover { background: var(--lcars-blue); color: #000; }
+    .btn-edit-ship { background: transparent; border: 1px solid var(--lcars-slate); color: var(--lcars-blue); font-size: 0.65rem; padding: 2px 6px; cursor: pointer; border-radius: 3px; margin-left: auto; transition: all 0.15s ease; }
+    .btn-edit-ship:hover:not(:disabled) { background: var(--lcars-blue); color: #000; }
 
     .captain-btn-row { display: flex; gap: 5px; margin-top: 0.5rem; }
     .btn-xp-mod { flex: 1; padding: 5px 0; background: #334155; color: #ffffff; border: 1px solid #475569; font-family: 'Antonio', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; border-radius: 4px; transition: background 0.15s ease; }
@@ -131,6 +131,8 @@
     .btn-xp-mod:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-status-kia { padding: 5px 10px; background: var(--lcars-dark-red); color: #fff; border: 1px solid var(--lcars-red); font-family: 'Antonio', sans-serif; font-size: 0.75rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
     .btn-status-mia { padding: 5px 10px; background: #b45309; color: #fff; border: 1px solid var(--lcars-orange); font-family: 'Antonio', sans-serif; font-size: 0.75rem; font-weight: 700; cursor: pointer; border-radius: 4px; }
+
+    .hidden-accordion { display: none !important; }
 
     #landscape-prompt { display: none; position: fixed; inset: 0; width: 100vw; height: 100dvh; background: rgba(3, 7, 18, 0.98); backdrop-filter: blur(8px); z-index: 9999999; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1.5rem; user-select: none; }
     #landscape-prompt svg { width: 64px; height: 64px; fill: var(--lcars-orange); margin-bottom: 1.25rem; animation: rotateDevice 2s infinite ease-in-out; }
@@ -280,15 +282,37 @@
     </div>
   </div>
 
-  <!-- SHARED SHIP UPGRADE POPUP -->
-  <div id="ship-upgrade-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
+  <!-- MASTER SHIP EDIT MODAL -->
+  <div id="ship-master-edit-modal" class="full-screen-modal hidden" style="z-index: 200; background: rgba(0,0,0,0.9); align-items: center; justify-content: center;">
     <div class="enlist-panel" style="margin: 0; width: 90%; max-width: 450px; border-color: var(--lcars-green);">
-      <div class="field-label" style="color: var(--lcars-green); font-size: 1.1rem; margin-bottom: 1rem;">MODIFY VESSEL UPGRADES</div>
-      <div class="field-label">INSTALLED TECH & WEAPONRY (COMMA SEPARATED)</div>
-      <input id="ship-upgrade-input" type="text" class="order-input" placeholder="E.G. ABLATIVE ARMOR, PHOTON TORPEDOES" style="font-size: 1.1rem; padding: 0.6rem;">
+      <div class="field-label" style="color: var(--lcars-green); font-size: 1.1rem; margin-bottom: 1rem;">MODIFY SHIP PARAMETERS</div>
+      
+      <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 0.75rem;">
+        <div>
+          <div style="display: flex; justify-content: space-between;">
+            <div class="field-label">SHIP NAME / REGISTRY</div>
+            <div style="display: flex; align-items: center; gap: 5px;">
+              <input type="checkbox" id="edit-ship-named" style="accent-color: var(--lcars-green); width: 14px; height: 14px; cursor: pointer;">
+              <label for="edit-ship-named" class="field-label" style="margin: 0; cursor: pointer;">UNIQUE NAMED SHIP</label>
+            </div>
+          </div>
+          <input id="edit-ship-name" type="text" class="order-input" style="margin-top: 4px;">
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0.75rem;">
+        <div><div class="field-label">SHIP CLASS</div><input id="edit-ship-class" type="text" class="order-input"></div>
+        <div><div class="field-label">FLEET ASSIGNMENT</div><select id="edit-ship-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;"></select></div>
+      </div>
+      
+      <div style="margin-bottom: 0.75rem;">
+        <div class="field-label">UPGRADES (COMMA SEPARATED)</div>
+        <input id="edit-ship-upgrades" type="text" class="order-input" placeholder="E.G. ABLATIVE ARMOR">
+      </div>
+      
       <div style="display: flex; gap: 10px; margin-top: 1.5rem;">
-        <button class="btn-submit-order" style="flex: 1; background: var(--lcars-red);" onclick="document.getElementById('ship-upgrade-modal').classList.add('hidden')">CANCEL</button>
-        <button class="btn-submit-order" style="flex: 1; background: var(--lcars-green);" onclick="confirmShipUpgrades()">SAVE UPGRADES</button>
+        <button class="btn-submit-order" style="flex: 1; background: var(--lcars-red);" onclick="document.getElementById('ship-master-edit-modal').classList.add('hidden')">CANCEL</button>
+        <button class="btn-submit-order" style="flex: 1; background: var(--lcars-green);" onclick="confirmMasterShipEdit()">SAVE CHANGES</button>
       </div>
     </div>
   </div>
@@ -330,7 +354,7 @@
     let pendingShipAssignId = null;
     let pendingShipAssignType = null;
     let pendingCrewTransferId = null;
-    let pendingShipUpgradeId = null;
+    let pendingShipEditId = null;
 
     function norm(str) { return String(str || '').trim().toLowerCase(); }
     
@@ -1110,7 +1134,6 @@
           body: JSON.stringify({ action: 'modify_crew', playerName: authCrewPlayer, pinHash: authCrewPinHash, crewId: pendingCrewTransferId, transferPlayer: targetPlayer })
         });
         
-        // Remove them from local array since they don't belong to this player anymore
         authenticatedCrew = authenticatedCrew.filter(c => c.crew_id !== pendingCrewTransferId);
         renderAuthenticatedCrewView();
         alert(`TRANSFER COMPLETE: Crew member assimilated by ${targetPlayer}.`);
@@ -1338,44 +1361,83 @@
         renderAuthenticatedShipsView();
       }
     }
-
-    function openShipUpgradeModal(shipId, currentUpgrades) {
-      pendingShipUpgradeId = shipId;
-      document.getElementById('ship-upgrade-input').value = currentUpgrades;
-      document.getElementById('ship-upgrade-modal').classList.remove('hidden');
+    
+    function toggleShipDetails(shipId) {
+      const el = document.getElementById(`ship-details-${shipId}`);
+      if (el) {
+        if (el.classList.contains('hidden-accordion')) {
+          el.classList.remove('hidden-accordion');
+        } else {
+          el.classList.add('hidden-accordion');
+        }
+      }
     }
 
-    async function confirmShipUpgrades() {
-      const newUpgrades = document.getElementById('ship-upgrade-input').value.trim();
-      document.getElementById('ship-upgrade-modal').classList.add('hidden');
+    function openShipMasterEditModal(shipId) {
+      const ship = authenticatedShips.find(s => s.ship_id === shipId);
+      if (!ship) return;
+      
+      pendingShipEditId = shipId;
+      
+      document.getElementById('edit-ship-name').value = ship.ship_name || '';
+      document.getElementById('edit-ship-class').value = ship.ship_class || '';
+      document.getElementById('edit-ship-upgrades').value = ship.upgrades || '';
+      
+      const isNamed = norm(ship.is_named) === 'true' || norm(ship.is_named) === 'yes';
+      document.getElementById('edit-ship-named').checked = isNamed;
+
+      const myFleets = (campaignData.taskForces || []).filter(f => norm(f.player) === norm(authShipsPlayer));
+      const fleetSelect = document.getElementById('edit-ship-fleet');
+      fleetSelect.innerHTML = `<option value="RESERVE" ${norm(ship.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>` + 
+                              myFleets.map(f => `<option value="${f.task_force_id}" ${norm(ship.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('');
+
+      document.getElementById('ship-master-edit-modal').classList.remove('hidden');
+    }
+
+    async function confirmMasterShipEdit() {
+      const newName = document.getElementById('edit-ship-name').value.trim();
+      const newClass = document.getElementById('edit-ship-class').value.trim();
+      const newUpgrades = document.getElementById('edit-ship-upgrades').value.trim();
+      const newFleet = document.getElementById('edit-ship-fleet').value;
+      const isNamed = document.getElementById('edit-ship-named').checked ? 'TRUE' : 'FALSE';
+
+      if (!newName) { alert("INPUT ERROR: Ship Name cannot be blank."); return; }
+
+      document.getElementById('ship-master-edit-modal').classList.add('hidden');
       
       try {
         await fetch(API_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'modify_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipId: pendingShipUpgradeId, upgrades: newUpgrades })
+          body: JSON.stringify({ 
+            action: 'modify_ship', 
+            playerName: authShipsPlayer, 
+            pinHash: authShipsPinHash, 
+            shipId: pendingShipEditId, 
+            newShipName: newName,
+            shipClass: newClass,
+            upgrades: newUpgrades,
+            isNamed: isNamed,
+            taskForceId: newFleet
+          })
         });
-        const ship = authenticatedShips.find(s => s.ship_id === pendingShipUpgradeId);
-        if (ship) ship.upgrades = newUpgrades;
-        renderAuthenticatedShipsView();
-      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
-    }
+        
+        // Refetch everything to ensure cascades applied correctly
+        const [resShips, resCaps, resCrew] = await Promise.all([
+          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_ships', playerName: authShipsPlayer, pinHash: authShipsPinHash }) }),
+          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_captains', playerName: authShipsPlayer, pinHash: authShipsPinHash }) }),
+          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_crew', playerName: authShipsPlayer, pinHash: authShipsPinHash }) })
+        ]);
+        
+        const dataShips = await resShips.json();
+        const dataCaps = await resCaps.json();
+        const dataCrew = await resCrew.json();
 
-    async function assignShipToFleet(shipId) {
-      const select = document.getElementById(`assign-ship-select-${shipId}`);
-      if (!select) return;
-      try {
-        const res = await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'modify_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipId: shipId, taskForceId: select.value })
-        });
-        const respData = await res.json();
-        if (respData.status === 'success') {
-          const ship = authenticatedShips.find(s => s.ship_id === shipId);
-          if (ship) ship.task_force_id = select.value;
-          renderAuthenticatedShipsView();
-        }
+        authenticatedShips = dataShips.ships || [];
+        authenticatedCaptains = dataCaps.captains || [];
+        authenticatedCrew = dataCrew.crew || [];
+        
+        renderAuthenticatedShipsView();
       } catch (err) { alert("TRANSMISSION ERROR: " + err); }
     }
 
@@ -1406,7 +1468,7 @@
       const cls = document.getElementById('enlist-ship-class').value.trim() || 'UNKNOWN CLASS';
       const tf = document.getElementById('enlist-ship-fleet').value;
       const namedSelect = document.getElementById('enlist-ship-named');
-      const isNamed = namedSelect ? namedSelect.value : 'FALSE';
+      const isNamed = namedSelect ? (namedSelect.checked ? 'TRUE' : 'FALSE') : 'FALSE';
       const upgrades = document.getElementById('enlist-ship-upgrades').value.trim();
 
       if (!name) { alert("INPUT ERROR: Please provide a valid unique Ship Name / Registry."); return; }
@@ -1468,8 +1530,6 @@
           const assignedCaps = authenticatedCaptains.filter(c => norm(c.assigned_ship) === norm(ship.ship_name) && norm(c.status) !== 'kia' && norm(c.status) !== 'mia');
           const assignedCrewArr = authenticatedCrew.filter(c => norm(c.assigned_ship) === norm(ship.ship_name) && norm(c.status) !== 'kia' && norm(c.status) !== 'dead' && norm(c.status) !== 'destroyed');
           
-          const currentTfOptions = `<option value="RESERVE" ${norm(ship.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(ship.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}`;
-
           let repairBtnText = isDead ? 'REPAIR / SALVAGE' : 'MARK DESTROYED';
           let repairDisabled = '';
           if (isDead && isNamed && cooldown > 0) {
@@ -1478,37 +1538,40 @@
           }
 
           return `
-            <div class="captain-card ${isDead ? 'kia' : ''}" style="border-left-color: var(--lcars-green);">
-              <div class="captain-header">
+            <div class="captain-card ${isDead ? 'kia' : ''}" style="border-left-color: var(--lcars-green); cursor: pointer;" onclick="toggleShipDetails('${ship.ship_id}')">
+              
+              <div class="captain-header" style="display: flex; justify-content: space-between; align-items: center;">
                 <span class="captain-name">${ship.ship_name} ${isNamed ? '<span style="color:var(--lcars-gold); font-size: 0.8rem; vertical-align: middle;">★</span>' : ''}</span>
-                <div class="captain-badges">
-                  <span class="badge-vet" style="background: var(--lcars-green); color: #000;">${ship.ship_class}</span>
-                </div>
-              </div>
-              <div class="captain-stats-row">
-                <span>STATUS: <strong style="color: ${isDead ? 'var(--lcars-red)' : '#4ade80'};">${isDead ? 'DESTROYED' : 'ACTIVE'}</strong></span>
+                <span style="font-size: 0.7rem; color: var(--lcars-slate);">▼ EXPAND</span>
               </div>
               
-              <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px; padding: 4px 6px; background: rgba(0,0,0,0.3); border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">UPGRADES: <strong style="color: var(--lcars-blue);">${ship.upgrades || 'NONE'}</strong></span>
-                <button class="btn-edit-ship" onclick="openShipUpgradeModal('${ship.ship_id}', '${(ship.upgrades || '').replace(/'/g, "\\'")}')" ${!isAssigned ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : ''}>[EDIT]</button>
-              </div>
+              <div id="ship-details-${ship.ship_id}" class="hidden-accordion" style="margin-top: 10px; cursor: default;" onclick="event.stopPropagation();">
+                <div class="captain-badges" style="margin-bottom: 6px; justify-content: flex-start;">
+                  <span class="badge-vet" style="background: var(--lcars-green); color: #000;">${ship.ship_class}</span>
+                </div>
+                
+                <div class="captain-stats-row" style="margin-top: 0;">
+                  <span>STATUS: <strong style="color: ${isDead ? 'var(--lcars-red)' : '#4ade80'};">${isDead ? 'DESTROYED' : 'ACTIVE'}</strong></span>
+                </div>
+                
+                <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 6px; padding: 6px; background: rgba(0,0,0,0.3); border-radius: 3px; display: flex; justify-content: space-between; align-items: center;">
+                  <span style="overflow: hidden; white-space: normal;">UPGRADES: <strong style="color: var(--lcars-blue);">${ship.upgrades || 'NONE'}</strong></span>
+                </div>
 
-              <div style="margin-top: 6px; padding: 6px; background: rgba(0,0,0,0.4); border-radius: 4px;">
-                <div style="font-size: 0.7rem; color: var(--lcars-green); font-weight: bold; margin-bottom: 4px; letter-spacing: 1px;">PERSONNEL ABOARD:</div>
-                <div style="font-size: 0.8rem; color: #fff; display: flex; flex-direction: column; gap: 3px;">
-                  ${assignedCaps.length > 0 ? assignedCaps.map(c => `<div><span style="color:var(--lcars-teal);">[CO]</span> ${c.captain_name}</div>`).join('') : '<div style="color:#94a3b8; font-style: italic;">NO COMMANDING OFFICER</div>'}
-                  ${assignedCrewArr.length > 0 ? assignedCrewArr.map(c => `<div><span style="color:var(--lcars-lilac);">[CRW]</span> ${c.crew_name}</div>`).join('') : ''}
+                <div style="margin-top: 6px; padding: 6px; background: rgba(0,0,0,0.4); border-radius: 4px;">
+                  <div style="font-size: 0.7rem; color: var(--lcars-green); font-weight: bold; margin-bottom: 4px; letter-spacing: 1px;">PERSONNEL ABOARD:</div>
+                  <div style="font-size: 0.8rem; color: #fff; display: flex; flex-direction: column; gap: 3px;">
+                    ${assignedCaps.length > 0 ? assignedCaps.map(c => `<div><span style="color:var(--lcars-teal);">[CO]</span> ${c.captain_name}</div>`).join('') : '<div style="color:#94a3b8; font-style: italic;">NO COMMANDING OFFICER</div>'}
+                    ${assignedCrewArr.length > 0 ? assignedCrewArr.map(c => `<div><span style="color:var(--lcars-lilac);">[CRW]</span> ${c.crew_name}</div>`).join('') : ''}
+                  </div>
+                </div>
+
+                <div class="captain-btn-row" style="margin-top: 12px; gap: 10px;">
+                  <button class="btn-xp-mod" style="background: var(--lcars-green); color: #000; font-size: 0.75rem;" onclick="openShipMasterEditModal('${ship.ship_id}')">[EDIT ALL VESSEL DETAILS]</button>
+                  <button class="btn-status-kia" style="flex: 1; border-color: var(--lcars-green); background: ${isDead ? 'var(--lcars-blue)' : 'var(--lcars-dark-red)'}; color: ${isDead ? '#000' : '#fff'};" onclick="toggleShipStatus('${ship.ship_id}', '${isDead ? 'ACTIVE' : 'DESTROYED'}')" ${repairDisabled}>${repairBtnText}</button>
                 </div>
               </div>
 
-              <div style="display: flex; gap: 6px; align-items: center; margin-top: 8px;">
-                <select id="assign-ship-select-${ship.ship_id}" class="order-select" style="font-size: 0.85rem; padding: 4px; border-color: var(--lcars-green); color: #fff;" ${!isAssigned ? 'disabled' : ''}>${currentTfOptions}</select>
-                <button class="btn-xp-mod" style="flex: none; padding: 4px 12px; background: var(--lcars-green); color: #000;" onclick="assignShipToFleet('${ship.ship_id}')" ${!isAssigned ? 'disabled' : ''}>ASSIGN</button>
-              </div>
-              <div class="captain-btn-row" style="margin-top: 8px;">
-                <button class="btn-status-kia" style="width: 100%; border-color: var(--lcars-green); background: ${isDead ? 'var(--lcars-blue)' : 'var(--lcars-dark-red)'}; color: ${isDead ? '#000' : '#fff'};" onclick="toggleShipStatus('${ship.ship_id}', '${isDead ? 'ACTIVE' : 'DESTROYED'}')" ${repairDisabled}>${repairBtnText}</button>
-              </div>
             </div>
           `;
         }).join('');
@@ -1545,10 +1608,10 @@
               <div>
                 <div style="display: flex; justify-content: space-between;">
                   <div class="field-label">UNIQUE SHIP NAME / REGISTRY</div>
-                  <select id="enlist-ship-named" class="order-select" style="width: auto; padding: 0 4px; font-size: 0.75rem; border-color: var(--lcars-amber); color: #fff;">
-                    <option value="FALSE">STANDARD VESSEL</option>
-                    <option value="TRUE">NAMED SHIP CARD</option>
-                  </select>
+                  <div style="display: flex; align-items: center; gap: 5px;">
+                    <input type="checkbox" id="enlist-ship-named" style="accent-color: var(--lcars-green); width: 14px; height: 14px; cursor: pointer;">
+                    <label for="enlist-ship-named" class="field-label" style="margin: 0; cursor: pointer;">UNIQUE NAMED SHIP</label>
+                  </div>
                 </div>
                 <input id="enlist-ship-name" type="text" class="order-input" placeholder="E.G. U.S.S. ENTERPRISE OR NX-01" style="margin-top: 4px;">
               </div>
