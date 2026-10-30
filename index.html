@@ -21,6 +21,7 @@
       --lcars-teal: #00aaaa;
       --lcars-panel: rgba(10, 14, 23, 0.9);
       --lcars-lilac: #c084fc;
+      --lcars-green: #22c55e;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { width: 100%; height: 100%; height: 100dvh; overflow: hidden; background-color: #030712; color: #ffffff; font-family: 'Antonio', -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 1px; }
@@ -47,6 +48,7 @@
     .rail-btn:hover { filter: brightness(1.3); }
     .rail-btn-captains { background: var(--lcars-teal); }
     .rail-btn-crew { background: var(--lcars-lilac); }
+    .rail-btn-ships { background: var(--lcars-green); }
     .rail-btn-rp { background: var(--lcars-gold); }
     .rail-btn-settings { background: var(--lcars-blue); }
     .rail-block-mid { flex: 1; background: var(--lcars-purple); opacity: 0.85; }
@@ -175,7 +177,6 @@
       </div>
     </header>
     <div id="theater-layout">
-      <!-- Left LCARS Side Rail -->
       <div class="lcars-side-rail">
         <div class="rail-block-top"></div>
         <button class="rail-btn rail-btn-captains" onclick="openCaptainsMenu()" title="Open Captain XP Roster">
@@ -184,6 +185,10 @@
         </button>
         <button class="rail-btn rail-btn-crew" onclick="openCrewMenu()" title="Open Crew Roster">
           <span>CREW</span>
+          <span style="font-size: 0.58rem; color: #1e293b;">ROSTER</span>
+        </button>
+        <button class="rail-btn rail-btn-ships" onclick="openShipsMenu()" title="Open Ship Roster">
+          <span>SHIPS</span>
           <span style="font-size: 0.58rem; color: #1e293b;">ROSTER</span>
         </button>
         <button class="rail-btn rail-btn-rp" onclick="openRpLedgerMenu()" title="Open Confidential RP Treasury">
@@ -218,7 +223,6 @@
     </div>
   </div>
 
-  <!-- FULL SCREEN CAPTAINS MODAL -->
   <div id="captains-modal" class="full-screen-modal hidden">
     <div class="modal-header">
       <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-teal);">CAPTAIN XP</div>
@@ -228,7 +232,6 @@
     <div id="captains-modal-content" class="modal-content" style="border-color: var(--lcars-teal);"></div>
   </div>
   
-  <!-- FULL SCREEN CREW MODAL -->
   <div id="crew-modal" class="full-screen-modal hidden">
     <div class="modal-header">
       <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-lilac);">CREW ROSTER</div>
@@ -236,6 +239,15 @@
       <button class="lcars-btn" style="background: var(--lcars-red); border-radius: 0 21px 21px 0;" onclick="closeCrewMenu()">CLOSE X</button>
     </div>
     <div id="crew-modal-content" class="modal-content" style="border-color: var(--lcars-lilac);"></div>
+  </div>
+
+  <div id="ships-modal" class="full-screen-modal hidden">
+    <div class="modal-header">
+      <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-green);">SHIPS ROSTER</div>
+      <div class="lcars-pill-bar" style="background: var(--lcars-blue);" id="ships-modal-title">VESSEL DEPLOYMENT STATUS</div>
+      <button class="lcars-btn" style="background: var(--lcars-red); border-radius: 0 21px 21px 0;" onclick="closeShipsMenu()">CLOSE X</button>
+    </div>
+    <div id="ships-modal-content" class="modal-content" style="border-color: var(--lcars-green);"></div>
   </div>
 
   <script>
@@ -603,7 +615,7 @@
         authCaptainPlayer = playerName; 
         authCaptainPinHash = pinHash;
         authenticatedCaptains = respData.captains || [];
-        captainViewFilter = 'ALL';
+        captainViewFilter = 'ALL'; 
         renderAuthenticatedCaptainsView();
       } catch (err) { 
         alert("COMMUNICATION ERROR: " + err); 
@@ -620,7 +632,7 @@
     }
 
     async function editCaptainShip(captainId, currentShip) {
-      const val = prompt(`ASSIGN VESSEL:\nEnter the name/class of the ship for this captain:`, currentShip === 'UNASSIGNED' ? '' : currentShip);
+      const val = prompt(`ASSIGN VESSEL:\nEnter the unique name or registry of the ship for this captain:`, currentShip === 'UNASSIGNED' ? '' : currentShip);
       if (val === null) return;
       const newShip = val.trim() || 'UNASSIGNED';
       
@@ -650,7 +662,7 @@
           const isMia = norm(c.status) === 'mia';
           if (captainViewFilter === 'KIA') return isKia;
           if (captainViewFilter === 'MIA') return isMia;
-          if (isKia || isMia) return false; 
+          if (isKia || isMia) return false;
           return norm(c.task_force_id) === norm(captainViewFilter);
         });
       }
@@ -752,10 +764,9 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
             <div><div class="field-label">BASE SKILL (1-9)</div><input id="enlist-cap-skill" type="number" min="1" max="9" value="6" class="order-input"></div>
             <div><div class="field-label">STARTING XP</div><input id="enlist-cap-xp" type="number" min="0" value="0" class="order-input"></div>
-            <div><div class="field-label">ASSIGNED VESSEL</div><input id="enlist-cap-ship" type="text" class="order-input" placeholder="SHIP NAME"></div>
+            <div><div class="field-label">ASSIGNED VESSEL</div><input id="enlist-cap-ship" type="text" class="order-input" placeholder="UNIQUE SHIP NAME"></div>
             <div><div class="field-label">FLEET ASSIGNMENT</div><select id="enlist-cap-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">${fleetEnlistOptions}</select></div>
           </div>
-
           <button class="btn-submit-order" style="background: var(--lcars-amber); color: #000; margin-top: 1rem; width: 100%;" onclick="executeEnlistCaptain()">COMMISSION NEW OFFICER</button>
         </div>
       `;
@@ -950,7 +961,7 @@
     }
 
     async function editCrewShip(crewId, currentShip) {
-      const val = prompt(`ASSIGN VESSEL:\nEnter the name/class of the ship for this crew member:`, currentShip === 'UNASSIGNED' ? '' : currentShip);
+      const val = prompt(`ASSIGN VESSEL:\nEnter the unique name or registry of the ship for this crew member:`, currentShip === 'UNASSIGNED' ? '' : currentShip);
       if (val === null) return;
       const newShip = val.trim() || 'UNASSIGNED';
       
@@ -963,14 +974,11 @@
         const crew = authenticatedCrew.find(c => c.crew_id === crewId);
         if (crew) crew.assigned_ship = newShip;
         renderAuthenticatedCrewView();
-      } catch (err) {
-        alert("TRANSMISSION ERROR: " + err);
-      }
+      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
     }
 
     async function toggleCrewStatus(crewId, newStatus) {
       if (!confirm(`CONFIRMATION: Mark crew member as ${newStatus}?`)) return;
-      
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
@@ -1082,9 +1090,254 @@
           <div class="field-label" style="color: var(--lcars-lilac); font-size: 0.95rem; margin-bottom: 0.5rem;">ENLIST NEW CREW MEMBER</div>
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
             <div><div class="field-label">CREW NAME</div><input id="enlist-crew-name" type="text" class="order-input" placeholder="E.G. WORF"></div>
-            <div><div class="field-label">ASSIGNED VESSEL</div><input id="enlist-crew-ship" type="text" class="order-input" placeholder="SHIP NAME"></div>
+            <div><div class="field-label">ASSIGNED VESSEL</div><input id="enlist-crew-ship" type="text" class="order-input" placeholder="UNIQUE SHIP NAME"></div>
           </div>
           <button class="btn-submit-order" style="background: var(--lcars-lilac); color: #000; margin-top: 1rem; width: 100%;" onclick="executeEnlistCrew()">COMMISSION NEW CREW</button>
+        </div>
+      `;
+    }
+
+    // --- FULL SCREEN SHIPS ROSTER ---
+    let authShipsPlayer = '';
+    let authShipsPinHash = '';
+    let authenticatedShips = [];
+    let shipsViewFilter = 'ALL';
+
+    function openShipsMenu() {
+      closeSidebar();
+      const modal = document.getElementById('ships-modal');
+      const content = document.getElementById('ships-modal-content');
+      const playerOptions = (campaignData.players || []).map(p => `<option value="${p.player_name}">${p.player_name}</option>`).join('');
+
+      content.innerHTML = `
+        <div style="max-width: 450px; margin: 3rem auto;">
+          <div class="sidebar-notes" style="border-left-color: var(--lcars-green); margin-bottom: 1rem;">
+            <div class="field-label" style="color: var(--lcars-green); margin-bottom: 2px;">SECURE SHIPYARD UPLINK</div>
+            FLEET MANIFESTS ARE CLASSIFIED. ENTER SECURITY PIN TO VIEW ASSIGNED VESSELS.
+          </div>
+          <div class="order-box" style="border-color: var(--lcars-green); padding: 1.5rem;">
+            <div class="field-label" style="color: var(--lcars-green);">SELECT ALLEGIANCE</div>
+            <select id="ships-auth-player" class="order-select" style="border-color: var(--lcars-green); color: var(--lcars-green); font-size: 1.1rem; padding: 0.75rem;">
+              ${playerOptions}
+            </select>
+            <div style="margin-top: 1rem;">
+              <div class="field-label" style="color: var(--lcars-amber);">SECURITY PIN</div>
+              <input id="ships-auth-pin" type="password" maxlength="8" class="order-input" placeholder="ENTER PIN" style="font-size: 1.1rem; padding: 0.75rem;" onkeydown="if(event.key === 'Enter') authenticateShipsRoster()">
+            </div>
+            <button id="btn-auth-ships" class="btn-submit-order" style="background: var(--lcars-green); color: #000; margin-top: 1.25rem; font-size: 1.1rem; padding: 0.75rem;" onclick="authenticateShipsRoster()">
+              DECRYPT SHIP LOGS
+            </button>
+          </div>
+        </div>
+      `;
+      modal.classList.remove('hidden');
+    }
+
+    function closeShipsMenu() { document.getElementById('ships-modal').classList.add('hidden'); }
+
+    async function authenticateShipsRoster() {
+      const pSelect = document.getElementById('ships-auth-player');
+      const pinInput = document.getElementById('ships-auth-pin');
+      if (!pSelect || !pinInput) return;
+      const playerName = pSelect.value;
+      const rawPin = pinInput.value;
+
+      if (!rawPin || rawPin.trim() === '') { alert("INPUT REQUIRED: Enter your PIN."); return; }
+
+      const btn = document.getElementById('btn-auth-ships');
+      if (btn) { btn.textContent = "AUTHENTICATING..."; btn.disabled = true; }
+
+      const pinHash = await hashPin(rawPin);
+      try {
+        const [resShips, resCaps, resCrew] = await Promise.all([
+          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_ships', playerName: playerName, pinHash: pinHash }) }),
+          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_captains', playerName: playerName, pinHash: pinHash }) }),
+          fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ action: 'get_crew', playerName: playerName, pinHash: pinHash }) })
+        ]);
+        
+        const dataShips = await resShips.json();
+        if (dataShips.status === 'auth_failed') { 
+          alert("SECURITY BREACH: Invalid PIN."); 
+          if (btn) { btn.textContent = "DECRYPT SHIP LOGS"; btn.disabled = false; }
+          return; 
+        }
+
+        const dataCaps = await resCaps.json();
+        const dataCrew = await resCrew.json();
+
+        authShipsPlayer = playerName; 
+        authShipsPinHash = pinHash;
+        authenticatedShips = dataShips.ships || [];
+        authenticatedCaptains = dataCaps.captains || [];
+        authenticatedCrew = dataCrew.crew || [];
+        shipsViewFilter = 'ALL';
+        renderAuthenticatedShipsView();
+      } catch (err) { 
+        alert("COMMUNICATION ERROR: " + err); 
+        if (btn) { btn.textContent = "DECRYPT SHIP LOGS"; btn.disabled = false; }
+      }
+    }
+
+    function updateShipsViewFilter() {
+      const select = document.getElementById('ships-view-filter');
+      if (select) {
+        shipsViewFilter = select.value;
+        renderAuthenticatedShipsView();
+      }
+    }
+
+    async function assignShipToFleet(shipId) {
+      const select = document.getElementById(`assign-ship-select-${shipId}`);
+      if (!select) return;
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'modify_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipId: shipId, taskForceId: select.value })
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          const ship = authenticatedShips.find(s => s.ship_id === shipId);
+          if (ship) ship.task_force_id = select.value;
+          renderAuthenticatedShipsView();
+        }
+      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+    }
+
+    async function toggleShipStatus(shipId, newStatus) {
+      if (!confirm(`CONFIRMATION: Mark vessel as ${newStatus}?`)) return;
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'modify_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipId: shipId, status: newStatus })
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          const ship = authenticatedShips.find(s => s.ship_id === shipId);
+          if (ship) ship.status = newStatus;
+          renderAuthenticatedShipsView();
+        }
+      } catch (err) { alert("TRANSMISSION ERROR: " + err); }
+    }
+
+    async function executeCommissionShip() {
+      const name = document.getElementById('enlist-ship-name').value.trim();
+      const cls = document.getElementById('enlist-ship-class').value.trim() || 'UNKNOWN CLASS';
+      const tf = document.getElementById('enlist-ship-fleet').value;
+
+      if (!name) { alert("INPUT ERROR: Please provide a valid unique Ship Name / Registry."); return; }
+
+      try {
+        const res = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'add_ship', playerName: authShipsPlayer, pinHash: authShipsPinHash, shipName: name, shipClass: cls, taskForceId: tf })
+        });
+        const respData = await res.json();
+        if (respData.status === 'success') {
+          document.getElementById('enlist-ship-name').value = '';
+          document.getElementById('enlist-ship-class').value = '';
+          alert(`SHIPYARD REPORT: ${name} commissioned.`);
+          
+          const refRes = await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'get_ships', playerName: authShipsPlayer, pinHash: authShipsPinHash })
+          });
+          const refData = await refRes.json();
+          authenticatedShips = refData.ships || [];
+          renderAuthenticatedShipsView();
+        }
+      } catch (err) { alert("COMMUNICATION ERROR: " + err); }
+    }
+
+    function renderAuthenticatedShipsView() {
+      const content = document.getElementById('ships-modal-content');
+      if (!content) return;
+      const myFleets = (campaignData.taskForces || []).filter(f => norm(f.player) === norm(authShipsPlayer));
+      
+      let filteredShips = authenticatedShips;
+      if (shipsViewFilter !== 'ALL') {
+        filteredShips = authenticatedShips.filter(s => {
+          const isDead = norm(s.status) === 'destroyed';
+          if (shipsViewFilter === 'DESTROYED') return isDead;
+          if (isDead) return false;
+          return norm(s.task_force_id) === norm(shipsViewFilter);
+        });
+      }
+
+      let cardsHtml = '';
+      if (filteredShips.length === 0) {
+        cardsHtml = `<div style="text-align: center; color: #94a3b8; font-size: 1rem; padding: 2rem; border: 1px dashed var(--lcars-slate); grid-column: 1 / -1; border-radius: 8px;">NO VESSELS FOUND FOR CURRENT FILTER.</div>`;
+      } else {
+        cardsHtml = filteredShips.map(ship => {
+          const isDead = norm(ship.status) === 'destroyed';
+          const isAssigned = !isDead;
+
+          const assignedCaps = authenticatedCaptains.filter(c => norm(c.assigned_ship) === norm(ship.ship_name) && norm(c.status) !== 'kia' && norm(c.status) !== 'mia');
+          const assignedCrewArr = authenticatedCrew.filter(c => norm(c.assigned_ship) === norm(ship.ship_name) && norm(c.status) !== 'kia' && norm(c.status) !== 'dead' && norm(c.status) !== 'destroyed');
+          
+          const currentTfOptions = `<option value="RESERVE" ${norm(ship.task_force_id) === 'reserve' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>${myFleets.map(f => `<option value="${f.task_force_id}" ${norm(ship.task_force_id) === norm(f.task_force_id) ? 'selected' : ''}>${f.task_force_id}</option>`).join('')}`;
+
+          return `
+            <div class="captain-card ${isDead ? 'kia' : ''}" style="border-left-color: var(--lcars-green);">
+              <div class="captain-header">
+                <span class="captain-name">${ship.ship_name}</span>
+                <div class="captain-badges">
+                  <span class="badge-vet" style="background: var(--lcars-green); color: #000;">${ship.ship_class}</span>
+                </div>
+              </div>
+              <div class="captain-stats-row">
+                <span>STATUS: <strong style="color: ${isDead ? 'var(--lcars-red)' : '#4ade80'};">${isDead ? 'DESTROYED' : 'ACTIVE'}</strong></span>
+              </div>
+              
+              <div style="margin-top: 6px; padding: 6px; background: rgba(0,0,0,0.4); border-radius: 4px;">
+                <div style="font-size: 0.7rem; color: var(--lcars-green); font-weight: bold; margin-bottom: 4px; letter-spacing: 1px;">PERSONNEL ABOARD:</div>
+                <div style="font-size: 0.8rem; color: #fff; display: flex; flex-direction: column; gap: 3px;">
+                  ${assignedCaps.length > 0 ? assignedCaps.map(c => `<div><span style="color:var(--lcars-teal);">[CO]</span> ${c.captain_name}</div>`).join('') : '<div style="color:#94a3b8; font-style: italic;">NO COMMANDING OFFICER</div>'}
+                  ${assignedCrewArr.length > 0 ? assignedCrewArr.map(c => `<div><span style="color:var(--lcars-lilac);">[CRW]</span> ${c.crew_name}</div>`).join('') : ''}
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 6px; align-items: center; margin-top: 8px;">
+                <select id="assign-ship-select-${ship.ship_id}" class="order-select" style="font-size: 0.85rem; padding: 4px; border-color: var(--lcars-green); color: #fff;" ${!isAssigned ? 'disabled' : ''}>${currentTfOptions}</select>
+                <button class="btn-xp-mod" style="flex: none; padding: 4px 12px; background: var(--lcars-green); color: #000;" onclick="assignShipToFleet('${ship.ship_id}')" ${!isAssigned ? 'disabled' : ''}>ASSIGN</button>
+              </div>
+              <div class="captain-btn-row" style="margin-top: 8px;">
+                <button class="btn-status-kia" style="width: 100%; border-color: var(--lcars-green); background: ${isDead ? 'var(--lcars-blue)' : 'var(--lcars-dark-red)'}; color: ${isDead ? '#000' : '#fff'};" onclick="toggleShipStatus('${ship.ship_id}', '${isDead ? 'ACTIVE' : 'DESTROYED'}')">${isDead ? 'REPAIR / SALVAGE' : 'MARK DESTROYED'}</button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const fleetEnlistOptions = `<option value="RESERVE">RESERVE / UNASSIGNED</option>${myFleets.map(f => `<option value="${f.task_force_id}">${f.task_force_id}</option>`).join('')}`;
+
+      content.innerHTML = `
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 1.25rem; color: var(--lcars-green); font-weight: 700;">FLEET MANIFEST: ${authShipsPlayer.toUpperCase()}</div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--lcars-green); font-size: 0.8rem; font-weight: 700;">FILTER:</span>
+            <select id="ships-view-filter" class="order-select" style="width: auto; padding: 4px 8px; font-size: 0.9rem; border-color: var(--lcars-green); color: #fff;" onchange="updateShipsViewFilter()">
+              <option value="ALL" ${shipsViewFilter === 'ALL' ? 'selected' : ''}>ALL SHIPS</option>
+              <option value="RESERVE" ${shipsViewFilter === 'RESERVE' ? 'selected' : ''}>RESERVE / UNASSIGNED</option>
+              ${myFleets.map(f => `<option value="${f.task_force_id}" ${shipsViewFilter === f.task_force_id ? 'selected' : ''}>ASSIGNED: ${f.task_force_id}</option>`).join('')}
+              <option value="DESTROYED" ${shipsViewFilter === 'DESTROYED' ? 'selected' : ''}>DESTROYED</option>
+            </select>
+          </div>
+        </div>
+        <div class="captains-grid">${cardsHtml}</div>
+        <div class="enlist-panel" style="border-color: var(--lcars-green);">
+          <div class="field-label" style="color: var(--lcars-green); font-size: 0.95rem; margin-bottom: 0.5rem;">COMMISSION NEW VESSEL</div>
+          <div style="display: grid; grid-template-columns: 1fr; gap: 10px; margin-top: 0.75rem;">
+            <div><div class="field-label">UNIQUE SHIP NAME / REGISTRY</div><input id="enlist-ship-name" type="text" class="order-input" placeholder="E.G. U.S.S. ENTERPRISE OR NX-01"></div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 0.75rem;">
+            <div><div class="field-label">SHIP CLASS</div><input id="enlist-ship-class" type="text" class="order-input" placeholder="E.G. GALAXY CLASS"></div>
+            <div><div class="field-label">FLEET ASSIGNMENT</div><select id="enlist-ship-fleet" class="order-select" style="border-color: var(--lcars-amber); color: #fff;">${fleetEnlistOptions}</select></div>
+          </div>
+          <button class="btn-submit-order" style="background: var(--lcars-green); color: #000; margin-top: 1rem; width: 100%;" onclick="executeCommissionShip()">COMMISSION VESSEL</button>
         </div>
       `;
     }
@@ -1342,7 +1595,7 @@
       try {
         const res = await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'set_pin', playerName: playerName, oldPinHash: oldPinHash, newPinHash: newPinHash })
         });
         const respData = await res.json();
@@ -1374,7 +1627,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'submit_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash, destinationSectorId: destSector })
         });
         delete unlockedForEdit[taskForceId];
@@ -1394,7 +1647,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'clear_order', taskForceId: taskForceId, playerName: assignedPlayer, pinHash: pinHash })
         });
         
@@ -1446,7 +1699,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'retreat_fleet', taskForceId: taskForceId, retreatSectorId: select.value, gmHash: gmHash, rawPass: rawPass })
         });
         alert(`COMMAND LOG: ${taskForceId} retreated to Sector ${select.value}.`);
@@ -1463,7 +1716,7 @@
       try {
         await fetch(API_URL, {
           method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'destroy_fleet', taskForceId: taskForceId, gmHash: gmHash, rawPass: pass.trim() })
         });
         alert(`COMMAND LOG: ${taskForceId} decommissioned.`);
