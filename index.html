@@ -227,6 +227,7 @@
     </div>
   </div>
 
+  <!-- MAIN MODALS -->
   <div id="captains-modal" class="full-screen-modal hidden">
     <div class="modal-header">
       <div class="lcars-elbow-top" style="width: 130px; background: var(--lcars-teal);">CAPTAIN XP</div>
@@ -1304,7 +1305,7 @@
       const content = document.getElementById('crew-modal-content');
       if (!content) return;
       
-      updateAllShipSelectors();
+      updateSharedShipDatalist();
 
       let filteredCrew = authenticatedCrew;
       if (crewViewFilter !== 'ALL') {
@@ -1349,7 +1350,7 @@
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
             <div style="font-size: 1.25rem; color: var(--lcars-lilac); font-weight: 700;">CREW MANIFEST: ${authCrewPlayer.toUpperCase()}</div>
-            <button class="btn-xp-mod" style="background: var(--lcars-lilac); color: #000; padding: 4px 12px; flex: none; width: auto;" onclick="document.getElementById('popup-enlist-crew').classList.remove('hidden'); updateAllShipSelectors();">+ ENLIST CREW</button>
+            <button class="btn-xp-mod" style="background: var(--lcars-lilac); color: #000; padding: 4px 12px; flex: none; width: auto;" onclick="document.getElementById('popup-enlist-crew').classList.remove('hidden')">+ ENLIST CREW</button>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="color: var(--lcars-lilac); font-size: 0.8rem; font-weight: 700;">FILTER:</span>
@@ -1785,7 +1786,7 @@
       content.innerHTML = `
         <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; flex-wrap: wrap; gap: 10px;">
           <div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
-            <div style="font-size: 1.25rem; color: var(--lcars-green); font-weight: 700;">FLEET MANIFEST: ${authShipsPlayer.toUpperCase()}</div>
+            <div style="font-size: 1.25rem; var(--lcars-green); font-weight: 700;">FLEET MANIFEST: ${authShipsPlayer.toUpperCase()}</div>
             <button class="btn-xp-mod" style="background: var(--lcars-green); color: #000; padding: 4px 12px; flex: none; width: auto;" onclick="document.getElementById('popup-enlist-ship').classList.remove('hidden')">+ COMMISSION VESSEL</button>
           </div>
           <div style="display: flex; align-items: center; gap: 8px;">
